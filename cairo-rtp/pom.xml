@@ -1,16 +1,13 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.speechforge</groupId>
+  <groupId>net.sourceforge.halef</groupId>
   <artifactId>cairo-rtp</artifactId>
   <packaging>jar</packaging>
   <name>Cairo RTP Module</name>
-  <version>SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <description>The module that provides RTP capabilities for speech recognition applications, clients and servers.</description>
   <url>http://${project.artifactId}.sourceforge.net</url>
   <inceptionYear>2008</inceptionYear>
-
   <mailingLists>
     <mailingList>
       <name>${project.artifactId}-checkin</name>
@@ -33,7 +30,6 @@
       <archive>http://www.nabble.com/${project.artifactId}-user-f15778.html</archive>
     </mailingList>
   </mailingLists>
-
   <developers>
     <developer>
       <id>ngodfredsen</id>
@@ -67,28 +63,18 @@
       <timezone>-8</timezone>
     </developer>
   </developers>
-
   <licenses>
     <license>
       <name>GNU General Public License (GPL)</name>
       <url>http://www.gnu.org/copyleft/gpl.txt</url>
     </license>
   </licenses>
-
   <scm>
     <connection>scm:svn:https://${project.artifactId}.svn.sourceforge.net/svnroot/${project.artifactId}/${project.artifactId}/trunk</connection>
     <developerConnection>scm:svn:https://${project.artifactId}.svn.sourceforge.net/svnroot/${project.artifactId}/${project.artifactId}/trunk</developerConnection>
-    <!--tag>HEAD</tag-->
     <url>http://${project.artifactId}.svn.sourceforge.net/viewvc/${project.artifactId}</url>
   </scm>
-
-  <organization>
-    <name>SpeechForge</name>
-    <url>http://www.speechforge.org</url>
-  </organization>
-
   <build>
-
     <directory>target</directory>
     <outputDirectory>target/classes</outputDirectory>
     <finalName>${project.artifactId}-${project.version}</finalName>
@@ -96,70 +82,56 @@
     <sourceDirectory>src/main/java</sourceDirectory>
     <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
-
     <resources>
       <resource>
         <directory>src/main/resources</directory>
       </resource>
     </resources>
-
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
       </testResource>
     </testResources>
-
     <plugins>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.4</version>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
+        <version>3.0</version>
         <configuration>
           <locales>en</locales>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.8.1</version>
         <configuration>
           <destDir>${project.build.directory}/site/docs/apidocs</destDir>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12</version>
         <configuration>
-          <!--debug>true</debug-->
-          <!--forkMode>once</forkMode-->
-          <!--childDelegation>false</childDelegation-->
           <excludes>
-
-            <!-- Example excludes
-            <exclude>**/TestRawAudioProcessor.java</exclude>
-            <exclude>**/TestSphinxWavFile.java</exclude>
-            <exclude>**/TestSphinxRecEngineRaw.java</exclude>
-            -->
-
           </excludes>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.12</version>
       </plugin>
-      
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -169,129 +141,164 @@
           </descriptors>
         </configuration>
       </plugin>
-
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <version>1.6.3</version>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/buildlib</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
-
     <extensions>
-       <extension>
-         <groupId>org.apache.maven.wagon</groupId>
-         <artifactId>wagon-ftp</artifactId>
-         <version>1.0-beta-4</version>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ftp</artifactId>
+        <version>1.0-beta-4</version>
       </extension>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh</artifactId>
         <version>1.0-beta-6</version>
       </extension>
-  </extensions>
-
-
+    </extensions>
   </build>
 
   <repositories>
-
     <repository>
       <id>central</id>
       <name>Maven Repository Switchboard</name>
       <layout>default</layout>
-      <!--url>http://www.ibiblio.org/maven2</url-->
       <url>http://repo1.maven.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
     </repository>
-
     <repository>
-      <id>speechforge-repository</id>
-      <name>SpeechForge Repository</name>
-      <url>http://www.speechforge.org/repository/</url>
-    </repository>   
-    
-    <repository>
-       <id>java.net</id>
-       <url>http://download.java.net/maven/2</url>
-       <!--layout>legacy</layout-->
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
     </repository>
-
+    <repository>
+      <id>repository.oss.sonatype.org</id>
+      <name>oss.sonatype.org</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
-
+  
   <dependencies>
-
     <!-- compile scope dependencies -->
-
-    <!-- Need to install this artifact separately for license reasons! -->
-    <!-- Download jsapi.exe to your java ext dir (jre/lib/ext) and execute to extract the jsapi jar file. -->
-    <!--dependency>
-      <groupId>javax.speech</groupId>
-      <artifactId>jsapi</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
-    </dependency-->
-
     <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>sphinx4</artifactId>
-      <version>SNAPSHOT</version>
+      <groupId>net.sourceforge.halef</groupId>
+      <artifactId>halefdbwriter</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
-
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>edu.cmu.sphinx</groupId>
+      <artifactId>sphinx4-core</artifactId>
+      <version>5prealpha-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>javax.media</groupId>
       <artifactId>jmf</artifactId>
       <version>2.1.1e</version>
       <scope>compile</scope>
     </dependency>
-
+	<dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-api</artifactId>
+    	<version>2.11.2</version>
+  	</dependency>
+  	<dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-core</artifactId>
+    	<version>2.11.2</version>
+  	</dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.13</version>
-      <scope>compile</scope>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-1.2-api</artifactId>
+    	<version>2.11.2</version>
     </dependency>
-    
-     <dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.3</version>
+      <version>2.6</version>
       <scope>compile</scope>
     </dependency>
-    
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
-      <version>1.3</version>
+      <version>1.6</version>
       <scope>compile</scope>
     </dependency>
-
-
-    <!--dependency>
-      <groupId>org.jlibrtp</groupId>
-      <artifactId>jlibrtp</artifactId>
-      <version>SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency-->
-    
     <!-- runtime scope dependencies -->
-
-    <!-- used by jlibrtp -->
-    <dependency>
-        <groupId>jdom</groupId>
-        <artifactId>jdom</artifactId>
-        <version>1.1</version>
-    </dependency> 
-    
     <!-- test scope dependencies -->
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.3</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
-
   <reporting>
     <plugins>
       <plugin>
@@ -305,27 +312,19 @@
               <report>license</report>
               <report>project-team</report>
               <report>scm</report>
-              <!--report>cim</report-->
-              <!--report>issue-tracking</report-->
             </reports>
           </reportSet>
         </reportSets>
       </plugin>
     </plugins>
   </reporting>
-
   <distributionManagement>
-    <repository>
-      <uniqueVersion>false</uniqueVersion>
-      <id>speechforge-repository</id>
-      <name>Speechforge Repository</name>
-      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/repository</url>
-    </repository>
-    <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=${project.group.id}</downloadUrl>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
-
   <properties>
     <project.group.id>149085</project.group.id>
   </properties>
-
 </project>

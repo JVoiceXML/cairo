@@ -1,16 +1,12 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.speechforge</groupId>
+  <groupId>net.sourceforge.halef</groupId>
   <artifactId>cairo</artifactId>
-  <packaging>jar</packaging>
   <name>Cairo</name>
-  <version>SNAPSHOT</version>
+  <version>0.3-SNAPSHOT</version>
   <description>Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.</description>
   <url>http://${project.artifactId}.sourceforge.net</url>
   <inceptionYear>2005</inceptionYear>
-
   <mailingLists>
     <mailingList>
       <name>${project.artifactId}-checkin</name>
@@ -33,7 +29,6 @@
       <archive>http://www.nabble.com/${project.artifactId}-user-f15778.html</archive>
     </mailingList>
   </mailingLists>
-
   <developers>
     <developer>
       <id>ngodfredsen</id>
@@ -67,121 +62,103 @@
       <timezone>-8</timezone>
     </developer>
   </developers>
-
   <licenses>
     <license>
       <name>GNU General Public License (GPL)</name>
       <url>http://www.gnu.org/copyleft/gpl.txt</url>
     </license>
   </licenses>
-
   <scm>
     <connection>scm:svn:https://${project.artifactId}.svn.sourceforge.net/svnroot/${project.artifactId}/${project.artifactId}/trunk</connection>
     <developerConnection>scm:svn:https://${project.artifactId}.svn.sourceforge.net/svnroot/${project.artifactId}/${project.artifactId}/trunk</developerConnection>
     <!--tag>HEAD</tag-->
     <url>http://${project.artifactId}.svn.sourceforge.net/viewvc/${project.artifactId}</url>
   </scm>
-
   <organization>
     <name>SpeechForge</name>
     <url>http://www.speechforge.org</url>
   </organization>
-
   <build>
-
     <directory>target</directory>
     <outputDirectory>target/classes</outputDirectory>
-    <finalName>${artifactId}-${version}</finalName>
+    <finalName>${project.artifactId}-${project.version}</finalName>
     <testOutputDirectory>target/test-classes</testOutputDirectory>
     <sourceDirectory>src/main/java</sourceDirectory>
     <scriptSourceDirectory>src/main/scripts</scriptSourceDirectory>
     <testSourceDirectory>src/test/java</testSourceDirectory>
-
     <resources>
       <resource>
         <directory>src/main/resources</directory>
       </resource>
     </resources>
-
     <testResources>
       <testResource>
         <directory>src/test/resources</directory>
       </testResource>
     </testResources>
-
     <plugins>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
         <configuration>
           <source>1.5</source>
           <target>1.5</target>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
+        <version>2.4</version>
         <configuration>
           <locales>en</locales>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.4</version>
         <configuration>
           <destDir>${project.build.directory}/site/docs/apidocs</destDir>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.1</version>
         <configuration>
-           <argLine>-Xms512m -Xmx512m</argLine>
+          <argLine>-Xms512m -Xmx512m</argLine>
           <!--debug>true</debug-->
           <!--forkMode>once</forkMode-->
           <!--childDelegation>false</childDelegation-->
           <excludes>
-
             <!-- not excluded (left here for convenience if need to temporarily disable)
-            <exclude>**/TestRawAudioProcessor.java</exclude>
-            <exclude>**/TestSphinxWavFile.java</exclude>
-            <exclude>**/TestSphinxRecEngineRaw.java</exclude>
-            -->
-
+            <exclude>**/TestRawAudioProcessor.java</exclude><exclude>**/TestSphinxWavFile.java</exclude><exclude>**/TestSphinxRecEngineRaw.java</exclude>-->
             <!-- The following tests are disabled since using PBDSReplicator with an audio file causes
                  timing issues that intermittently cause tests to hang or fail. -->
             <exclude>**/TestSphinxRecEngineReplicated.java</exclude>
             <exclude>**/TestPBDSReplicator.java</exclude>
             <exclude>**/TestRunSphinxRecEngine.java</exclude>
-
             <!-- The following test is disabled since it requires user input through a microphone. -->
             <exclude>**/TestSphinxRecEngineMicrophone.java</exclude>
-
             <!-- The following test is disabled since the expected data values are based on the
                  16k acoustic model which is no longer used. -->
             <exclude>**/TestRawAudioProcessor.java</exclude>
-
-			<!-- Word Error Rate tests, are configurable tests  meant to run standalone and not part of the automated 
-			     unit test suite. -->
+            <!-- Word Error Rate tests, are configurable tests  meant to run standalone and not part of the automated 
+           unit test suite. -->
             <exclude>**/BareRecognizerWerTest.java</exclude>
             <exclude>**/BaseRecognizerWerTest.java</exclude>
             <exclude>**/JMFRecognizerWerTest.java</exclude>
             <exclude>**/ReplicatorRecognizerWerTest.java</exclude>
             <exclude>**/RTPRecognizerWerTest.java</exclude>
-
           </excludes>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.22.1</version>
       </plugin>
-
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
@@ -191,7 +168,6 @@
           </descriptors>
         </configuration>
       </plugin>
-
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <version>1.1</version>
@@ -199,231 +175,240 @@
           <execution>
             <phase>site</phase>
             <configuration>
-		  <tasks>
+              <tasks>
                 <!--echo message="Hello from ant"/-->
                 <replace dir="${basedir}/target/site">
-                   <include name="**/*.html"/>
-			 <replacetoken><![CDATA[</body>]]></replacetoken>
-		       <replacevalue><![CDATA[
+                  <include name="**/*.html"/>
+                  <replacetoken>
+                    <![CDATA[</body>]]>
+                  </replacetoken>
+                  <replacevalue>
+                    <![CDATA[
 
-    <!--Google Analytics Script -->
-       <script type="text/javascript">
-           var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    <!--Google Analytics Script --><script type="text/javascript">var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-       </script>
-       <script type="text/javascript">
-           var pageTracker = _gat._getTracker("UA-5160702-1");
+       </script><script type="text/javascript">var pageTracker = _gat._getTracker("UA-5160702-1");
            pageTracker._trackPageview();
-       </script>
-    <!-- End Google Analytics Script -->
-
-    </body> ]]></replacevalue>
-                 </replace>    
-               </tasks>
-             </configuration>
-             <goals>
-               <goal>run</goal>
-             </goals>
-           </execution>
-         </executions>
+       </script><!-- End Google Analytics Script --></body>]]>
+                  </replacevalue>
+                </replace>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/buildlib</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <extensions>
-       <extension>
-         <groupId>org.apache.maven.wagon</groupId>
-         <artifactId>wagon-ftp</artifactId>
-         <version>1.0-beta-4</version>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ftp</artifactId>
+        <version>1.0-beta-4</version>
       </extension>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
         <artifactId>wagon-ssh</artifactId>
         <version>1.0-beta-6</version>
       </extension>
-  </extensions>
-
-
+    </extensions>
   </build>
 
   <repositories>
-
     <repository>
       <id>central</id>
       <name>Maven Repository Switchboard</name>
       <layout>default</layout>
-      <!--url>http://www.ibiblio.org/maven2</url-->
       <url>http://repo1.maven.org/maven2</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
     </repository>
-
     <repository>
-      <id>speechforge-repository</id>
-      <name>SpeechForge Repository</name>
-      <url>http://www.speechforge.org/repository/</url>
-    </repository>    
-
+      <id>repository.oss.sonatype.org</id>
+      <name>oss.sonatype.org</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>central2</id>
+      <name>bintray</name>
+      <url>https://dl.bintray.com/marytts/marytts</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <snapshots/>
+      <id>snapshots</id>
+      <name>libs-snapshot</name>
+      <url>https://oss.jfrog.org/artifactory/libs-snapshot</url>
+    </repository>
+    <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2</url>
+    </repository>
   </repositories>
 
   <dependencies>
-
+    <dependency>
+      <groupId>javax.media</groupId>
+      <artifactId>jmf</artifactId>
+      <version>2.1.1e</version>
+    </dependency>
     <!-- compile scope dependencies -->
-
     <dependency>
-      <groupId>org.mrcp4j</groupId>
-      <artifactId>mrcp4j</artifactId>
-      <version>0.2</version>
+      <groupId>net.sourceforge.halef</groupId>
+      <artifactId>halef-mrcp4j</artifactId>
+      <version>0.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
-      <groupId>org.speechforge</groupId>
+      <groupId>org.glassfish.tyrus.bundles</groupId>
+      <artifactId>tyrus-standalone-client</artifactId>
+      <version>1.13.1</version>
+    </dependency>
+    <dependency>
+      <groupId>de.dfki.mary</groupId>
+      <artifactId>marytts-client</artifactId>
+      <version>5.2</version>
+      <exclusions>
+      	<exclusion>
+      		<groupId>log4j</groupId>
+      		<artifactId>log4j</artifactId>
+      	</exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.sourceforge.halef</groupId>
       <artifactId>cairo-sip</artifactId>
-      <version>SNAPSHOT</version>
+      <version>0.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-    
     <dependency>
-      <groupId>org.speechforge</groupId>
+      <groupId>net.sourceforge.halef</groupId>
       <artifactId>cairo-rtp</artifactId>
-      <version>SNAPSHOT</version>
+      <version>0.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
+    <!-- dependency><groupId>sphinx</groupId><artifactId>sphinx4</artifactId><version>SNAPSHOT</version-->
+    <!--scope>compile</scope-->
+    <!-- scope>system</scope><systemPath>/export/Apps/Cairo/cairo-VM/lib/halef-sphinx4-0.1.jar</systemPath></dependency -->
     <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>sphinx4</artifactId>
-      <version>SNAPSHOT</version>
-      <scope>compile</scope>
+      <groupId>edu.cmu.sphinx</groupId>
+      <artifactId>sphinx4-core</artifactId>
+      <version>5prealpha-SNAPSHOT</version>
     </dependency>
-    
     <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>jsapi-1.0-base</artifactId>
-      <version>SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- Need to install this artifact separately for license reasons! -->
-    <!-- Download jsapi.exe to your java ext dir (jre/lib/ext) and execute to extract the jsapi jar file. -->
-    <!--dependency>
       <groupId>javax.speech</groupId>
       <artifactId>jsapi</artifactId>
       <version>1.0</version>
-      <scope>compile</scope>
-    </dependency-->
-
+      <scope>system</scope>
+      <systemPath>${JAVA_HOME}/lib/ext/jsapi-1.0.jar</systemPath>
+    </dependency>
     <dependency>
-      <groupId>freetts</groupId>
-      <artifactId>freetts</artifactId>
-      <version>SNAPSHOT</version>
+      <groupId>net.sourceforge.halef</groupId>
+      <artifactId>halefdbwriter</artifactId>
+      <version>0.0.2-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
-      <groupId>commons-cli</groupId>
-      <artifactId>commons-cli</artifactId>
+      <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mobicents.external.freetts</groupId>
+      <artifactId>freetts</artifactId>
       <version>1.0</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.1</version>
+      <groupId>commons-cli</groupId>
+      <artifactId>commons-cli</artifactId>
+      <version>1.4</version>
       <scope>compile</scope>
     </dependency>
-
     <dependency>
       <groupId>commons-configuration</groupId>
       <artifactId>commons-configuration</artifactId>
-      <version>1.2</version>
+      <version>1.6</version>
       <scope>compile</scope>
     </dependency>
-
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.3</version>
-      <scope>compile</scope>
-    </dependency>
-
     <dependency>
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
       <version>1.3</version>
       <scope>compile</scope>
     </dependency>
-
+	<dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-api</artifactId>
+    	<version>2.11.2</version>
+  	</dependency>
+  	<dependency>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-core</artifactId>
+    	<version>2.11.2</version>
+  	</dependency>
     <dependency>
-      <groupId>commons-validator</groupId>
-      <artifactId>commons-validator</artifactId>
-      <version>1.2.0</version>
-      <scope>compile</scope>
+    	<groupId>org.apache.logging.log4j</groupId>
+    	<artifactId>log4j-1.2-api</artifactId>
+    	<version>2.11.2</version>
     </dependency>
-
-    <dependency>
-      <groupId>jdom</groupId>
-      <artifactId>jdom</artifactId>
-      <version>1.0</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.13</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- runtime scope dependencies -->
-
-    <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
-      <version>SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>WSJ_8gau_13dCep_8kHz_31mel_200Hz_3500Hz</artifactId>
-      <version>SNAPSHOT</version>
-      <scope>runtime</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>freetts</groupId>
-      <artifactId>cmudict</artifactId>
-      <version>04</version>
-      <scope>runtime</scope>
-    </dependency>
-
+      <!-- runtime scope dependencies -->
     <!-- test scope dependencies -->
-
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.4</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
-      <groupId>sphinx</groupId>
-      <artifactId>TIDIGITS_8gau_13dCep_16k_40mel_130Hz_6800Hz</artifactId>
-      <version>SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>sipunit</groupId>
-      <artifactId>sipunit</artifactId>
+      <groupId>javax.sdp</groupId>
+      <artifactId>nist-sdp</artifactId>
       <version>1.0</version>
-      <scope>test</scope>
+      <scope>compile</scope>
     </dependency>
-
+    <dependency>
+      <groupId>javax.sip</groupId>
+      <artifactId>jain-sip-api</artifactId>
+      <version>1.2.1.4</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.sip</groupId>
+      <artifactId>jain-sip-ri</artifactId>
+      <version>1.2.324</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
-
   <reporting>
     <plugins>
       <plugin>
@@ -445,23 +430,13 @@
       </plugin>
     </plugins>
   </reporting>
-
   <distributionManagement>
-    <repository>
-      <uniqueVersion>false</uniqueVersion>
-      <id>speechforge-repository</id>
-      <name>Speechforge Repository</name>
-      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/repository</url>
-    </repository>
-    <site>
-      <id>speechforge-site</id>
-      <url>scp://www.speechforge.org/home/webadmin/speechforge.org/html/projects/cairo</url>
-    </site>
-    <downloadUrl>https://sourceforge.net/project/showfiles.php?group_id=${project.group.id}</downloadUrl>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
   </distributionManagement>
-
   <properties>
     <project.group.id>149085</project.group.id>
   </properties>
-
 </project>
