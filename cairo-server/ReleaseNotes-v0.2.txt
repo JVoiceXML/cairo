@@ -1,0 +1,38 @@
+Release Notes for Cairo v0.2:
+=============================
+
+Project Cairo sets out to provide an enterprise grade, Media Resource
+Control Protocol Version 2 (MRCPv2) compliant speech server solution
+utilizing existing open source speech resources.
+
+Version History
+---------------
+
+Cairo v0.2 adds support for establishing sessions using Session Initiation
+Protocol (SIP) signalling and improves speech recognition performance by
+matching the voice models used by Sphinx to the sampling rate of the
+received audio data.
+
+Cairo v0.1 implemented support for speech synthesis and speech recognition
+functionality using Media Resource Control Protocol Version 2 (MRCPv2) for
+the control channel between the speech client and the speech resource and
+Real-time Transport Protocol (RTP) for streaming audio to and from the
+media sink/source.
+
+
+Change Log for Project Cairo:
+=============================
+
+Cairo v0.2:
+-----------
+* Use SIP instead of Java RMI for session initiation.
+
+* Use the WSJ 8khz acoustic model instead of the 16khz model for speech
+recognition processing.  The 8khz model matches the sampling rate of the
+codec used for RTP audio data and as a result recognition performance is
+much improved.
+
+
+Cairo v0.1:
+-----------
+No prior release to compare with.

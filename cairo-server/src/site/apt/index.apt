@@ -1,0 +1,99 @@
+                       -----
+                     Overview
+                       -----
+                  Cairo Project Team
+                       -----
+
+Welcome to Project Cairo
+
+  Cairo provides an open source speech resource server written entirely in the Java programming language.  To achieve maximum compatibility with existing and future speech clients the Cairo server has been designed from the ground up to comply with the {{{faq.html#WhatIsMRCPv2}MRCPv2}} standard.
+
+  The purpose of Cairo is not to duplicate functionality provided by existing open source speech projects such as {{{http://freetts.sourceforge.net}FreeTTS}} and {{{http://cmusphinx.sourceforge.net/sphinx4/}Sphinx}}, but rather to build upon them and provide additional functionality such as clustering, load balancing and failover support in order to meet the requirements necessary for use in enterprise scale deployments of speech/telephony applications.
+
+About Cairo
+
+  There are four projects that make up Cairo.
+  
+  * Cairo-server is the main Cairo project.  If you are new to Cairo, this is a good place to start.
+  
+  * Cairo-client is library which you can use to build your own speech clients.  Note that you also have the option to use mrcp4j library directly to build mrcpv2 clients.  Cairo-client provides a higher level abstraction than mrcp4j.
+  
+  * Cairo-sip is a library used by both cairo-server and cairo-client to do SIP processing.  It is implemented using JAIN-SIP.
+  
+  * Cairo-rtp is a library used by the cairo-server and cairo-client demo to do rtp processing.  It is implemented using JMF.
+
+Latest News
+
+*Cairo-client v0.1 Released - December 10, 2008
+
+   Cairo-client is an open source speech client library written entirely in the
+Java programming language.  Cairo-client provides a simple API for building
+clients of MRCPv2 compliant speech servers.
+
+   This is the first release for the cairo-client project.  This release provides a 
+library of basic speech client capabilities.  It uses MRCPv2 to communicate with
+an MRCPv2 compliant speech resource server.  You can use cairo-client to build 
+applications requiring speech recognition and speech synthesis capabilities.
+
+*Cairo-server v0.3 Released - December 5, 2008
+
+   Cairo-server is an open source speech resource server written entirely in the
+Java programming language.  Cairo-server builds upon pre-existing open source
+speech projects such as FreeTTS and Sphinx and adds additional functionality
+to meet the requirements necessary for use in enterprise scale deployments of
+speech/telephony applications.
+
+   Cairo-server v0.3 - adds improved support for speech clients by adding hotword
+recognition mode, playback of pre-recorded prompts, SIP softphone integration
+and termination of active requests and sessions from the client.  Natural
+language processing has also been added and there have been further
+improvements made in the areas of endpointing and speech recognition
+performance.  Additionaly, this release also factors out some common code into
+3 new sub-projects: cairo-rtp, cairo-sip and cairo-client. What was previously
+Cairo has now been renamed to cairo-server.
+
+*Cairo-sip v0.2 Released - December 5, 2008
+
+   The cairo-sip library provides a simple Java API for supporting SIP/SDP message
+communication between MRCPv2 clients and servers.
+
+   Cairo-sip v0.2 adds support for NAT traversal and includes bug fixes.
+
+
+*Cairo-rtp v0.1 Released - October 26, 2008
+
+   The cairo-rtp library provides a simple Java API for supporting RTP audio
+streaming between a media source and a media sink.
+
+   This is the first release for the cairo-rtp project.   This release provides
+the necessary RTP streaming capabilities required for implementing MRCPv2
+clients and servers.
+
+*Cairo-sip v0.1 Released - October 21, 2008
+
+   The cairo-sip library provides a simple Java API for supporting SIP/SDP message communication between MRCPv2 clients and servers.
+
+   The Session Initiation Protocol (SIP) and the Session Description Protocol (SDP) are critical elements of the Media Resource Control Protocol Version 2 (MRCPv2) standard as described in the MRCPv2 specification:
+
+---
+   "MRCPv2 is not a "stand-alone" protocol - it relies on a session management
+   protocol such as the Session Initiation Protocol (SIP) to establish the
+   MRCPv2 control session between the client and the server, and for rendezvous
+   and capability discovery. It also depends on SIP and SDP to establish the
+   media sessions and associated parameters between the media source or sink
+   and the media server."
+---
+
+   This is the first release for the cairo-sip project.  This release provides the necessary SIP and SDP capabilities required for implementing MRCPv2 clients and servers. 
+
+*Cairo v0.2 Released - November 13, 2007
+
+  "Cairo sets out to provide an enterprise grade, Media Resource Control Protocol Version 2 (MRCPv2) compliant speech server solution utilizing existing open source speech resources.
+
+  Cairo v0.2 adds support for establishing sessions using Session Initiation Protocol (SIP) signalling and improves speech recognition performance by matching the voice models used by Sphinx to the sampling rate of the received audio data..." ({{{http://www.freelists.org/archives/speechforge-news/11-2007/msg00000.html}more}})
+
+Get Cairo
+
+  The latest version of Cairo can be downloaded {{{http://sourceforge.net/project/showfiles.php?group_id=149085}here}}.
+
+  After {{{install.html}installation}} of Cairo please see the {{{intro.html}Getting Started Guide}} for instructions on starting up the Cairo server processes and running the MRCPv2 client demos.

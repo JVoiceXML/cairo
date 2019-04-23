@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<faqs id="General FAQ">
+  <part id="General">
+    <faq id="WhatIsMRCPv2">
+      <question>What is MRCPv2?</question>
+      <answer>
+        <p>
+          MRCPv2 stands for Media Resource Control Protocol Version 2 and is a protocol being developed by the Speech Services
+          Control Working Group (<a href="http://www.ietf.org/html.charters/speechsc-charter.html" target="_blank">Speechsc</a>)
+          of the Internet Engineering Task Force (<a href="http://www.ietf.org" target="_blank">IETF</a>) to allow client hosts to
+          control media processing resources such as speech synthesizers, speech recognizers, speaker
+          verifiers and speaker identifiers residing in servers on the network.
+        </p>
+        <p>
+          You can read the full text of the latest MRCPv2 draft <a href="http://tools.ietf.org/html/draft-ietf-speechsc-mrcpv2" target="_blank">here</a>.
+        </p>
+      </answer>
+    </faq>
+    <faq id="nofaqs">
+      <question>Where are the rest of the FAQs?</question>
+      <answer>
+        <p>
+          Rather than start guessing at which will be the most frequently asked questions we have opted to wait for actual questions from the community and then post the most common ones here as they get answered.  If you have any questions regarding Cairo please post a message to the <a href="http://www.nabble.com/cairo-user-f15778.html" target="_blank">cairo-user</a> forum.
+        </p>
+      </answer>
+    </faq>
+  </part>
+</faqs>
