@@ -1,6 +1,8 @@
 package org.speechforge.cairo.performance;
 
-import edu.cmu.sphinx.jsapi.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 import java.io.BufferedReader;
@@ -35,8 +37,8 @@ public abstract class BaseRecognizerWerTest {
    int testCount;
     
     public abstract  void setUp(URL config);  
-    public abstract String recognizeAudioFile(URL audiofile);
-    public abstract void processGrammarLocation(GrammarLocation grammarLocation) throws IOException;
+    public abstract String recognizeAudioFile(URL audiofile) throws JSGFGrammarParseException, JSGFGrammarException;
+    public abstract void processGrammarLocation(GrammarLocation grammarLocation) throws IOException, JSGFGrammarParseException, JSGFGrammarException;
     public abstract void shutdown();
     
     
@@ -144,7 +146,13 @@ public abstract class BaseRecognizerWerTest {
             shutdown();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } catch (JSGFGrammarParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSGFGrammarException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         
     }

@@ -1,8 +1,9 @@
 package org.speechforge.cairo.performance;
 
 import edu.cmu.sphinx.frontend.util.StreamDataSource;
-import edu.cmu.sphinx.jsapi.JSGFGrammar;
-
+import edu.cmu.sphinx.jsgf.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
 import edu.cmu.sphinx.recognizer.Recognizer;
 
 import edu.cmu.sphinx.result.Result;
@@ -197,7 +198,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         return result.getText();
     }
 
-    public void processGrammarLocation(GrammarLocation grammarLocation) throws IOException {
+    public void processGrammarLocation(GrammarLocation grammarLocation) throws IOException, JSGFGrammarParseException, JSGFGrammarException {
         jsgfGrammarManager.setBaseURL(grammarLocation.getBaseURL());
         jsgfGrammarManager.loadJSGF(grammarLocation.getGrammarName());
     }

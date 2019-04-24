@@ -1,14 +1,6 @@
 package org.speechforge.cairo.performance;
 
 import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
-import edu.cmu.sphinx.jsapi.JSGFGrammar;
-import edu.cmu.sphinx.recognizer.Recognizer;
-import edu.cmu.sphinx.result.ConfidenceResult;
-import edu.cmu.sphinx.result.ConfidenceScorer;
-import edu.cmu.sphinx.result.Path;
-import edu.cmu.sphinx.result.WordResult;
-import edu.cmu.sphinx.util.props.ConfigurationManager;
-import edu.cmu.sphinx.util.props.PropertyException;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,22 +16,23 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.sdp.SdpConstants;
 import javax.speech.recognition.GrammarException;
-import org.apache.commons.pool.ObjectPool;
+
 import org.apache.log4j.Logger;
-import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.AudioFormats;
+import org.speechforge.cairo.rtp.RTPPlayer;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.GrammarLocation;
-import org.speechforge.cairo.server.recog.RTPRecogChannel;
 import org.speechforge.cairo.server.recog.RecogListener;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicatorFactory;
-import org.speechforge.cairo.rtp.RTPPlayer;
-import org.speechforge.cairo.jmf.ProcessorStarter;
-import org.speechforge.cairo.rtp.AudioFormats;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
+import edu.cmu.sphinx.util.props.ConfigurationManager;
+import edu.cmu.sphinx.util.props.PropertyException;
 
 
 /**
@@ -73,7 +66,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
       RTPPlayer audioFilePlayer;
       GrammarLocation grammarLocation;
       RTPStreamReplicator replicator;
-      ConfidenceScorer scorer;
+//      ConfidenceScorer scorer;
       PlayThread p;
 
 	private ProcessorReplicatorPair pair;
@@ -93,7 +86,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           try {
               cm = new ConfigurationManager(config);
               engine = new SphinxRecEngine(cm,1);
-              scorer = (ConfidenceScorer) cm.lookup("confidenceScorer");
+//              scorer = (ConfidenceScorer) cm.lookup("confidenceScorer");
           } catch (IOException e) {
               // TODO Auto-generated catch block
               e.printStackTrace();
@@ -146,7 +139,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
       }
 
  
-    public String recognizeAudioFile(URL audioFileURL) {
+    public String recognizeAudioFile(URL audioFileURL) throws JSGFGrammarParseException, JSGFGrammarException {
 
         Processor processor = null;
          Listener listener = new Listener();

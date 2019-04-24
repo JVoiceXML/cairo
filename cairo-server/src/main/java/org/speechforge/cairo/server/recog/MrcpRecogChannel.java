@@ -24,6 +24,10 @@ package org.speechforge.cairo.server.recog;
 
 import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
+
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
+
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 
 import java.io.BufferedReader;
@@ -233,7 +237,19 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                     statusCode = MrcpResponse.STATUS_ILLEGAL_VALUE_FOR_HEADER;
                     // TODO: add completion cause header
                     // TODO: add bad value headers
-                }
+                } catch (JSGFGrammarParseException e) {
+                    _logger.debug(e, e);
+                    statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                    CompletionCause completionCause = new CompletionCause((short) 4, "grammar-load-failure");
+                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
+				} catch (JSGFGrammarException e) {
+                    _logger.debug(e, e);
+                    statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
+                    CompletionCause completionCause = new CompletionCause((short) 4, "grammar-load-failure");
+                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
+                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
+				}
             }
         }
 

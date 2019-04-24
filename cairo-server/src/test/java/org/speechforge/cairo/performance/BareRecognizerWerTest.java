@@ -1,7 +1,9 @@
 package org.speechforge.cairo.performance;
 
 import edu.cmu.sphinx.frontend.util.StreamDataSource;
-import edu.cmu.sphinx.jsapi.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
@@ -60,7 +62,7 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
             AudioInputStream ais = AudioSystem.getAudioInputStream(audioFileURL);
             
             /* set the stream data source to read from the audio file */
-            reader.setInputStream(ais, audioFileURL.getFile());
+            reader.setInputStream(ais);
 
             result = recognizer.recognize();
 
@@ -78,7 +80,7 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
         
     }
     
-    public  void processGrammarLocation(GrammarLocation grammarLocation) throws IOException {
+    public  void processGrammarLocation(GrammarLocation grammarLocation) throws IOException, JSGFGrammarParseException, JSGFGrammarException {
         jsgfGrammarManager.setBaseURL(grammarLocation.getBaseURL());
         jsgfGrammarManager.loadJSGF(grammarLocation.getGrammarName());
     }

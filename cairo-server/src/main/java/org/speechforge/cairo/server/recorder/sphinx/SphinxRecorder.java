@@ -42,7 +42,7 @@ import edu.cmu.sphinx.frontend.FloatData;
 import edu.cmu.sphinx.frontend.FrontEnd;
 import edu.cmu.sphinx.frontend.endpoint.SpeechEndSignal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechStartSignal;
-import edu.cmu.sphinx.jsapi.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammar;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
@@ -224,8 +224,8 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 
 	    private void infoDataStartSignal(DataStartSignal dataStartSignal) {
 	        Map<String, Object> dataProps = dataStartSignal.getProps();
-	        if (dataProps.containsKey(DataStartSignal.SPEECH_TAGGED_FEATURE_STREAM))
-	           _logger.debug("SPEECH TAG FEATURE STREAM: "+dataProps.get(DataStartSignal.SPEECH_TAGGED_FEATURE_STREAM));
+	        if (dataProps.containsKey("vadTaggedFeatureStream"))
+	           _logger.debug("SPEECH TAG FEATURE STREAM: "+dataProps.get("vadTaggedFeatureStream"));
 	    }
 	    
    

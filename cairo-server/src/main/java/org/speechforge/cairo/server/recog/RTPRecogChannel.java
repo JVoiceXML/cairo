@@ -28,6 +28,10 @@ import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
 import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
+
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
+
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 
@@ -92,9 +96,11 @@ public class RTPRecogChannel {
      * @throws IOException
      * @throws ResourceUnavailableException
      * @throws GrammarException
+     * @throws JSGFGrammarParseException 
+     * @throws JSGFGrammarException 
      */
     public synchronized void recognize(RecogListener listener, GrammarLocation grammarLocation, long noInputTimeout, boolean hotword)
-      throws IllegalStateException, IOException, ResourceUnavailableException, GrammarException {
+      throws IllegalStateException, IOException, ResourceUnavailableException, GrammarException, JSGFGrammarParseException, JSGFGrammarException {
 
         if (_processor != null) {
             throw new IllegalStateException("Recognition already in progress!");
@@ -151,7 +157,13 @@ public class RTPRecogChannel {
         } catch (IOException e) {
             closeProcessor();
             throw e;
-        }
+        } catch (JSGFGrammarParseException e) {
+            closeProcessor();
+            throw e;
+		} catch (JSGFGrammarException e) {
+            closeProcessor();
+            throw e;
+		}
     }
 
     /**

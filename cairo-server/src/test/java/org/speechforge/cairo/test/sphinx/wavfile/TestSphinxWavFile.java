@@ -109,7 +109,7 @@ public class TestSphinxWavFile extends AbstractTestCase {
 
         /* set the stream data source to read from the audio file */
         AudioInputStream ais = AudioSystem.getAudioInputStream(audioFileURL);
-        source.setInputStream(ais, audioFileURL.getFile());
+        source.setInputStream(ais);
 
         /* decode the audio file */
         Result result = recognizer.recognize();

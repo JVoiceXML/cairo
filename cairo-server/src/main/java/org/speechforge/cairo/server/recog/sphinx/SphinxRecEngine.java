@@ -57,7 +57,9 @@ import javax.speech.recognition.GrammarException;
 import javax.speech.recognition.RuleGrammar;
 import javax.speech.recognition.RuleParse;
 
-import edu.cmu.sphinx.jsapi.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
@@ -144,8 +146,10 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      * @param grammarLocation
      * @throws IOException
      * @throws GrammarException
+     * @throws JSGFGrammarException 
+     * @throws JSGFGrammarParseException 
      */
-    public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException {
+    public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException, JSGFGrammarParseException, JSGFGrammarException {
     	
         _jsgfGrammar.setBaseURL(grammarLocation.getBaseURL());
         _jsgfGrammar.loadJSGF(grammarLocation.getGrammarName());
@@ -165,7 +169,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             throw new IllegalStateException("Recognition already in progress!");
         }
         
-        RuleGrammar ruleGrammar = _jsgfGrammar.getRuleGrammar();
+        RuleGrammar ruleGrammar = (RuleGrammar) _jsgfGrammar.getRuleGrammar();
         return ruleGrammar.parse(text, ruleName);
     }
 
@@ -223,7 +227,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
                  } else {
                      _logger.debug("result is:"+result.toString());
                  }
-                 rr.setNewResult(result, _jsgfGrammar.getRuleGrammar());
+                 rr.setNewResult(result, (RuleGrammar) _jsgfGrammar.getRuleGrammar());
                  _logger.debug("Rec result: "+rr.toString());
                  _logger.debug("text:"+rr.getText()+" matches:"+rr.getRuleMatches()+" oog flag:"+rr.isOutOfGrammar());
                  if( (!rr.getRuleMatches().isEmpty()) && (!rr.isOutOfGrammar())) {
@@ -245,7 +249,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             _logger.info("waitForResult(): got null result from recognizer!");
             return null;
         }
-        return new RecognitionResult(result, _jsgfGrammar.getRuleGrammar());
+        return new RecognitionResult(result, (RuleGrammar) _jsgfGrammar.getRuleGrammar());
 
     }
 
