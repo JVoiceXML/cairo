@@ -319,6 +319,12 @@
       <version>5prealpha-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>edu.cmu.sphinx</groupId>
+      <artifactId>sphinx4-data</artifactId>
+      <version>5prealpha-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>javax.speech</groupId>
       <artifactId>jsapi</artifactId>
       <version>1.0</version>
