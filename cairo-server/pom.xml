@@ -325,6 +325,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>edu.cmu.sphinx</groupId>
+      <artifactId>sphinx4-wsj</artifactId>
+      <version>5prealpha-SNAPSHOT</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/lib/WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>javax.speech</groupId>
       <artifactId>jsapi</artifactId>
       <version>1.0</version>

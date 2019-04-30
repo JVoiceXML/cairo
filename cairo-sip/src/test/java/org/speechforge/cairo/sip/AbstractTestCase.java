@@ -22,12 +22,9 @@
  */
 package org.speechforge.cairo.sip;
 
-import java.net.URL;
+import org.apache.log4j.Logger;
 
 import junit.framework.TestCase;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.xml.DOMConfigurator;
 
 /**
  * Unit test base class.
@@ -46,12 +43,6 @@ public abstract class AbstractTestCase extends TestCase {
         super(testName);
     }
 
-    public void setUp() throws Exception {
-        // configure log4j
-        URL log4jURL = this.getClass().getResource("/log4j.xml");
-        assertNotNull(log4jURL);
-        DOMConfigurator.configure(log4jURL);
-    }
 
 //    public void testDummy() throws Exception {
 //        debugTestName(_logger);
