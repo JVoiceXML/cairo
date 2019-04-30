@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>net.sourceforge.halef</groupId>
+  <groupId>org.jvoicexml</groupId>
   <artifactId>cairo-client</artifactId>
   <packaging>jar</packaging>
   <name>Cairo Client Module</name>
@@ -287,11 +287,19 @@
     <!-- compile scope dependencies -->
 
     <dependency>
-      <groupId>net.sourceforge.halef</groupId>
-      <artifactId>halef-mrcp4j</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <groupId>org.jvoicexml</groupId>
+      <artifactId>mrcp4j</artifactId>
+      <version>0.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
+
+	<dependency>
+    	<groupId>net.sourceforge.halef</groupId>
+    	<artifactId>halef-speechcloud-cli</artifactId>
+    	<version>0.1-SNAPSHOT</version>
+    	<scope>system</scope>
+    	<systemPath>${project.basedir}/lib/speechcloud-client.jar</systemPath>
+	</dependency>
 
     <dependency>
         <groupId>net.sourceforge.halef</groupId>
