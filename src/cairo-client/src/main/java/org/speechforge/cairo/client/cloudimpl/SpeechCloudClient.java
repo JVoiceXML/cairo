@@ -923,6 +923,13 @@ public class SpeechCloudClient implements SpeechClient, SpeechClientProvider, Pr
 	}
 
 
+	@Override
+	public void setContentType(String contentType) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 //	public void recognitionComplete(Utterance result) {
 //	    _logger.debug("Recognition complete event");
 //		//TODO:  THIS IS NOT TESTED.  ONLY CHANGED TO COMPILE!!  CONVERTING FROM UTTERANCE.tostring() TO RecResult will probably not work!!!

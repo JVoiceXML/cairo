@@ -44,6 +44,7 @@ public interface SpeechClient {
     //TODO:  Re-Implement the non blocking calls.  Commented them out for the time being to get something working.
     //TODO:  Redesign the SpeechRequest object. reduce to essential components.  remove MRCP references...
     
+    void setContentType(String contentType);
        
     /**
      * Play the prompt using a speech sythesizer or play the audio file.

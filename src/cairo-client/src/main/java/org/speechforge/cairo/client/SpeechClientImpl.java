@@ -143,6 +143,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
     private final Collection<SpeechEventListener> listenerList;
     
+    private String _contentType;
+    
     /**
      * Instantiates a new speech client impl.
      * 
@@ -159,6 +161,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
            _recogChannel.addEventListener(this); 
         listenerList = new java.util.ArrayList<SpeechEventListener>();
         
+    }
+
+    public void setContentType(String contentType) {
+    	_contentType = contentType;
     }
 
 
@@ -607,7 +613,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
            if (attachGrammar) {
               URL gUrl = new URL(grammarUrl);
-              request.setContent("application/jsgf", null, gUrl);
+              request.setContent(_contentType, null, gUrl);
           } else {
               request.setContent("text/uri-list", null, grammarUrl);
           }
