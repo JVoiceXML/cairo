@@ -277,10 +277,9 @@
     </dependency>
     <!-- compile scope dependencies -->
     <dependency>
-      <groupId>net.sourceforge.halef</groupId>
-      <artifactId>halef-mrcp4j</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <scope>compile</scope>
+      <groupId>org.jvoicexml</groupId>
+      <artifactId>mrcp4j</artifactId>
+      <version>0.3-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.tyrus.bundles</groupId>
@@ -299,16 +298,14 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>net.sourceforge.halef</groupId>
+      <groupId>org.jvoicexml</groupId>
       <artifactId>cairo-sip</artifactId>
       <version>0.3-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>net.sourceforge.halef</groupId>
+      <groupId>org.jvoicexml</groupId>
       <artifactId>cairo-rtp</artifactId>
       <version>0.3-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
     <!-- dependency><groupId>sphinx</groupId><artifactId>sphinx4</artifactId><version>SNAPSHOT</version-->
     <!--scope>compile</scope-->

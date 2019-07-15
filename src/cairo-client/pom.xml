@@ -310,17 +310,15 @@
 
 
     <dependency>
-      <groupId>net.sourceforge.halef</groupId>
+      <groupId>org.jvoicexml</groupId>
       <artifactId>cairo-rtp</artifactId>
       <version>0.3-SNAPSHOT</version>
-      <scope>compile</scope>
     </dependency>
 
     <dependency>
-        <groupId>net.sourceforge.halef</groupId>
+        <groupId>org.jvoicexml</groupId>
         <artifactId>cairo-sip</artifactId>
         <version>0.3-SNAPSHOT</version>
-        <scope>compile</scope>
     </dependency>
 
 	<dependency>
