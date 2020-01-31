@@ -22,22 +22,21 @@
  */
 package org.speechforge.cairo.test.sphinx.wavfile;
 
-import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
 
 import java.net.URL;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
 
 import edu.cmu.sphinx.frontend.util.StreamDataSource;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-
-import org.apache.log4j.Logger;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Unit test for basic recognition with Sphinx (no Cairo classes).

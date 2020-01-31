@@ -333,7 +333,7 @@
       <artifactId>jsapi</artifactId>
       <version>1.0</version>
       <scope>system</scope>
-      <systemPath>${JAVA_HOME}/lib/ext/jsapi-1.0.jar</systemPath>
+      <systemPath>${project.basedir}/lib/jsapi-1.0.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.halef</groupId>
