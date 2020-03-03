@@ -237,12 +237,6 @@
   <dependencies>
     <!-- compile scope dependencies -->
     <dependency>
-      <groupId>net.sourceforge.halef</groupId>
-      <artifactId>halefdbwriter</artifactId>
-      <version>0.0.2-SNAPSHOT</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
       <version>1.1</version>

@@ -293,22 +293,6 @@
       <scope>compile</scope>
     </dependency>
 
-	<dependency>
-    	<groupId>net.sourceforge.halef</groupId>
-    	<artifactId>halef-speechcloud-cli</artifactId>
-    	<version>0.1-SNAPSHOT</version>
-    	<scope>system</scope>
-    	<systemPath>${project.basedir}/lib/speechcloud-client.jar</systemPath>
-	</dependency>
-
-    <dependency>
-        <groupId>net.sourceforge.halef</groupId>
-        <artifactId>halefdbwriter</artifactId>
-        <version>0.0.2-SNAPSHOT</version>      
-        <scope>compile</scope>
-    </dependency>
-
-
     <dependency>
       <groupId>org.jvoicexml</groupId>
       <artifactId>cairo-rtp</artifactId>
