@@ -256,7 +256,7 @@
     <!-- compile scope dependencies -->
     <dependency>
       <groupId>org.jvoicexml</groupId>
-      <artifactId>mrcp4j</artifactId>
+      <artifactId>org.mrcp4j</artifactId>
       <version>0.3-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
