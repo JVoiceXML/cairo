@@ -1,4 +1,4 @@
 include 'org.speechforge.cairo.rtp', 
-    'org.speechforge.cairo.sip',
-    'org.speechforge.cairo.client', 
-    'org.speechforge.cairo.server', 
+    'org.speechforge.cairo.sip', 
+    'org.speechforge.cairo.client',  
+    'org.speechforge.cairo.server'
