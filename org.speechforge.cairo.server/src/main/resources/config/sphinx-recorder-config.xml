@@ -27,7 +27,8 @@
             <item>primaryInput1</item>
             <item>speechClassifier1</item>
             <item>speechMarker1</item>
-            <item>nonSpeechDataFilter1</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>

@@ -22,18 +22,17 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.util.pool.ObjectPoolUtil;
-import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
-import org.speechforge.cairo.util.pool.PoolableObject;
-
 import java.net.URL;
-
-import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
+import org.speechforge.cairo.util.pool.ObjectPoolUtil;
+import org.speechforge.cairo.util.pool.PoolableObject;
+
+import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 /**
  * Serves to create a pool of {@link org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine} instances.
