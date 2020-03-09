@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'application'
 
 repositories {
     mavenCentral()
@@ -14,8 +15,7 @@ dependencies {
     compile group: 'javax.media', name: 'jmf', version: '2.1.1e'
     compile group: 'edu.cmu.sphinx', name: 'sphinx4-core', version: '5prealpha-SNAPSHOT'
     compile group: 'edu.cmu.sphinx', name: 'sphinx4-data', version: '5prealpha-SNAPSHOT'
-    compile fileTree(dir: "./lib", include: ['WSJ_8gau_13dCep_16k_40mel_130Hz_6800Hz.jar'])
-    compile fileTree(dir: "./lib", include: ['jsapi-1.0.jar'])
+    compile fileTree(dir: "./lib", include: ['*.jar'])
     compile group: 'org.mobicents.external.freetts', name: 'freetts', version: '1.0'
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile group: 'commons-configuration', name: 'commons-configuration', version: '1.6'
@@ -114,4 +114,45 @@ uploadArchives {
             }
         }
     }
+}
+
+run {
+    dependsOn jar
+    
+    mainClassName = "org.speechforge.cairo.server.resource.ResourceServerImpl"
+    classpath += files("${project.rootDir}/config-template")
+    jvmArgs = ["-Xmx2048m",
+               "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000"]
+    args = ["-sipPort 5050",
+            "-sipTransport udp"]
+}
+
+task(runReceiver, type: JavaExec) {
+    dependsOn jar
+    
+    main = "org.speechforge.cairo.server.resource.ReceiverResource"
+    classpath = sourceSets.main.runtimeClasspath \
+                + files("${project.rootDir}/config-template")
+    jvmArgs = ["-Xmx2048m",
+               "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000"]
+    args = ["file:${project.rootDir}/config-template/cairo-config.xml",
+            "receiver1"]
+}
+
+task(runTransmitter, type: JavaExec) {
+    dependsOn jar
+    
+    main = "org.speechforge.cairo.server.resource.TransmitterResource"
+    classpath = sourceSets.main.runtimeClasspath \
+                + files("${project.rootDir}/config-template")
+    jvmArgs = ["-Xmx2048m",
+               "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000"]
+    args = ["file:${project.rootDir}/config-template/cairo-config.xml",
+            "transmitter1"]
 }
