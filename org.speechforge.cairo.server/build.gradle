@@ -139,7 +139,7 @@ task(runReceiver, type: JavaExec) {
                "-XX:+UseConcMarkSweepGC",
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000"]
-    args = ["file:${project.rootDir}/config-template/cairo-config.xml",
+    args = ["file:${buildDir}/resources/main/config/cairo-config.xml",
             "receiver1"]
 }
 
@@ -153,6 +153,6 @@ task(runTransmitter, type: JavaExec) {
                "-XX:+UseConcMarkSweepGC",
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000"]
-    args = ["file:${project.rootDir}/config-template/cairo-config.xml",
+    args = ["file:${buildDir}/resources/main/config/cairo-config.xml",
             "transmitter1"]
 }
