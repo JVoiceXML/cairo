@@ -7,7 +7,7 @@
       <mrcpPort>32416</mrcpPort>
       <rtpBasePort>42050</rtpBasePort>
       <maxConnects>50</maxConnects>
-      <engines>5</engines>
+      <engines>1</engines>
       <recorderEngines>5</recorderEngines>
       <baseRecordingDir>/temp/cairo/recordingDir</baseRecordingDir>
       <baseGrammarDir>/temp/cairo/baseGrammarDir</baseGrammarDir>
@@ -24,7 +24,7 @@
       <mrcpPort>32417</mrcpPort>
       <rtpBasePort>42150</rtpBasePort>
       <maxConnects>50</maxConnects>
-      <engines>5</engines>
+      <engines>1</engines>
       <voiceName>kevin</voiceName>
       <basePromptDir>/temp/cairo/basePromptDir</basePromptDir>
       <!-- can specify ip address, if not specified it tries to get it progamatically -->

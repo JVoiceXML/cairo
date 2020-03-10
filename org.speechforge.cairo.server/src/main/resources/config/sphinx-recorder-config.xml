@@ -66,7 +66,8 @@
             <item>primaryInput2</item>
             <item>speechClassifier2</item>
             <item>speechMarker2</item>
-            <item>nonSpeechDataFilter2</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -104,7 +105,8 @@
             <item>primaryInput3</item>
             <item>speechClassifier3</item>
             <item>speechMarker3</item>
-            <item>nonSpeechDataFilter3</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -143,7 +145,8 @@
             <item>primaryInput4</item>
             <item>speechClassifier4</item>
             <item>speechMarker4</item>
-            <item>nonSpeechDataFilter4</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -182,7 +185,8 @@
             <item>primaryInput5</item>
             <item>speechClassifier5</item>
             <item>speechMarker5</item>
-            <item>nonSpeechDataFilter5</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -221,7 +225,8 @@
             <item>primaryInput6</item>
             <item>speechClassifier6</item>
             <item>speechMarker6</item>
-            <item>nonSpeechDataFilter6</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -262,7 +267,8 @@
             <item>primaryInput7</item>
             <item>speechClassifier7</item>
             <item>speechMarker7</item>
-            <item>nonSpeechDataFilter7</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -301,7 +307,8 @@
             <item>primaryInput8</item>
             <item>speechClassifier8</item>
             <item>speechMarker8</item>
-            <item>nonSpeechDataFilter8</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -339,7 +346,8 @@
             <item>primaryInput9</item>
             <item>speechClassifier9</item>
             <item>speechMarker9</item>
-            <item>nonSpeechDataFilter9</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
@@ -379,7 +387,8 @@
             <item>primaryInput10</item>
             <item>speechClassifier10</item>
             <item>speechMarker10</item>
-            <item>nonSpeechDataFilter10</item>
+            <!-- Commented to start up without errors -->
+            <!-- >item>nonSpeechDataFilter1</item-->
         
         </propertylist>
     </component>
