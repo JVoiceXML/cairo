@@ -1,0 +1,99 @@
+                       -----
+                  Getting Started
+                       -----
+                  Cairo Project Team
+                       -----
+
+Getting Started
+
+  If you have not yet installed Cairo please see the {{{install.html}Cairo Installation Guide}} for instructions on downloading and installing the Cairo software.
+
+  Once Cairo is successfully installed you can follow the instructions below to launch the various Cairo server processes and run the demo MRCPv2 clients.
+
+*------------------+
+| <Note: These instructions and the batch files provided in the Cairo distribution are geared towards a deployment of Cairo on Windows.  Since Cairo is written entirely in Java it should work on any operating system, however it has, as of yet, only been verified on Windows.  If you are interested in deploying Cairo on another operating system please post a message to the {{{http://www.nabble.com/cairo-user-f15778.html}cairo-user}} forum to get assistance in this process.>
+*------------------+
+
+Starting the Cairo Server
+
+*Server Architecture
+
+  Rather than being architected as a single monolithic server, Cairo is composed of a number of separate components, each performing a specific function and running in its own process space (i.e. JVM).
+
+  Cairo can be started up in a variety of configurations depending upon the capabilities required of the individual deployment.  Out of the box, Cairo is configured to be run with one instance of each component type: a Resource Server, a Receiver Resource, and a Transmitter Resource.
+
+  The Cairo server components have the following functions:
+
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| <Component>          | <Function>
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| Resource Server      | Manages client connections with resources (only one of these should be running per Cairo deployment).
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| Transmitter Resource | Responsible for all functions that generate audio data to be streamed to the client (e.g. speech synthesis).
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+| Receiver Resource    | Responsible for all functions that process audio data streamed from the client (e.g. speech recognition).
+*----------------------+--------------------------------------------------------------------------------------------------------------+
+
+*Launching Server Processes
+
+  Server process are started by passing appropriate parameters to the <<<launch.bat>>> script in the <<<bin>>> directory of your Cairo installation.  However the <<<launch.bat>>> script should not be invoked directly.  Instead batch files are supplied for each of the server processes present in the default configuration.
+
+  The resource server (<<<rserver.bat>>>) should always be started first since the resources must register with the resource server when they become available.  Once the resource server has completed initialization you will see a message on the console that says <"Server and registry bound and waiting...">
+  
+  Then the individual resources (<<<transmitter1.bat>>> and <<<receiver1.bat>>>) can be started in any order.  When ready, each of the resources will display a <"Resource bound and waiting..."> message.
+
+  Once all three server processes have completed initialization and display a waiting message, the server cluster is ready to accept MRCPv2 client requests.
+
+
+Running the Demo MRCPv2 Clients
+
+  A number of demo clients are supplied with the Cairo installation.  These can either be run directly or they may be used as example code to write your own MRCPv2 client.
+
+*Prerequisites
+
+  The included demo clients play synthesized speech and/or perform speech recognition on microphone input and as such require (preferably high quality) microphone and speakers attached to the system executing the demos.
+
+* Example Grammar
+
+  Most of the demo clients that include speech recognition functionality are configured by default to use the grammar file <<<demo/grammar/example.gram>>>.   This grammar is in Java Speech Grammar Format (JSGF).  If you are familiar with JSGF you can examine the grammar file to find out what some valid utterances are that the demos will recognize.  Here are some examples of valid utterances from the <<<example.gram>>> grammar file:
+
+    * <"I would like sports news.">
+
+    * <"Get me the weather.">
+
+    * <"I would like to hear a stock quote.">
+
+  Demo clients that run in <<<-loop>>> mode use the grammar file <<<demo/grammar/example-loop.gram>>> instead.  This grammar extends <<<example.gram>>> by adding voice commands for exiting a looping demo.  The <<<example-loop.gram>>> grammar file adds the following recognized utterances:
+
+    * <"Exit.">
+
+    * <"Quit.">
+
+* Available Clients
+
+  The following demo clients are included in the Cairo installation.
+
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <Client>               | <Description>
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-speechsynth>>> | MRCPv2 client application that utilizes a <<<speechsynth>>> resource to play a TTS prompt.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-recog>>>       | MRCPv2 client application that utilizes a <<<speechrecog>>> resource to perform speech recognition on microphone input.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-bargein>>>     | MRCPv2 client application that plays a TTS prompt while performing speech recognition on microphone input.  Prompt playback is cancelled as soon as start of speech is detected.
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-parrot>>>      | This is the same client as <<<demo-bargein>>> but run in <<<-parrot>>> mode so that recognized utterances are read back to the user using TTS.
+|                        |(Note: <<<-loop>>> mode is also enabled so that this demo will repeat until the phrase <"quit"> or <"exit"> is recognized.)
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+| <<<demo-standalone>>>  | Standalone application that performs speech recognition on microphone input using an embedded <<<org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine>>> instance directly (instead of by streaming audio to an MRCPv2 recognition resource).
+*------------------------+--------------------------------------------------------------------------------------------------------------+
+
+  Each client can be started by running the appropriate batch script located in the <<<demo/bin>>> directory of your Cairo installation.  Source code for the demos is also included in the installation and can be found in the <<<demo/src/java>>> directory.
+
+Running the Cairo-client Demo
+
+   A version of demo-bargein and demo-parrot is available in the cairo-client.  These can either be run directly or they may be used as example code to write your own client.
+   
+   Unpack the seperately available download in the directory of your choice and then run one of the scripts in the /bin directory.
+
+~~Please see the Demo Clients Guide for further information.

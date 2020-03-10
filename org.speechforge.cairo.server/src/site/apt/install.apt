@@ -1,0 +1,41 @@
+                       -----
+                    Installation
+                       -----
+                  Cairo Project Team
+                       -----
+
+{Downloads}
+
+  The latest version of Cairo can be downloaded {{{http://sourceforge.net/project/showfiles.php?group_id=149085}here}}.
+
+{Installation}
+
+*Prerequisites
+
+  Cairo requires Java Runtime Environment (JRE) 5.0 or higher which can be downloaded here:
+
+  {{http://java.sun.com/javase/downloads/}}
+
+  If you have not already, you will need to set your JAVA_HOME environment variable to point to the installed location of your JRE/JDK.
+
+*Extract Cairo
+
+  To install Cairo, extract all files from the binary distribution archive to a directory of your choosing.
+
+*Download and Install JMF 2.1.1
+
+  Cairo requires Java Media Framework (JMF) version 2.1.1. which can be downloaded here:
+
+  {{http://java.sun.com/products/java-media/jmf/2.1.1/download.html}}
+
+  Download and run the JMF installer that corresponds to your specific operating system.  This will install <<<jmf.jar>>> and <<<sound.jar>>> to the <<<lib/ext>>> directory of your installed JRE(s) as well as performing the configurations specific to your operating system.
+
+*Install JSAPI
+
+  Run the JSAPI installer found in the <<<lib>>> directory of your Cairo installation (either <<<jsapi.exe>>> or <<<jsapi.sh>>> depending upon your operating system) and accept the Sun Microsystems license agreement.  This will extract the <<<jsapi.jar>>> to your Cairo <<<lib>>> directory.  (If you run the JSAPI installer from a different directory you will need to move the <<<jsapi.jar>>> from that directory to your Cairo installation's <<<lib>>> directory in order for it to be included in the Cairo classpath.)
+
+  Note: Extracting <<<jsapi.jar>>> to the <<<lib>>> directory is sufficient for this single Cairo installation.  However to avoid this step during future installations you can permanently install JSAPI by moving the <<<jsapi.jar>>> to the <<<lib/ext>>> directory of your installed JRE(s).
+
+{What Next?}
+
+  See the {{{intro.html}Getting Started Guide}} for instructions on starting up the Cairo server processes and running the MRCPv2 client demos.

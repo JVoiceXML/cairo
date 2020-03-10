@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="cairo">
+
+  <bannerLeft>
+    <name>SpeechForge Banner</name>
+    <src>images/speechforge-banner.jpg</src>
+    <href>http://www.speechforge.org</href>
+  </bannerLeft>
+
+  <bannerRight>
+    <name>SourceForge.net Logo</name>
+    <src>http://sflogo.sourceforge.net/sflogo.php?group_id=149085&amp;type=5</src>
+    <href>http://sourceforge.net/</href>
+  </bannerRight>
+
+  <body>
+
+    <links>
+      <item name="Cairo" href="index.html"/>
+      <item name="MRCP4J" href="../mrcp4j/index.html"/>
+      <item name="SpeechForge Home" href="../../index.html"/>
+    </links>
+
+    <menu name="Cairo">
+      <item name="Overview" href="index.html"/>
+      <item name="Downloads" href="http://sourceforge.net/project/showfiles.php?group_id=149085"/>
+      <item name="Installation" href="install.html"/>
+      <item name="Getting Started" href="intro.html"/>
+      <item name="FAQ" href="faq.html"/>
+      <item name="API Documentation" href="docs/apidocs/index.html?overview-summary.html"/>
+      <item name="Issue Tracking" href="http://www.speechforge.org:8080/jira/secure/Dashboard.jspa"/>
+    </menu>
+
+    <menu name="Project Documentation">
+      <item name="Project Info" href="project-info.html" collapse="false">
+        <item name="Dependencies" href="dependencies.html"/>
+        <item name="Mailing Lists" href="mail-lists.html"/>
+        <item name="Project License" href="license.html"/>
+        <item name="Project Team" href="team-list.html"/>
+        <item name="Source Repository" href="source-repository.html"/>
+      </item>
+    </menu>
+
+  </body>
+
+</project>
