@@ -1,0 +1,30 @@
+Release Notes for cairo-rtp v0.1:
+=================================
+The cairo-rtp library provides a simple Java API for supporting RTP audio
+streaming between a media source and a media sink.
+
+This is the first release for the cairo-rtp project.   This release provides
+the necessary RTP streaming capabilities required for implementing MRCPv2
+clients and servers
+
+
+Version History
+---------------
+
+Cairo-rtp v0.2 adds support for server side rtp stream processing.  This 
+was code that was originally in the cairo-server project.  Now it can be
+used in other projects without requiring the inclusion entire cairo-server.
+
+Change Log for Project Cairo-rtp:
+=================================
+
+Cairo-rtp v0.2:
+---------------
+* Includes the server side rtp streaming features.
+
+* Adds the ability to cleanup rtp replicators (fixes a replicator leak).
+
+
+Cairo-rtp v0.1:
+----------------
+No prior release to compare with.

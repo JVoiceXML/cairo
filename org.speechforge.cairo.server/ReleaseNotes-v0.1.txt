@@ -1,0 +1,11 @@
+Release Notes for Cairo v0.1:
+=============================
+Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech
+server solution utilizing existing open source speech resources.
+
+This is the first release for the Cairo project.  This release provides
+support for basic speech synthesis and speech recognition functionality
+using Media Resource Control Protocol Version 2 (MRCPv2) for the control
+channel between the speech client and the speech resource and Real-time
+Transport Protocol (RTP) for streaming audio to and from the media
+sink/source.

@@ -1,0 +1,11 @@
+Release Notes for cairo-client v0.1:
+====================================
+
+Cairo-client is an open source speech client library written entirely in the
+Java programming language.  Cairo-client provides a simple API for building
+clients of MRCPv2 compliant speech servers.
+
+This is the first release for the cairo-client project.  This release provides a 
+library of basic speech client capabilities.  It uses MRCPv2 to communicate with
+an MRCPv2 compliant speech resource server.  You can use cairo-client to build 
+applications requiring speech recognition and speech synthesis capabilities.
