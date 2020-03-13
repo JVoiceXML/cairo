@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
+
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataProcessingException;
@@ -33,11 +34,9 @@ import edu.cmu.sphinx.util.props.S4Integer;
  * </ol>  
  * 
  * <p>For second point.  In the original classifier module, the noise estimate was calculated as 
- * <br>
- * B(i) = c*(F(i) -B(i-1)) + B(i-1) if F(i) < B(i-1) 
- * <br>
- * B(i) = F(i) otherwise.  
- * <br> 
+ * {@code B(i) = c*(F(i) -B(i-1)) + B(i-1) if F(i) < B(i-1) 
+ * B(i) = F(i)}
+ * otherwise.  
  * where F(i) is the rms value of the ith frame and B(i) is the estmated background noise of the ith frame
  * <br> 
  * This cuases the noise estimate to steadily increase 
@@ -62,7 +61,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
  *
  * <p>The second and third step of this endpointer are documented in the
  * classes {@link SpeechMarker SpeechMarker} and 
- * {@link NonSpeechDataFilter NonSpeechDataFilter}.
+ * {@code NonSpeechDataFilter}.
  *
  * @see SpeechMarker
  *

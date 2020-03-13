@@ -54,7 +54,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
 
     /**
      * TODOC
-     * @throws RemoteException
+     * @throws RemoteException error publishing on the registry
      */
     public ResourceRegistryImpl() throws RemoteException {
         super();
@@ -63,8 +63,8 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
 
     /**
      * TODOC
-     * @param port
-     * @throws RemoteException
+     * @param port the port to use
+     * @throws RemoteException error publishing on the registry
      */
     public ResourceRegistryImpl(int port) throws RemoteException {
         super(port);
@@ -73,10 +73,10 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
 
     /**
      * TODOC
-     * @param port
-     * @param csf
-     * @param ssf
-     * @throws RemoteException
+     * @param port the port
+     * @param csf the client socket factory
+     * @param ssf the server socket factory
+     * @throws RemoteException error publishing on the registry
      */
     public ResourceRegistryImpl(int port, RMIClientSocketFactory csf,
             RMIServerSocketFactory ssf) throws RemoteException {

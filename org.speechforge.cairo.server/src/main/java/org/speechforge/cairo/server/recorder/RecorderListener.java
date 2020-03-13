@@ -36,7 +36,7 @@ public interface RecorderListener {
 
     /**
      * TODOC
-     * @param result 
+     * @param uri URI of the recording 
      */
     public void recordingComplete(String uri);
 

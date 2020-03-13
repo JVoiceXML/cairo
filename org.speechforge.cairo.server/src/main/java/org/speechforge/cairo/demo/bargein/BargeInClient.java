@@ -278,11 +278,10 @@ public class BargeInClient implements MrcpEventListener {
 
     /**
      * TODOC
-     * @param prompt
-     * @return recognition result string
-     * @throws IOException
-     * @throws MrcpInvocationException
-     * @throws InterruptedException
+     * @param prompt the prompt to plays
+     * @throws IOException I/O exception
+     * @throws MrcpInvocationException MRCP error
+     * @throws InterruptedException call interrupted
      */
     public synchronized void play(String prompt)
       throws IOException, MrcpInvocationException, InterruptedException {

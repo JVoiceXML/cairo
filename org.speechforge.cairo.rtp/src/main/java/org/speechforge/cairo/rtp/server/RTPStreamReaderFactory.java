@@ -95,9 +95,9 @@ public class RTPStreamReaderFactory implements PoolableObjectFactory {
 
     /**
      * TODOC
-     * @param rtpBasePort
-     * @param maxConnects
-     * @return
+     * @param rtpBasePort base port 
+     * @param maxConnects max number of connects
+     * @return created pool
      */
     public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects) {
         PortPairPool ppp = new PortPairPool(rtpBasePort, maxConnects);

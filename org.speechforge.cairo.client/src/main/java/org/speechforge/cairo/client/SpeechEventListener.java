@@ -22,10 +22,8 @@
  */
 package org.speechforge.cairo.client;
 
-import org.mrcp4j.message.MrcpEvent;
 import org.speechforge.cairo.client.recog.RecognitionResult;
 
-// TODO: Auto-generated Javadoc
 
 /**
  * Callback interface for getting recognition and synthesis/tts results.
@@ -67,6 +65,7 @@ public interface SpeechEventListener {
      * Character event received.  Most typically used for DTMF (in which case valid characters include 0-9, * and #)
      * 
      * @param c the charcater received
+     * @param status the event type
      */
     public void characterEventReceived(String c, DtmfEventType status);
     

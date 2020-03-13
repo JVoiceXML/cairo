@@ -22,16 +22,6 @@
  */
 package org.speechforge.cairo.demo.hotword;
 
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.server.resource.ResourceImpl;
-import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.sip.SimpleSipAgent;
-import org.speechforge.cairo.sip.SipAgent;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.cairo.util.CairoUtil;
-
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -68,6 +58,13 @@ import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.server.resource.ResourceImpl;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SimpleSipAgent;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Demo MRCPv2 client application that plays a TTS prompt while performing speech recognition on
@@ -108,8 +105,8 @@ public class HotwordClient implements MrcpEventListener {
     
     /**
      * TODOC
-     * @param ttsChannel 
-     * @param recogChannel 
+     * @param ttsChannel the TTS channel
+     * @param recogChannel the recognition channel
      */
     public HotwordClient(MrcpChannel ttsChannel, MrcpChannel recogChannel) {
         _ttsChannel = ttsChannel;
@@ -225,13 +222,13 @@ public class HotwordClient implements MrcpEventListener {
 
     /**
      * TODOC
-     * @param prompt
-     * @param grammarUrl
+     * @param prompt the prompt to play
+     * @param grammarUrl the URL of the grammar
      * @return recognition result string
-     * @throws IOException
-     * @throws MrcpInvocationException
-     * @throws InterruptedException
-     * @throws IllegalValueException 
+     * @throws IOException error accessing the channel
+     * @throws MrcpInvocationException MRCP error
+     * @throws InterruptedException call interrupted
+     * @throws IllegalValueException illegal value
      */
     public synchronized String playAndRecognize(String prompt, URL grammarUrl)
       throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {
@@ -284,11 +281,10 @@ public class HotwordClient implements MrcpEventListener {
 
     /**
      * TODOC
-     * @param prompt
-     * @return recognition result string
-     * @throws IOException
-     * @throws MrcpInvocationException
-     * @throws InterruptedException
+     * @param prompt the prompt to play
+     * @throws IOException error playing the prompt
+     * @throws MrcpInvocationException MRCP error playing the prompt
+     * @throws InterruptedException call interrupted
      */
     public synchronized void play(String prompt)
       throws IOException, MrcpInvocationException, InterruptedException {

@@ -25,7 +25,7 @@ package org.speechforge.cairo.server.recorder;
 import org.apache.log4j.Logger;
 
 /**
- * Delegates method calls to an underlying {@link org.speechforge.cairo.server.recog.RecorderListener} implementation.
+ * Delegates method calls to an underlying {@link RecorderListener} implementation.
  * Can be subclassed to intercept calls to the decorated object.
  *
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
@@ -38,7 +38,7 @@ public class RecorderListenerDecorator implements RecorderListener {
 
     /**
      * TODOC
-     * @param recogListener 
+     * @param recorderListener the listener
      */
     public RecorderListenerDecorator(RecorderListener recorderListener) {
         _recorderListener = recorderListener;

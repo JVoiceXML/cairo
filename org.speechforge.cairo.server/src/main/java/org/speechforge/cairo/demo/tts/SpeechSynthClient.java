@@ -22,15 +22,6 @@
  */
 package org.speechforge.cairo.demo.tts;
 
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.server.resource.ResourceImpl;
-import org.speechforge.cairo.sip.SimpleSipAgent;
-import org.speechforge.cairo.sip.SipAgent;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.cairo.util.CairoUtil;
-
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -63,6 +54,12 @@ import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.request.MrcpRequest;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.server.resource.ResourceImpl;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SimpleSipAgent;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Demo MRCPv2 client application that utilizes a {@code speechsynth} resource to play a TTS prompt.
@@ -96,9 +93,7 @@ public class SpeechSynthClient implements MrcpEventListener {
 
     /**
      * TODOC
-     * @param ttsChannel 
-     * @param recogChannel 
-     * @param recordChannel 
+     * @param ttsChannel the TTS channel 
      */
     public SpeechSynthClient(MrcpChannel ttsChannel) {
         _ttsChannel = ttsChannel;

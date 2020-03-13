@@ -23,18 +23,8 @@
 package org.speechforge.cairo.server.resource;
 
 
-import org.speechforge.cairo.sip.ResourceUnavailableException;
-import org.speechforge.cairo.sip.SipAgent;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SessionListener;
-import org.speechforge.cairo.sip.SipResource;
-import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.cairo.util.CairoUtil;
-
-import java.awt.Toolkit;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -48,14 +38,20 @@ import javax.sip.TimeoutEvent;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
+import org.speechforge.cairo.sip.ResourceUnavailableException;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SessionListener;
+import org.speechforge.cairo.sip.SipAgent;
+import org.speechforge.cairo.sip.SipResource;
+import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
- * Implements a {@link org.speechforge.cairo.server.resource.ResourceServer} that can be utilized by MRCPv2
+ * Implements a ResourceServer that can be utilized by MRCPv2
  * clients for establishing and managing connections to MRCPv2 resource implementations.
  * 
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}

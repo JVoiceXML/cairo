@@ -130,12 +130,9 @@ public class AudioFormats {
 
 
     /**
-     * @param supportedFormatsJMF the supportedFormatsJMF to set
+     * @param af the supportedFormatsJMF to set
+     * @return supported audio format
      */
-    //public void setSupportedFormatsJMF(Format[] supportedFormatsJMF) {
-    //    this.supportedFormatsJMF = supportedFormatsJMF;
-    //}
-    
    public  static javax.media.format.AudioFormat convertToJmfFormat(AudioFormat af) {
     	
     	String encoding;

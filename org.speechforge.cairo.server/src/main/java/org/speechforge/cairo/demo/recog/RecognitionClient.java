@@ -22,15 +22,6 @@
  */
 package org.speechforge.cairo.demo.recog;
 
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.server.resource.ResourceImpl;
-import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.sip.SimpleSipAgent;
-import org.speechforge.cairo.sip.SipAgent;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.cairo.util.CairoUtil;
-
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -67,6 +58,12 @@ import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.server.resource.ResourceImpl;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SimpleSipAgent;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Demo MRCPv2 client application that utilizes a {@code speechrecog} resource to perform
@@ -99,7 +96,7 @@ public class RecognitionClient implements MrcpEventListener {
     
     /**
      * TODOC
-     * @param recogChannel 
+     * @param recogChannel  the recognition channel
      */
     public RecognitionClient(MrcpChannel recogChannel) {
         _recogChannel = recogChannel;

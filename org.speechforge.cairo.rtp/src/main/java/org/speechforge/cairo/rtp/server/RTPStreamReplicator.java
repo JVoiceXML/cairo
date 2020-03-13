@@ -166,7 +166,7 @@ public class RTPStreamReplicator extends RTPConsumer {
      * TODOC
      * @param outputContentDescriptor A <code>ContentDescriptor</code> that describes the desired output content-type.
      * @param maxWait the maximum time to wait in milliseconds if the stream has not yet been received.
-     * @param preferredMediaFormats 
+     * @param preferredMediaFormats the preferred media formats
      * @return A new <code>Processor</code> that is in the <code>Realized</code> state.
      * @throws IOException if there are I/O problems creating the processor from the stream.
      * @throws IllegalStateException if the stream has not been received yet, and is not received within the maximum time to wait.

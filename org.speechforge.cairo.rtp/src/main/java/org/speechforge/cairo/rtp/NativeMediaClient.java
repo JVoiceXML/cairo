@@ -63,10 +63,10 @@ public class NativeMediaClient extends RTPConsumer {
 
     /**
      * Constructs media client in send/receive mode.
-     * @param localPort 
-     * @param remoteAddress 
-     * @param remotePort 
-     * @throws IOException 
+     * @param localPort the local port
+     * @param remoteAddress the remote address
+     * @param remotePort the remote port
+     * @throws IOException error crating the client
      */
     public NativeMediaClient(int localPort, InetAddress remoteAddress, int remotePort)
       throws IOException {
@@ -76,10 +76,8 @@ public class NativeMediaClient extends RTPConsumer {
 
     /**
      * Constructs media client in receive only mode.
-     * @param localPort 
-     * @param remoteAddress 
-     * @param remotePort 
-     * @throws IOException 
+     * @param localPort  the local port
+     * @throws IOException error creating the client at the given port 
      */
     public NativeMediaClient(int localPort)
       throws IOException {
@@ -170,8 +168,8 @@ public class NativeMediaClient extends RTPConsumer {
 
     /**
      * TODOC
-     * @param args
-     * @throws Exception 
+     * @param args program arguments
+     * @throws Exception error executiong the program
      */
     public static void main(String[] args) throws Exception {
         int localPort = 42048;

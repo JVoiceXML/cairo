@@ -38,8 +38,8 @@ public final class ByteHexConverter {
 
     /**
      * TODOC.
-     * @param bytes TODOC.
-     * @return TODOC.
+     * @param bytes the bytes to convert.
+     * @return converted string
      */
     public static String toHexString(byte[] bytes) {
         StringBuffer sb = new StringBuffer();
@@ -51,8 +51,8 @@ public final class ByteHexConverter {
 
     /**
      * TODOC.
-     * @param writer TODOC.
-     * @param bytes TODOC.
+     * @param writer the writer.
+     * @param bytes the bytes to convert
      * @throws IOException If an I/O error occurs
      */
     public static void writeHexDigits(Writer writer, byte[] bytes) throws IOException {
@@ -61,10 +61,10 @@ public final class ByteHexConverter {
 
     /**
      * TODOC.
-     * @param writer TODOC.
-     * @param bytes 
-     * @param offset 
-     * @param length 
+     * @param writer the writer.
+     * @param bytes the bytes to convert
+     * @param offset offset in buffer
+     * @param length length starting from offset
      * @throws IOException If an I/O error occurs
      */
     public static void writeHexDigits(Writer writer, byte[] bytes, int offset, int length)
@@ -88,8 +88,8 @@ public final class ByteHexConverter {
 
     /**
      * TODOC.
-     * @param hexString TODOC.
-     * @return TODOC.
+     * @param hexString the hex string to convert.
+     * @return converted bytes
      */
     public static byte[] toByteArray(String hexString) {
         char[] charArray = hexString.toCharArray();

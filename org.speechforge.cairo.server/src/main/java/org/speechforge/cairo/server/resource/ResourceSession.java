@@ -68,7 +68,7 @@ public class ResourceSession {
 
 
     /**
-     * @param lastRequest the lastRequest to set
+     * @param lastInvite the lastRequest to set
      */
     public void setLastInvite(SdpMessage lastInvite) {
         this.lastInvite = lastInvite;

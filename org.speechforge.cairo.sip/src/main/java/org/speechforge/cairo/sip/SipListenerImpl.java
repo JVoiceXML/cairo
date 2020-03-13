@@ -46,9 +46,7 @@ import javax.sip.TimeoutEvent;
 import javax.sip.TransactionAlreadyExistsException;
 import javax.sip.TransactionTerminatedEvent;
 import javax.sip.TransactionUnavailableException;
-import javax.sip.address.Address;
 import javax.sip.header.CSeqHeader;
-import javax.sip.header.ContactHeader;
 import javax.sip.header.ContentTypeHeader;
 import javax.sip.header.Header;
 import javax.sip.header.ToHeader;
@@ -66,7 +64,7 @@ import org.apache.log4j.Logger;
  */
 public class SipListenerImpl implements SipListener {
 
-    static Logger _logger = Logger.getLogger(SipListenerImpl.class);
+    static Logger LOGGER = Logger.getLogger(SipListenerImpl.class);
 
     private SipAgent sipClient;
 
@@ -75,11 +73,11 @@ public class SipListenerImpl implements SipListener {
     }
 
     public void processDialogTerminated(DialogTerminatedEvent arg0) {
-        _logger.info("Got a dialog terminated event");
+        LOGGER.info("Got a dialog terminated event");
     }
 
     public void processIOException(IOExceptionEvent arg0) {
-        _logger.info("Got an IO Exception");
+        LOGGER.info("Got an IO Exception");
     }
 
     public void processRequest(RequestEvent requestEvent) {
@@ -95,7 +93,7 @@ public class SipListenerImpl implements SipListener {
          * to.getAddress().getURI().getScheme())) {
          */
         
-        if (_logger.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
         	  StringBuilder sb = new StringBuilder(); 
         	  sb.append("\n------------- RECEIVED A SIP REQUEST ---------------");
 
@@ -116,7 +114,7 @@ public class SipListenerImpl implements SipListener {
                sb.append("\n");
                sb.append(contentString);
             }
-            _logger.debug(sb);
+            LOGGER.debug(sb);
          }
 
         if (request.getMethod().equals(Request.INVITE)) {
@@ -139,18 +137,18 @@ public class SipListenerImpl implements SipListener {
             // and why the shootist example just sends the response. I would
             // think it should be symetrical.
             try {
-                _logger.info("Got an unhandled SIP request Method = " + request.getMethod());
+                LOGGER.info("Got an unhandled SIP request Method = " + request.getMethod());
                 SipAgent.sendResponse(stx, sipClient.getMessageFactory().createResponse(202, request));
                 // send one back
                 SipProvider prov = (SipProvider) requestEvent.getSource();
                 Request refer = requestEvent.getDialog().createRequest("REFER");
                 SipAgent.sendRequest(requestEvent.getDialog(), prov.getNewClientTransaction(refer));
             } catch (SipException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (InvalidArgumentException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (ParseException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             }
         }
     }
@@ -164,7 +162,7 @@ public class SipListenerImpl implements SipListener {
         ClientTransaction ctx = responseEvent.getClientTransaction();
         CSeqHeader cseq = (CSeqHeader) response.getHeader(CSeqHeader.NAME);
 
-        if (_logger.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
         	 StringBuilder sb = new StringBuilder();
         	 sb.append("\n------------- RECEIVED A SIP RESPONSE ---------------");
         	 sb.append("\nSip Response received : Status:" + response.getStatusCode()+", "+response.getReasonPhrase());
@@ -184,14 +182,14 @@ public class SipListenerImpl implements SipListener {
                sb.append("\n");
                sb.append(contentString);
            } 
-           _logger.debug(sb);
+           LOGGER.debug(sb);
         }
         
         
         if (ctx != null) {
             dialog = ctx.getDialog();
         } else {
-            _logger.info("Stray SIP response -- dropping ");
+            LOGGER.info("Stray SIP response -- dropping ");
             //_logger.info("Status:" + response.getStatusCode()+", "+response.getReasonPhrase());
             
             return;
@@ -210,7 +208,7 @@ public class SipListenerImpl implements SipListener {
                         e1.printStackTrace();
                     }
                     
-                    if (_logger.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         StringBuilder sb = new StringBuilder(); 
                         sb.append("\n------------- SENDING A SIP ACK REQUEST ---------------");
                      
@@ -229,7 +227,7 @@ public class SipListenerImpl implements SipListener {
                             sb.append("\n");
                             sb.append(contentString);
                         } 
-                        _logger.debug(sb);
+                        LOGGER.debug(sb);
                      }
                     
                     
@@ -247,7 +245,7 @@ public class SipListenerImpl implements SipListener {
                         SdpFactory sdpFactory = SdpFactory.getInstance();
 
                         if (contentBytes == null) {
-                            _logger.info("No content in the response.");
+                            LOGGER.info("No content in the response.");
                         }
                         String contentString = new String(contentBytes);
                         SessionDescription sd = null;
@@ -259,7 +257,7 @@ public class SipListenerImpl implements SipListener {
                         }
 
                         SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
-                        _logger.debug(sdpMessage.toString());                        
+                        LOGGER.debug(sdpMessage.toString());                        
                         SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(true, sdpMessage, session);
                         session.setState(SipSession.SessionState.inviteResponseReceived);
                         synchronized(session){
@@ -268,7 +266,7 @@ public class SipListenerImpl implements SipListener {
                     } else {
                         // TODO: handle error condition where the session was
                         // not in the pending map
-                        _logger.info("SIP Invite Response received but the session was not in pending map. "
+                        LOGGER.info("SIP Invite Response received but the session was not in pending map. "
                                 + response.toString());
                     }
 
@@ -298,20 +296,20 @@ public class SipListenerImpl implements SipListener {
                        SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(false, null, session);
                     }
                 } else { //methods not handled for this repsonse code
-                    _logger.warn("Received an SIP response status code for an unhandled method (ignoring it): "+ responseEvent.getResponse().getStatusCode()+" : "+responseEvent.getResponse().getReasonPhrase()+" response to a "+cseq.getMethod());
+                    LOGGER.warn("Received an SIP response status code for an unhandled method (ignoring it): "+ responseEvent.getResponse().getStatusCode()+" : "+responseEvent.getResponse().getReasonPhrase()+" response to a "+cseq.getMethod());
                 }
             } else {  //response code not handled
-               _logger.warn("Received an unhandled SIP response status code (ignoring it): " + responseEvent.getResponse().getStatusCode() +" : "+responseEvent.getResponse().getReasonPhrase());
+               LOGGER.warn("Received an unhandled SIP response status code (ignoring it): " + responseEvent.getResponse().getStatusCode() +" : "+responseEvent.getResponse().getReasonPhrase());
             }
         } catch (SipException e) {
             // TODO: Handle case where there is an exception handling the invite
             // response. I think We still need to respond with an ACK (or NACK)
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         }
     }
 
     public void processTimeout(TimeoutEvent event) {
-        _logger.debug("Transaction Time out");
+        LOGGER.debug("Transaction Time out");
         
         // if this is a client transaction timeout and if an invite
         //cleanup pending sessions
@@ -330,7 +328,7 @@ public class SipListenerImpl implements SipListener {
     }
 
     public void processTransactionTerminated(TransactionTerminatedEvent arg0) {
-        _logger.debug("Got a transaction terminated event");
+        LOGGER.debug("Got a transaction terminated event");
     }
 
     /**
@@ -390,7 +388,7 @@ public class SipListenerImpl implements SipListener {
                 // here what should the server offer
                 // two mrcp channels and a rtp channel?
                 noOffer = true;
-                _logger.info("No offer in the invite request.  Should provide offer in response but not supported yet.");
+                LOGGER.info("No offer in the invite request.  Should provide offer in response but not supported yet.");
             } else {
                 Dialog dialog = requestEvent.getDialog();
                 if ( dialog == null) {
@@ -401,8 +399,8 @@ public class SipListenerImpl implements SipListener {
                    try {
                        SipAgent.sendResponse(stx, response);
                    } catch (InvalidArgumentException e) {
-                       // TODO Auto-generated catch block
-                       e.printStackTrace();
+                	   LOGGER.error("error sending sip response", e);
+                	   return;
                    }
                    dialog = stx.getDialog();
                    if (dialog != null) {
@@ -415,17 +413,18 @@ public class SipListenerImpl implements SipListener {
                                reinvite = true;
                                session.setStx(stx);
                                session.setRequest(requestEvent);
-                              _logger.warn("Recieved a re-invite request. Type A");
+                              LOGGER.warn("Recieved a re-invite request. Type A");
                            } else {
-                               _logger.debug("adding the session with dialog ID: "+dialog.getDialogId());
+                               LOGGER.debug("adding the session with dialog ID: "
+                            		   + dialog.getDialogId());
                                session = SipSession.createSipSession(sipClient, null, dialog, requestEvent, stx, channelName, applicationName);
                                SipSession.addSession(session);
                            }
                        } else {
-                           _logger.warn("Failed to create a SIP session for teh invite request.  No Dialog id established for the dialog.");
+                           LOGGER.warn("Failed to create a SIP session for the invite request.  No Dialog id established for the dialog.");
                        }
                    } else {
-                       _logger.warn("Failed to create a SIP session for the invite request. No Dialog attached to server transaction.");
+                       LOGGER.warn("Failed to create a SIP session for the invite request. No Dialog attached to server transaction.");
                    }
                    
                 } else {
@@ -434,22 +433,19 @@ public class SipListenerImpl implements SipListener {
                     session.setStx(stx);
                     session.setRequest(requestEvent);
                     reinvite = true;
-                    _logger.warn("Recieved a re-invite request. Type B.");
+                    LOGGER.warn("Recieved a re-invite request. Type B.");
                 }
                 
                 //establish the session, now that the dialog id is established
-
-            
-                
                 String contentString = new String(contentBytes);
                 SessionDescription sd = sdpFactory.createSessionDescription(contentString);
                 SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
 
-                //valudate the sdp message (throw sdpException if the message is invalid)
+                //validate the sdp message (throw sdpException if the message is invalid)
                 SdpMessageValidator.validate(sdpMessage);
                 
                 //process the invitaion (the resource manager processInviteRequest method)
-                SdpMessage sdpResponse = sipClient.getSessionListener().processInviteRequest(sdpMessage, session);
+                sipClient.getSessionListener().processInviteRequest(sdpMessage, session);
                 
                 //----- REmoved the response sending
                 //------Must send yourself. 
@@ -458,26 +454,21 @@ public class SipListenerImpl implements SipListener {
 
             }
         } catch (SipException e) {
-            e.printStackTrace();
             OfferRejected(requestEvent, session, stx);
-            _logger.info("Could not process invite." + e, e);
-
+            LOGGER.info("Could not process invite: " + e, e);
         } catch (ParseException e) {
             OfferRejected(requestEvent,session, stx);
-            _logger.info("Could not process invite." + e, e);
+            LOGGER.info("Could not process invite: " + e, e);
         } catch (ResourceUnavailableException e) {
             OfferRejected(requestEvent,session, stx);
-            _logger.info("Could not process invite." + e, e);
+            LOGGER.info("Could not process invite: " + e, e);
         } catch (RemoteException e) {
             OfferRejected(requestEvent,session, stx);
-            _logger.info("Could not process invite." + e, e);
+            LOGGER.info("Could not process invite: " + e, e);
         } catch (SdpException e) {
             OfferRejected(requestEvent,session, stx);
-            _logger.info("Could not process invite." + e, e);
+            LOGGER.info("Could not process invite: " + e, e);
         }
-
-
-
     }
     
 
@@ -498,11 +489,11 @@ public class SipListenerImpl implements SipListener {
             String contentString = new String(contentBytes);
             ContentTypeHeader cTypeHeader = (ContentTypeHeader) request.getHeader(ContentTypeHeader.NAME);
             if (cTypeHeader == null) {
-                _logger.warn("no content type header in the info request."); 
+                LOGGER.warn("no content type header in the info request."); 
             }
 
             if (stx == null) {
-                _logger.warn("null stx so getting a new one...");
+                LOGGER.warn("null stx so getting a new one...");
                 try {
                     stx = sipProvider.getNewServerTransaction(request);
                 } catch (TransactionAlreadyExistsException e) {
@@ -517,7 +508,7 @@ public class SipListenerImpl implements SipListener {
 
             Dialog dialog = requestEvent.getDialog();
             if ( dialog == null) {
-                _logger.warn("info request: null dialog.  Therefore no session to find out where to forward the info");  
+                LOGGER.warn("info request: null dialog.  Therefore no session to find out where to forward the info");  
             } else {
                 String did = dialog.getDialogId();
                 session = SipSession.getSession(did);
@@ -533,11 +524,11 @@ public class SipListenerImpl implements SipListener {
                 Response response = sipClient.getMessageFactory().createResponse(200, request);
                 SipAgent.sendResponse(stx, response);
             } catch (SipException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (ParseException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (InvalidArgumentException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             }
            
     }
@@ -558,7 +549,7 @@ public class SipListenerImpl implements SipListener {
         // 2) If the callee is currently not willing or able to take additional
         // calls at this end system. A 486 (Busy Here)
         // SHOULD be returned in such a scenario.
-        _logger.info("Could not process invite request.");
+        LOGGER.info("Could not process invite request.");
         SipProvider sipProvider = (SipProvider) requestEvent.getSource();
         Request request = requestEvent.getRequest();
         try {
@@ -577,11 +568,11 @@ public class SipListenerImpl implements SipListener {
             SipSession.removeSession(session);
             
         } catch (SipException e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         } catch (InvalidArgumentException e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         } catch (ParseException e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         } catch (RemoteException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -613,7 +604,7 @@ public class SipListenerImpl implements SipListener {
             // }
 
         } catch (Exception e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         }
     }
 
@@ -635,7 +626,7 @@ public class SipListenerImpl implements SipListener {
         // dialog. It is RECOMMENDED that a 487 (Request Terminated) response
         // be generated to those pending requests."
         if (session == null) {
-            _logger.info("Receieved a BYE for which there is no corresponding session.  SessionID: "+dialog.getDialogId());
+            LOGGER.info("Receieved a BYE for which there is no corresponding session.  SessionID: "+dialog.getDialogId());
         } else {
             try {
                 //process the invitaion (the resource manager processInviteRequest method)
@@ -644,11 +635,11 @@ public class SipListenerImpl implements SipListener {
                 Response response = sipClient.getMessageFactory().createResponse(200, request);
                 SipAgent.sendResponse(stx, response);
             } catch (SipException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (ParseException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (InvalidArgumentException e) {
-                _logger.error(e, e);
+                LOGGER.error(e, e);
             } catch (RemoteException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -669,15 +660,15 @@ public class SipListenerImpl implements SipListener {
         try {
             //TODO:  to be able to forward calls to this device need to maintain a registry
             // for now this is just for demo support (i.e. calling from the device to cairo)
-            _logger.info("registering device "+request.toString());
+            LOGGER.info("registering device "+request.toString());
             Response response = sipClient.getMessageFactory().createResponse(200, request);
             SipAgent.sendResponse(stx, response);
         } catch (SipException e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         } catch (ParseException e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
         } catch (InvalidArgumentException e) {
-            _logger.error(e, e);
+            LOGGER.error(e, e);
 
         }
 
