@@ -159,6 +159,7 @@ public class SessionManager  {
         /**
          * New recog channel.  Use this method to create a session with just a recognition mrcpv2 channel.
          * 
+         * @param clientRtpPort the client RTP port
          * @param clientHost the client host
          * @param sessionName the session name
          * 

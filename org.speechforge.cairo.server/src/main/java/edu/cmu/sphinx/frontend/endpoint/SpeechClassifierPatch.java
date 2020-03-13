@@ -47,7 +47,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
  * Provides a patch to fix a bug in {@code edu.cmu.sphinx.frontend.endpoint.SpeechClassifier}.
  *
  * <p>Please see <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904"
- * target="_blank">http://sourceforge.net/tracker/index.php?func=detail&aid=1501329&group_id=1904&atid=101904</a>
+   target="_blank">http://sourceforge.net/tracker/index.php?func=detail&amp;aid=1501329&amp;group_id=1904&amp;atid=101904</a>
  * for details of the bug.<hr>
  *
  * Implements a level tracking endpointer invented by Bent Schmidt Nielsen.
@@ -69,7 +69,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
  *
  * <p>The second and third step of this endpointer are documented in the
  * classes {@link SpeechMarker SpeechMarker} and 
- * {@link NonSpeechDataFilter NonSpeechDataFilter}.
+ * {@code NonSpeechDataFilter}.
  *
  * @see SpeechMarker
  *

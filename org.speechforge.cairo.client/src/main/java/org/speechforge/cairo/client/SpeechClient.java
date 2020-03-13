@@ -33,7 +33,6 @@ import org.mrcp4j.message.header.IllegalValueException;
 import org.speechforge.cairo.client.recog.RecognitionResult;
 
 
-// TODO: Auto-generated Javadoc
 /**
  * SpeechClient API that peovides MRCPv2 based speech recogntion capabilites.  Provides both blocking and non-blocking calls.
  * 
@@ -55,8 +54,8 @@ public interface SpeechClient {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
-     * @throws NoMediaControlChannelException 
-     * @throws InvalidSessionAddressException 
+     * @throws NoMediaControlChannelException error accessing the  media control channel
+     * @throws InvalidSessionAddressException SIP address could npot be determined
      */
     public void playBlocking(boolean urlPrompt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException, InvalidSessionAddressException;
 
@@ -69,6 +68,7 @@ public interface SpeechClient {
      * @param grammarUrl A url to the grammar file
      * @param hotword a flag indicating that the recognition mode is hotword mode
      * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
+     * @param noInputTimeout timeout for noinput in msec
      * 
      * @return the recognition result
      * 
@@ -76,7 +76,7 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException media channel could not be accessed 
      */
     public RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
 
@@ -88,6 +88,7 @@ public interface SpeechClient {
      * 
      * @param reader the reader for the grammar
      * @param hotword a flag indicating that the recognition mode is hotword mode
+     * @param noInputTimeout timeout for noinput in msec
      * 
      * @return the recognition result
      * 
@@ -95,7 +96,7 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException media channel could not be accesses
      */
     public RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout)throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
 
@@ -116,8 +117,8 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
-     * @throws InvalidSessionAddressException 
+     * @throws NoMediaControlChannelException media channel could not be accesses
+     * @throws InvalidSessionAddressException SIP address could not be determined
      */
     public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException, InvalidSessionAddressException;
     
@@ -137,7 +138,7 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException media channel could not be accesses
      */
     public RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException;
         
@@ -204,7 +205,7 @@ public interface SpeechClient {
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException error accessing the media channel
      */
     public SpeechRequest queuePrompt(boolean urlPormpt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;    
 
@@ -232,6 +233,7 @@ public interface SpeechClient {
      * @param grammarUrl A url to the grammar file
      * @param hotword a flag indicating that the recognition mode is hotword mode
      * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
+     * @param noInputTimeout no-input timeout in msec
      * 
      * @return the speech request
      * 
@@ -239,7 +241,7 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException error accessing the media channel
      */
     public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
 
@@ -250,6 +252,7 @@ public interface SpeechClient {
      * @param reader the reader for the grammar
      * @param hotword a flag indicating that the recognition mode is hotword mode
      * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
+     * @param noInputTimeout no-input timeout in msec
      * 
      * @return the speech request
      * 
@@ -257,26 +260,26 @@ public interface SpeechClient {
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException error accessing the media channel
      */
     public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
     
     /**
      * Cancel request.
      * 
-     * @param request the request
-     * @throws InterruptedException 
-     * @throws IOException 
-     * @throws MrcpInvocationException 
-     * @throws NoMediaControlChannelException 
+     * @throws InterruptedException cancel was interrupted 
+     * @throws IOException error accessing the streams
+     * @throws MrcpInvocationException general MRCP error
+     * @throws NoMediaControlChannelException error accessing the media control 
+     * 				channel
      */
     public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException, NoMediaControlChannelException;
     
     /**
      * Shutdown. close all channels and release all resources
-     * @throws InterruptedException 
-     * @throws IOException 
-     * @throws MrcpInvocationException 
+     * @throws InterruptedException shutdown was interrupted
+     * @throws IOException error closing the streams
+     * @throws MrcpInvocationException generic MRCP exception
      */
     public void shutdown() throws MrcpInvocationException, IOException, InterruptedException;
     

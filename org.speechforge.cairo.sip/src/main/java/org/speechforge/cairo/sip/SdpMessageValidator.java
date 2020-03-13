@@ -40,7 +40,7 @@ import org.mrcp4j.MrcpResourceType;
  */
 public class SdpMessageValidator {
     
-    private static Logger _logger = Logger.getLogger(SdpMessageValidator.class);
+    private static Logger LOGGER = Logger.getLogger(SdpMessageValidator.class);
 
     public static void validate(SdpMessage message)  throws SdpException {
 
@@ -61,12 +61,15 @@ public class SdpMessageValidator {
                 //int port = media.getMediaPort();
                 //Vector mFormats = media.getMediaFormats(true);
                 Vector attributes = md.getAttributes(true);
-                if ((media.getMediaType().equals("audio")) && (media.getProtocol().equals("RTP/AVP"))) {
+                final String mediaType = media.getMediaType();
+                final String protocol = media.getProtocol();
+                if (mediaType.equals("audio") && ((protocol.equals("RTP/AVP") || protocol.equals("RTP/AVPF")))) {
+                    LOGGER.warn("protocol '" + protocol + "' not implemented, yet");
                        // TODO: Check if the RTP Encoding in the request is supported by cairos codecs and streaming reosurces. 
                        //       Should offers be rejected if encoding not supported -- or counter-offered?  Maybe this is not a validation task
                        //       but a session negotiation task.
-                } else if ((media.getMediaType().equals("application"))
-                        && (media.getProtocol().equals("TCP/MRCPv2"))) {
+                } else if (mediaType.equals("application")
+                        && protocol.equals("TCP/MRCPv2")) {
                     for (Enumeration attrEnum = attributes.elements(); attrEnum.hasMoreElements();) {
                         Attribute attribute = (Attribute) attrEnum.nextElement();
                         if (attribute.getName().equals("setup")) {
@@ -132,21 +135,22 @@ public class SdpMessageValidator {
 
                 } else {
                     text = text + "Unrecognized media type/protocol pair in sdp message. type = "+
-                                  media.getMediaType() + " proto= " + media.getProtocol()+"\n";
+                                  mediaType + " proto= " + protocol + "\n";
                     problemCount++;
                 }
             }
             
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw e;
         } 
-        if (problemCount>0) {
-            _logger.debug("The following "+problemCount+" validation problems were found in the sdp Message\n"+ text);
-            _logger.debug(sd.toString());
+        if (problemCount > 0) {
+            LOGGER.warn("The following " + problemCount +
+            		" validation problems were found in the sdp Message\n"+ text);
+            LOGGER.warn(sd.toString());
             throw new SdpException(text);
         }
-        _logger.debug("returning from Sdp message validate method.  No problems found");
+        LOGGER.debug("returning from Sdp message validate method. No problems found");
     }
     
     

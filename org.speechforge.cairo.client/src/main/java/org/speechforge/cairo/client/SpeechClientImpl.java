@@ -63,7 +63,6 @@ import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
 
-// TODO: Auto-generated Javadoc
 /**
  * SpeechClient Implementation.
  * 
@@ -148,7 +147,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /**
      * Instantiates a new speech client impl.
      * 
-     * @param session the session
+     * @param tts the TTS channel
+     * @param recog the recognition channel
      */
     public SpeechClientImpl(MrcpChannel tts, MrcpChannel recog) {
         super();
@@ -411,14 +411,13 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * 
      * @param prompt the prompt
      * @param urlPrompt the url prompt
-     * @param listener the listener
      * 
      * @return recognition result string
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException error accessing the media control channel 
      */
     public SpeechRequest play(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
 
@@ -454,7 +453,9 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * Recognize.
      * 
      * @param grammarUrl the grammar url
-     * @param listener the listener
+     * @param hotword hotword detection enabled
+     * @param attachGrammar grammar should be attached
+     * @param noInputTimeout no-speech timeout in msec 
      * 
      * @return the speech request
      * 
@@ -462,7 +463,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException error accessing the media control
+     * 		channel 
      */
     public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
   	
@@ -492,9 +494,10 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     /**
      * Play and recognize.
      * 
+     * @param urlPrompt the URL to a prompt
      * @param prompt the prompt
      * @param grammarUrl the grammar url
-     * @param listener the listener
+     * @param hotword hotword enabled
      * 
      * @return the speech request
      * 
@@ -502,7 +505,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
      * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException 
+     * @throws NoMediaControlChannelException error accessing the media control channel
      */
     public  SpeechRequest playAndRecognize(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword)
     throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {

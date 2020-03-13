@@ -40,8 +40,8 @@ public class ObjectPoolUtil {
 
     /**
      * TODOC
-     * @param maxActive
-     * @return
+     * @param maxActive max active objects
+     * @return created pool
      */
     public static GenericObjectPool.Config getGenericObjectPoolConfig(int maxActive) {
         GenericObjectPool.Config config = new GenericObjectPool.Config();

@@ -32,6 +32,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.format.AudioFormat;
 
+import org.apache.log4j.Logger;
+import org.speechforge.cairo.util.ByteHexConverter;
+
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataEndSignal;
@@ -40,10 +43,6 @@ import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.S4Integer;
-
-import org.apache.log4j.Logger;
-import org.speechforge.cairo.util.BlockingFifoQueue;
-import org.speechforge.cairo.util.ByteHexConverter;
 
 /**
  * Processes raw audio data input and feeds it to the frontend of the Sphinx recognition engine.

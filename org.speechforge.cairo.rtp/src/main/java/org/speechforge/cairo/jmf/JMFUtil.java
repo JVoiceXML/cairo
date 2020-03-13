@@ -75,13 +75,13 @@ public class JMFUtil {
 
 
     /**
-     * @param mediaLocator
-     * @param mediaFormat
-     * @return
-     * @throws NoDataSourceException
-     * @throws IOException
-     * @throws NoProcessorException
-     * @throws CannotRealizeException
+     * @param mediaLocator the media locator
+     * @param preferredMediaFormat the preferred media format
+     * @return created JMF processor
+     * @throws NoDataSourceException no data source available
+     * @throws IOException I/O exception
+     * @throws NoProcessorException no processor available
+     * @throws CannotRealizeException unable to realize
      */
     public static Processor createRealizedProcessor(MediaLocator mediaLocator, AudioFormat preferredMediaFormat)
       throws NoDataSourceException, IOException, NoProcessorException, CannotRealizeException {
@@ -90,13 +90,13 @@ public class JMFUtil {
     }
 
     /**
-     * @param mediaLocator
-     * @param preferredMediaFormats
-     * @return
-     * @throws NoDataSourceException
-     * @throws IOException
-     * @throws NoProcessorException
-     * @throws CannotRealizeException
+     * @param mediaLocator the media locator
+     * @param preferredMediaFormats the preferred media formats
+     * @return created JMF processor
+     * @throws NoDataSourceException no data source available
+     * @throws IOException I/O exception
+     * @throws NoProcessorException no processor available
+     * @throws CannotRealizeException unable to realize
      */
     public static Processor createRealizedProcessor(MediaLocator mediaLocator, AudioFormat[] preferredMediaFormats)
       throws NoDataSourceException, IOException, NoProcessorException, CannotRealizeException {
@@ -111,11 +111,12 @@ public class JMFUtil {
 
     
     /**
-     * @param dataSource
-     * @return
-     * @throws NoProcessorException
-     * @throws CannotRealizeException
-     * @throws IOException
+     * @param dataSource the data source
+     * @param preferredMediaFormats the preferred media format
+     * @return created JMF processor
+     * @throws NoProcessorException no processor available
+     * @throws CannotRealizeException unable to realize
+     * @throws IOException I/O exception
      */
     public static Processor createRealizedProcessor(DataSource dataSource, AudioFormat[] preferredMediaFormats)
       throws NoProcessorException, CannotRealizeException, IOException {

@@ -43,7 +43,7 @@ public class ResourceUnavailableException extends Exception {
 
     /**
      * TODOC
-     * @param message
+     * @param message the detailed error message
      */
     public ResourceUnavailableException(String message) {
         super(message);
@@ -51,8 +51,8 @@ public class ResourceUnavailableException extends Exception {
 
     /**
      * TODOC
-     * @param message
-     * @param cause
+     * @param message the detailed error message
+     * @param cause the root cause of the error
      */
     public ResourceUnavailableException(String message, Throwable cause) {
         super(message, cause);
@@ -60,7 +60,7 @@ public class ResourceUnavailableException extends Exception {
 
     /**
      * TODOC
-     * @param cause
+     * @param cause the root cause of the error
      */
     public ResourceUnavailableException(Throwable cause) {
         super(cause);

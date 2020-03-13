@@ -101,9 +101,10 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
 
     /**
      * TODOC
-     * @param rtpBasePort
-     * @param maxConnects
-     * @return
+     * @param rtpBasePort RTP base port
+     * @param maxConnects max number of connects
+     * @param localAddress the local address
+     * @return created pool
      */
     public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects, InetAddress localAddress) {
         PortPairPool ppp = new PortPairPool(rtpBasePort, maxConnects);

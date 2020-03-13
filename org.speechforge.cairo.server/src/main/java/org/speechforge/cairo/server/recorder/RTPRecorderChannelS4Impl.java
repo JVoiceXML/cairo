@@ -81,9 +81,11 @@ public class RTPRecorderChannelS4Impl implements RTPRecorderChannel  {
 
     /**
      * TODOC
-     * @param channelID unique id of the recorder channel
-     * @param baseRecordingDir base directory to save recorded files to
-     * @param replicator 
+     * @param cd unique descriptor of the recorder channel
+     * @param recorderPool the recorder pool
+     * @param recordingDir base directory to save recorded files to
+     * @param replicator  the stream replicator
+     * 
      * @throws IllegalArgumentException if the File specified is not a directory
      */
     public RTPRecorderChannelS4Impl(ObjectPool recorderPool, File recordingDir, RTPStreamReplicator replicator, ContentDescriptor cd) throws IllegalArgumentException {

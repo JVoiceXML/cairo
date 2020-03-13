@@ -29,7 +29,6 @@ import java.rmi.server.UnicastRemoteObject;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
-import org.speechforge.cairo.sip.SipResource;
 
 /**
  * Base class for resource implementations.
@@ -49,7 +48,7 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
     /**
      * TODOC
      * @param type whether the resource is to receive audio input or transmit audio output
-     * @throws RemoteException
+     * @throws RemoteException error publishing on the registry
      */
     public ResourceImpl(Type type) throws RemoteException {
         _type = type;
