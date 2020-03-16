@@ -22,6 +22,26 @@
  */
 package org.speechforge.cairo.sip;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
+
+import javax.sdp.Connection;
+import javax.sdp.Media;
+import javax.sdp.MediaDescription;
+import javax.sdp.Origin;
+import javax.sdp.SdpConstants;
+import javax.sdp.SdpException;
+import javax.sdp.SdpParseException;
+import javax.sdp.SessionDescription;
+import javax.sdp.SessionName;
+import javax.sdp.Version;
+
+import org.apache.log4j.Logger;
+import org.mrcp4j.MrcpResourceType;
+
 import gov.nist.javax.sdp.MediaDescriptionImpl;
 import gov.nist.javax.sdp.SessionDescriptionImpl;
 import gov.nist.javax.sdp.fields.ConnectionField;
@@ -29,33 +49,6 @@ import gov.nist.javax.sdp.fields.MediaField;
 import gov.nist.javax.sdp.fields.OriginField;
 import gov.nist.javax.sdp.fields.ProtoVersionField;
 import gov.nist.javax.sdp.fields.SessionNameField;
-
-import java.io.Serializable;
-import java.net.InetAddress;
-
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
-
-import javax.sdp.Attribute;
-import javax.sdp.Connection;
-
-import javax.sdp.Media;
-import javax.sdp.MediaDescription;
-import javax.sdp.Origin;
-import javax.sdp.SdpConstants;
-import javax.sdp.SdpException;
-import javax.sdp.Version;
-
-import javax.sdp.SdpParseException;
-import javax.sdp.SessionDescription;
-import javax.sdp.SessionName;
-
-import org.apache.log4j.Logger;
-import org.mrcp4j.MrcpResourceType;
 
 /**
  * Encapsulates the sdp message used to to describe session (within SIP
@@ -227,7 +220,7 @@ public class SdpMessage implements Serializable {
     }
 
     /**
-     * @param sessionDescription
+     * @param sd
      *            the session description to set
      */
     public void setSessionDescription(SessionDescription sd) {
@@ -298,9 +291,12 @@ public class SdpMessage implements Serializable {
      * The cairo sdpSessionMessage implements the simpler SessionMessage
      * interface that is used by cario clients and servers.
      * 
-     * @param
+     * @param user the user of the session
+     * @param address the address to use
+     * @param sessionName the name of the session
+     * 
      * @return the sdpSessionMessage
-     * @throws SdpException
+     * @throws SdpException error creating the message
      */
     public static SdpMessage createNewSdpSessionMessage(String user, String address, String sessionName)
             throws SdpException {
@@ -403,8 +399,10 @@ public class SdpMessage implements Serializable {
     /**
      * Creates a rtp channel sdp object for a given resource type
      * 
-     * @param resourceType
-     *            the resource type (speechrecog or speechsynth)
+     * @param localPort
+     *            the local port
+     * @param formats
+     * 			  supported audio fomrts
      * 
      * @return the rtp media desription (As a sdp object)
      * 
@@ -439,10 +437,14 @@ public class SdpMessage implements Serializable {
     /**
      * Creates a rtp channel sdp object for a given resource type
      * 
-     * @param resourceType
-     *            the resource type (speechrecog or speechsynth)
+     * @param localPort
+     *            the port for the connection
+     * @param formats
+     * 			  supported formats
+     * @param rtpHost
+     * 			the host for the conection
      * 
-     * @return the rtp media desription (As a sdp object)
+     * @return the rtp media description (As a sdp object)
      * 
      * @throws SdpException
      *             the sdp exception

@@ -397,9 +397,6 @@ public class SipSession {
     	return lastRequest;
     }
     
-    /**
-     * @return the SdpMessage
-     */
     public void setSdpMessage(SdpMessage s) {
     	lastRequest = s;
     }
