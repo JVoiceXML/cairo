@@ -38,7 +38,7 @@ public class RecogListenerDecorator implements RecogListener {
 
     /**
      * TODOC
-     * @param recogListener 
+     * @param recogListener the recognition listener
      */
     public RecogListenerDecorator(RecogListener recogListener) {
         _recogListener = recogListener;

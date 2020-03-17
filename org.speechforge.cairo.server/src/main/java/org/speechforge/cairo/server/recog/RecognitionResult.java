@@ -79,11 +79,11 @@ public class RecognitionResult {
 
     /**
      * TODOC
-     * @param rawResult
-     * @throws NullPointerException
+     * @param rawResult the rar result
+     * @param ruleGrammar rule grammar to use for parsing
+     * @throws NullPointerException error parsing the result
      */
     public RecognitionResult(Result rawResult, RuleGrammar ruleGrammar) throws NullPointerException {
-
         setNewResult(rawResult,ruleGrammar);
     }
     
@@ -123,7 +123,7 @@ public class RecognitionResult {
 
     /**
      * TODOC
-     * @return
+     * @return underlying rule gramamr
      */
     public RuleGrammar getRuleGrammar() {
         return _ruleGrammar;
@@ -131,7 +131,7 @@ public class RecognitionResult {
 
     /**
      * TODOC
-     * @return
+     * @return the text 
      */
     public String getText() {
         return _text;
@@ -139,7 +139,7 @@ public class RecognitionResult {
 
     /**
      * TODOC
-     * @return
+     * @return matched rules
      */
     public List<RuleMatch> getRuleMatches() {
         return _ruleMatches;
@@ -168,11 +168,9 @@ public class RecognitionResult {
      * @throws InvalidRecognitionResultException result could not be parsed
      */
     public static  RecognitionResult constructResultFromString(String inputString) throws InvalidRecognitionResultException {
-        
-
-
-        if (inputString == null)
+        if (inputString == null) {
             throw new InvalidRecognitionResultException();
+        }
         
         RecognitionResult result = new RecognitionResult();
         if(inputString.trim().equals(OUTOFGRAMMAR)) {
@@ -219,7 +217,7 @@ public class RecognitionResult {
     
     /**
      * TODOC
-     * @return
+     * @return text is out of grammar
      */
     public boolean isOutOfGrammar() {
         return oog;

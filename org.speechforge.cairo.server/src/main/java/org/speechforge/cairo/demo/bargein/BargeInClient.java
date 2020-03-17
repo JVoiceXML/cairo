@@ -105,9 +105,9 @@ public class BargeInClient implements MrcpEventListener {
     private static NativeMediaClient mediaClient;
     
     /**
-     * TODOC
-     * @param ttsChannel 
-     * @param recogChannel 
+     * COnstructs a new object.
+     * @param ttsChannel  the TTS channel
+     * @param recogChannel the recognition channel
      */
     public BargeInClient(MrcpChannel ttsChannel, MrcpChannel recogChannel) {
         _ttsChannel = ttsChannel;
@@ -222,13 +222,13 @@ public class BargeInClient implements MrcpEventListener {
 
     /**
      * TODOC
-     * @param prompt
-     * @param grammarUrl
+     * @param prompt the text prompt to play
+     * @param grammarUrl the URL of a grammar to use
      * @return recognition result string
-     * @throws IOException
-     * @throws MrcpInvocationException
-     * @throws InterruptedException
-     * @throws IllegalValueException 
+     * @throws IOException error playing the prompt or recording audio
+     * @throws MrcpInvocationException general MRCP error
+     * @throws InterruptedException call interrupted
+     * @throws IllegalValueException  illegal value
      */
     public synchronized String playAndRecognize(String prompt, URL grammarUrl)
       throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException {

@@ -82,10 +82,10 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
     private GrammarManager _grammarManager;
 
     /**
-     * TODOC
-     * @param channelID 
-     * @param rtpChannel 
-     * @param baseGrammarDir 
+     * Constructs a new object.
+     * @param channelID the ID of the channel 
+     * @param rtpChannel the RTP channel
+     * @param baseGrammarDir base directoy for grammars
      */
     public MrcpRecogChannel(String channelID, RTPRecogChannel rtpChannel, File baseGrammarDir) {
         //_channelID = channelID;

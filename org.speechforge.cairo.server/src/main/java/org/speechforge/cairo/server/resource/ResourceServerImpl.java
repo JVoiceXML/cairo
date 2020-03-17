@@ -80,13 +80,18 @@ public class ResourceServerImpl implements SessionListener {
 	private String hostIpAddress;
 
     /**
-     * TODOC
+     * Constructs a new object
      * 
-     * @param registryImpl
-     * @throws RemoteException
-     * @throws SipException
+     * @param registryImpl the tegistry to use 
+     * @param sipPort the port to use
+     * @param sipTransport the transport to use, e.g. UDP
+     * @param hostIpAddress the address of th host
+     * @param publicAddress th epublic address
+     * @throws RemoteException error exporting the bject to the registry
+     * @throws SipException error creating the SIP agent
      */
-    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, String sipTransport, String hostIpAddress, String publicAddress) throws RemoteException, SipException {
+    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, 
+    		String sipTransport, String hostIpAddress, String publicAddress) throws RemoteException, SipException {
         super();
         this.hostIpAddress = hostIpAddress;
         if( hostIpAddress == null ) {
@@ -112,11 +117,11 @@ public class ResourceServerImpl implements SessionListener {
     }
 
     /**
-     * TODOC
+     * Contrsucts a new object
      * 
-     * @param port
-     * @param registryImpl
-     * @throws RemoteException
+     * @param port the port to use
+     * @param registryImpl the registry to use
+     * @throws RemoteException error exporting the object to the registry
      */
     public ResourceServerImpl(int port, ResourceRegistryImpl registryImpl) throws RemoteException {
         _registryImpl = registryImpl;
@@ -253,8 +258,8 @@ public class ResourceServerImpl implements SessionListener {
     /**
      * TODOC
      * 
-     * @param args
-     * @throws Exception
+     * @param args program arguments
+     * @throws Exception error running the program
      */
     public static void main(String[] args) throws Exception {
         CommandLineParser parser = new GnuParser();

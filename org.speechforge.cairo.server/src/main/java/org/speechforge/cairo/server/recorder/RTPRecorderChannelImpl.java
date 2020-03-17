@@ -24,10 +24,6 @@ package org.speechforge.cairo.server.recorder;
 
 import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
-import org.speechforge.cairo.exception.ResourceUnavailableException;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -45,6 +41,10 @@ import javax.media.protocol.FileTypeDescriptor;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
 
 /**
  * Manages recording requests against an RTP audio stream being received.
@@ -67,10 +67,10 @@ public class RTPRecorderChannelImpl implements DataSinkListener, RTPRecorderChan
 	private ProcessorReplicatorPair _pair;
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @param channelID unique id of the recorder channel
      * @param baseRecordingDir base directory to save recorded files to
-     * @param replicator 
+     * @param replicator  the replicator to use
      * @throws IllegalArgumentException if the File specified is not a directory
      */
     public RTPRecorderChannelImpl(String channelID, File baseRecordingDir, RTPStreamReplicator replicator) throws IllegalArgumentException {
@@ -89,8 +89,8 @@ public class RTPRecorderChannelImpl implements DataSinkListener, RTPRecorderChan
      * 
      * @param startInputTimers whether to start input timers or wait for a future command to start input timers
      * @return the location of the recorded file
-     * @throws IOException
-     * @throws IllegalStateException
+     * @throws IOException error recording
+     * @throws IllegalStateException agent in wrrong state
      */
     
     public synchronized File startRecording(boolean startInputTimers) throws IOException, IllegalStateException {

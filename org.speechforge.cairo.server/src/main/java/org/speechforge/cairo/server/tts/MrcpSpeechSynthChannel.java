@@ -22,10 +22,6 @@
  */
 package org.speechforge.cairo.server.tts;
 
-import org.speechforge.cairo.exception.UnsupportedHeaderException;
-import org.speechforge.cairo.server.MrcpGenericChannel;
-import org.speechforge.cairo.server.resource.TransmitterResource;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,10 +45,12 @@ import org.mrcp4j.message.header.CompletionCause;
 import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
-import org.mrcp4j.message.request.StopRequest;
 import org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest;
+import org.mrcp4j.message.request.StopRequest;
 import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.SpeechSynthRequestHandler;
+import org.speechforge.cairo.exception.UnsupportedHeaderException;
+import org.speechforge.cairo.server.MrcpGenericChannel;
 
 
 /**
@@ -75,12 +73,12 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
     private File _promptDir;
 
     /**
-     * TODOC
-     * @param channelID 
-     * @param basePromptDir 
-     * @param rtpChannel 
-     * @param promptGeneratorPool 
-     * @throws IllegalArgumentException 
+     * Constructs a new object.
+     * @param channelID  the channel ID
+     * @param basePromptDir the directory to store prompts
+     * @param rtpChannel the RTP channel
+     * @param promptGeneratorPool pool for prompt generators
+     * @throws IllegalArgumentException any illegal argument provided
      */
     public MrcpSpeechSynthChannel(String channelID, RTPSpeechSynthChannel rtpChannel, File basePromptDir, ObjectPool promptGeneratorPool)
       throws IllegalArgumentException {

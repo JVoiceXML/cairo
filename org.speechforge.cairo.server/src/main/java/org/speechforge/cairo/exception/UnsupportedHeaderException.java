@@ -30,29 +30,29 @@ package org.speechforge.cairo.exception;
 public class UnsupportedHeaderException extends CairoException {
 
     /**
-     * 
+     * Constructs a new object.
      */
     public UnsupportedHeaderException() {
         super();
     }
 
     /**
-     * @param message
-     * @param cause
+     * @param message the detail message
+     * @param cause the root cause
      */
     public UnsupportedHeaderException(String message, Throwable cause) {
         super(message, cause);
     }
 
     /**
-     * @param message
+     * @param message the detail message
      */
     public UnsupportedHeaderException(String message) {
         super(message);
     }
 
     /**
-     * @param cause
+     * @param cause the root cause
      */
     public UnsupportedHeaderException(Throwable cause) {
         super(cause);

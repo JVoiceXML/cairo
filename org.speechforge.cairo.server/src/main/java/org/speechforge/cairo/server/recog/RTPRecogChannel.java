@@ -76,8 +76,8 @@ public class RTPRecogChannel {
 
     /**
      * TODOC
-     * @param recEnginePool 
-     * @param replicator 
+     * @param recEnginePool the recognizer pool
+     * @param replicator  the RTP stream replicator
      */
     public RTPRecogChannel(ObjectPool recEnginePool, RTPStreamReplicator replicator) {
         Validate.notNull(recEnginePool, "Null recEnginePool!");
@@ -89,17 +89,19 @@ public class RTPRecogChannel {
 
     /**
      * TODOC
-     * @param listener
-     * @param grammarLocation
-     * @param noInputTimeout
-     * @throws IllegalStateException
-     * @throws IOException
-     * @throws ResourceUnavailableException
-     * @throws GrammarException
-     * @throws JSGFGrammarParseException 
-     * @throws JSGFGrammarException 
+     * @param listener the recognition listener
+     * @param grammarLocation the location of the grammar
+     * @param noInputTimeout no-speech timeout in msec
+     * @param hotword hotwaord may be used
+     * @throws IllegalStateException illegal state
+     * @throws IOException error accessing the streams
+     * @throws ResourceUnavailableException resource not availabel
+     * @throws GrammarException error parsing the grammar
+     * @throws JSGFGrammarParseException error parsing the grammar 
+     * @throws JSGFGrammarException error parsing the grammar
      */
-    public synchronized void recognize(RecogListener listener, GrammarLocation grammarLocation, long noInputTimeout, boolean hotword)
+    public synchronized void recognize(RecogListener listener,
+    		GrammarLocation grammarLocation, long noInputTimeout, boolean hotword)
       throws IllegalStateException, IOException, ResourceUnavailableException, GrammarException, JSGFGrammarParseException, JSGFGrammarException {
 
         if (_processor != null) {

@@ -30,18 +30,18 @@ package org.speechforge.cairo.server.recog;
 public interface RecogListener {
 
     /**
-     * TODOC
+     * Notification that speech has started.
      */
     public void speechStarted();
 
     /**
-     * TODOC
-     * @param result 
+     * Notificatin that recognition has completed.
+     * @param result the recognition result 
      */
     public void recognitionComplete(RecognitionResult result);
 
     /**
-     * TODOC
+     * Notification of a no-speech timeout.
      */
     public void noInputTimeout();
 

@@ -45,9 +45,9 @@ public class GrammarManager {
     private URL _grammarDirUrl;
 
     /**
-     * TODOC
-     * @param channelID 
-     * @param baseGrammarDir 
+     * Constructs a new object.
+     * @param channelID the ID of the channel
+     * @param baseGrammarDir the base directory for grammars
      */
     public GrammarManager(String channelID, File baseGrammarDir) {
         Validate.isTrue(baseGrammarDir.isDirectory(), "baseGrammarDir parameter was not a directory: ", baseGrammarDir);
@@ -64,10 +64,10 @@ public class GrammarManager {
     
     /**
      * TODOC
-     * @param grammarID
-     * @param grammarText
-     * @return
-     * @throws IOException
+     * @param grammarID the ID if the grammar
+     * @param grammarText the grammar
+     * @return location of the grammar
+     * @throws IOException error writing the grammar
      */
     // NOTE: could reduce sync scope but not necessary since generally single threaded access
     public synchronized GrammarLocation saveGrammar(String grammarID, String grammarText)
@@ -96,8 +96,8 @@ public class GrammarManager {
 
     /**
      * TODOC
-     * @param grammarID
-     * @return
+     * @param grammarID the ID of the grammar
+     * @return location of the grammar
      */
     public synchronized GrammarLocation getGrammarLocation(String grammarID) {
         return _grammars.get(grammarID);
