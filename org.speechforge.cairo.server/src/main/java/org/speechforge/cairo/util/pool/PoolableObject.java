@@ -33,13 +33,13 @@ public interface PoolableObject {
 
     /**
      * Reinitialize instance to be returned by the pool.
-     * @throws Exception 
+     * @throws Exception error activating the pooled object
      */
     void activate() throws Exception;
 
     /**
      * Uninitialize instance to be returned to the pool.
-     * @throws Exception 
+     * @throws Exception error passivating the pooled object
      */
     void passivate() throws Exception;
 
@@ -51,7 +51,7 @@ public interface PoolableObject {
 
     /**
      * Destroys an instance no longer needed by the pool.
-     * @throws Exception 
+     * @throws Exception error destroying the pooled object
      */
     void destroy() throws Exception;
 

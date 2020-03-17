@@ -22,19 +22,9 @@
  */
 package org.speechforge.cairo.demo.recorder;
 
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.server.resource.ResourceImpl;
-import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.sip.SimpleSipAgent;
-import org.speechforge.cairo.sip.SipAgent;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.cairo.util.CairoUtil;
-
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Vector;
@@ -67,6 +57,12 @@ import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.server.resource.ResourceImpl;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SimpleSipAgent;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Demo MRCPv2 client application that utilizes a {@code recognizer} resource to perform
@@ -98,8 +94,8 @@ public class RecorderClient implements MrcpEventListener {
     private static NativeMediaClient mediaClient;
     
     /**
-     * TODOC
-     * @param recogChannel 
+     * Constructs a new object.
+     * @param recogChannel the recognition channel
      */
     public RecorderClient(MrcpChannel recogChannel) {
         _recogChannel = recogChannel;
@@ -179,9 +175,6 @@ public class RecorderClient implements MrcpEventListener {
         CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();
 
         return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
-        
-        //return response.getContent();
-
     }
 
 

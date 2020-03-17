@@ -30,7 +30,7 @@ package org.speechforge.cairo.exception;
 public class ResourceUnavailableException extends CairoException {
 
     /**
-     * TODOC
+     * Constructs a new object.
      */
     public ResourceUnavailableException() {
         super();
@@ -38,7 +38,7 @@ public class ResourceUnavailableException extends CairoException {
 
     /**
      * TODOC
-     * @param message
+     * @param message the detail message
      */
     public ResourceUnavailableException(String message) {
         super(message);
@@ -46,8 +46,8 @@ public class ResourceUnavailableException extends CairoException {
 
     /**
      * TODOC
-     * @param message
-     * @param cause
+     * @param message the detail message
+     * @param cause the root cause
      */
     public ResourceUnavailableException(String message, Throwable cause) {
         super(message, cause);
@@ -55,7 +55,7 @@ public class ResourceUnavailableException extends CairoException {
 
     /**
      * TODOC
-     * @param cause
+     * @param cause the root cause
      */
     public ResourceUnavailableException(Throwable cause) {
         super(cause);

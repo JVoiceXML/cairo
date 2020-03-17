@@ -62,7 +62,7 @@ public class PromptGenerator extends AbstractPoolableObject {
      * @param dir directory in which to save the generated prompt file.
      * @return the generated prompt file.
      * @throws IllegalArgumentException if the directory specified is not a directory.
-     * @throws IOException 
+     * @throws IOException  error creating the prompt file
      */
     public synchronized File generatePrompt(String text, File dir) throws IllegalArgumentException, IOException {
         if (dir == null || !dir.isDirectory()) {

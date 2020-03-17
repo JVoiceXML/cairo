@@ -30,36 +30,32 @@ package org.speechforge.cairo.exception;
 public abstract class CairoException extends Exception {
 
     /**
-     * 
+     * Constructs a new object
      */
     public CairoException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param message
-     * @param cause
+     * @param message the detail message
+     * @param cause the root cause
      */
     public CairoException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param message
+     * @param message the detail message
      */
     public CairoException(String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
 
     /**
-     * @param cause
+     * @param cause the root cause
      */
     public CairoException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
 }
