@@ -43,8 +43,8 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
     private String _voiceName;
 
     /**
-     * TODOC
-     * @param voiceName
+     * Constructs a new object.
+     * @param voiceName name of the voice to use to play prompts
      */
     public PromptGeneratorFactory(String voiceName) {
         _voiceName = voiceName;
@@ -60,8 +60,10 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
 
     /**
      * TODOC
-     * @param instances
-     * @return
+     * @param voiceName name of the voice to use to play prompts
+     * @param instances number of instances to create
+     * @return created pool
+     * @throws InstantiationException error creating the pool
      */
     public static ObjectPool createObjectPool(String voiceName, int instances)
       throws InstantiationException {

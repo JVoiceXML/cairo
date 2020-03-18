@@ -65,11 +65,14 @@ public class RTPSpeechSynthChannel {
     
     /**
      * TODOC
-     * @param localPort 
-     * @param remoteAddress 
-     * @param remotePort 
+     * @param localPort the port to use
+     * @param localAddress the local address
+     * @param remoteAddress the remote address
+     * @param remotePort the remote port
+     * @param af the aaudio format to use 
      */
-    public RTPSpeechSynthChannel(int localPort, InetAddress localAddress, InetAddress remoteAddress, int remotePort, AudioFormats af) {
+    public RTPSpeechSynthChannel(int localPort, InetAddress localAddress,
+    		InetAddress remoteAddress, int remotePort, AudioFormats af) {
         _localPort = localPort;
         _remoteAddress = remoteAddress;
         _remotePort = remotePort;
@@ -229,8 +232,8 @@ public class RTPSpeechSynthChannel {
 
     /**
      * TODOC
-     * @param args
-     * @throws Exception
+     * @param args program argumetns
+     * @throws Exception error executing the program
      */
     public static void main(String[] args) throws Exception {
         

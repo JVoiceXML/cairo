@@ -48,9 +48,9 @@ public class ReceiverConfig extends ResourceConfig {
 
     /**
      * TODOC
-     * @param index
-     * @param config
-     * @throws ConfigurationException 
+     * @param index index of the instance
+     * @param config the configuration to use
+     * @throws ConfigurationException error in the configuration
      */
     public ReceiverConfig(int index, XMLConfiguration config) throws ConfigurationException {
         super(index, config);

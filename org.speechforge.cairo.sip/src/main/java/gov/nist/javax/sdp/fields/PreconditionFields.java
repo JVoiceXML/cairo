@@ -33,8 +33,10 @@ package gov.nist.javax.sdp.fields;
 
 import java.io.Serializable;
 import java.util.Vector;
+
 import javax.sdp.SdpException;
 import javax.sdp.SdpParseException;
+
 import gov.nist.core.NameValue;
 
 
@@ -60,7 +62,7 @@ public class PreconditionFields implements Serializable
 	
 	
 	/**
-	 * Constructor
+	 * Constructs a new object.
 	 *
 	 */
 	public PreconditionFields()
@@ -115,7 +117,7 @@ public class PreconditionFields implements Serializable
 	 * a string value encoded like the "curr" attribute value</p>
 	 * 
 	 * @param precondCurrValue - a string with the value for a "curr" attribute
-	 * @throws SdpException
+	 * @throws SdpException if the value could not be set or parsed
 	 */
 	public void setPreconditionCurr(String precondCurrValue) throws SdpException 
 	{
@@ -173,7 +175,7 @@ public class PreconditionFields implements Serializable
 	 * 
 	 * @param status - (local, remote, e2e)
 	 * @param directionTag - (none, send, recv, sendrecv)
-	 * @throws SdpParseException
+	 * @throws SdpException if the value could not be set or parsed
 	 */
 	public void setPreconditionCurr(String status, String directionTag) 
 		throws SdpException
@@ -226,18 +228,12 @@ public class PreconditionFields implements Serializable
 		}
 	}
 	
-
-	
-	
-	
-	
-
 	/**
 	 * <p>Set attribute line for desired precondition state, given
 	 * a string value encoded like the "des" attribute value</p>
 	 * 
 	 * @param precondDesValue - a string with the value for a "des" attribute
-	 * @throws SdpException
+	 * @throws SdpException if the value could not be set or parsed
 	 */
 	public void setPreconditionDes(String precondDesValue) throws SdpException 
 	{
@@ -282,11 +278,6 @@ public class PreconditionFields implements Serializable
 		}
 	}
 
-	
-	
-	
-	
-	
 	/**
 	 * <p>Set the value of the attributes with the name "des"
 	 * for desired precondition. </p>
@@ -297,15 +288,14 @@ public class PreconditionFields implements Serializable
 	 * 
 	 * <p>If there is an attribute "des" for the same status-type,
 	 * the strength-tag and direction-tag are updated with the 
-	 * ones supplied.<p> 
+	 * ones supplied.</p> 
 	 * 
 	 * <p>IETF RFC4032: strength should only be downgraded within SDP offers</p>
-	 * 
 	 * 
 	 * @param strength - (none, optional,
 	 * @param status - (local, remote, e2e)
 	 * @param direction - (none, send, recv, sendrecv)
-	 * @throws SdpParseException
+	 * @throws SdpException if the value could not be set or parsed
 	 */
 	public void setPreconditionDes(String strength, String status, String direction) 
 		throws SdpException
@@ -357,18 +347,12 @@ public class PreconditionFields implements Serializable
 		}
 	}
 	
-
-
-	
-	
-	
-	
 	/**
 	 * <p>Set attribute line for confirmation precondition request, given
 	 * a string value encoded like the "conf" attribute value</p>
 	 * 
 	 * @param precondConfValue - a string with the value for a "conf" attribute
-	 * @throws SdpException
+	 * @throws SdpException if the value could not be set or parsed
 	 */
 	public void setPreconditionConfirmStatus(String precondConfValue) 
 		throws SdpException 
@@ -477,15 +461,6 @@ public class PreconditionFields implements Serializable
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	/**
 	 * <p>Get the attribute fields with the name "curr"
 	 * for current precondition.</p> 
@@ -495,7 +470,8 @@ public class PreconditionFields implements Serializable
 	 * @param status - (local, remote, e2e)
 	 * @return a vector with the attribute field that match status-type 
 	 * (with only one element or null if none exists)
-	 * @throws SdpParseException
+	 * @throws SdpException if the value could not be set or parsed
+	 * @throws SdpParseException if the value could not be parsed
 	 */
 	public Vector getPreconditionCurr(String status) 
 		throws SdpException, SdpParseException
@@ -532,9 +508,6 @@ public class PreconditionFields implements Serializable
 		}
 	}
 	
-	
-	
-	
 	/**
 	 * <p>Get the attribute fields with the name "des"
 	 * for desired precondition</p>
@@ -545,7 +518,8 @@ public class PreconditionFields implements Serializable
 	 * 
 	 * @param status - (local, remote, e2e)
 	 * @return a vector with the attribute fields that match location-tag
-	 * @throws SdpParseException
+	 * @throws SdpException if the value could not be set or parsed
+	 * @throws SdpParseException if the value could not be parsed
 	 */
 	public Vector getPreconditionDes(String status) 
 		throws SdpException, SdpParseException
@@ -582,8 +556,6 @@ public class PreconditionFields implements Serializable
 		}
 	}
 	
-
-	
 	/**
 	 * <p>Get the attribute fields with the name "conf"
 	 * for confirmation precondition.</p>
@@ -597,7 +569,7 @@ public class PreconditionFields implements Serializable
 	 * <p>(eg: a=conf:qos remote sendrecv)</p>
 	 * 
 	 * @return a vector with the "conf" attribute fields
-	 * @throws SdpException
+	 * @throws SdpException if the value could not be set or parsed
 	 */
 	public Vector getPreconditionConfirmStatus() throws SdpException
 	{
@@ -665,10 +637,4 @@ public class PreconditionFields implements Serializable
 	public static final int PRECONDITION_QOS 	= 0;
 	public static final String[] PRECONDITION 	= { "qos" 
 												};
-	
-	
-	
-	
-	
-	
 }

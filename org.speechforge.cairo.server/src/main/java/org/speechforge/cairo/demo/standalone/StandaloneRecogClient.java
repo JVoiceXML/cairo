@@ -22,17 +22,9 @@
  */
 package org.speechforge.cairo.demo.standalone;
 
+import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 import static org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
 import static org.speechforge.cairo.server.resource.ResourceImpl.HELP_OPTION;
-import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
-
-import org.speechforge.cairo.server.recog.GrammarLocation;
-import org.speechforge.cairo.server.recog.RecogListenerDecorator;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.rtp.server.PBDSReplicator;
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import java.awt.Toolkit;
 import java.io.IOException;
@@ -45,8 +37,6 @@ import javax.media.NoProcessorException;
 import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 
-import edu.cmu.sphinx.util.props.ConfigurationManager;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -54,6 +44,15 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
+import org.speechforge.cairo.server.recog.GrammarLocation;
+import org.speechforge.cairo.server.recog.RecogListenerDecorator;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
+
+import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 /**
  * Demo application that performs speech recognition on microphone input using the
@@ -79,7 +78,7 @@ public class StandaloneRecogClient extends RecogListenerDecorator {
 
     /**
      * TODOC
-     * @param engine 
+     * @param engine the sphinc recognizer
      */
     public StandaloneRecogClient(SphinxRecEngine engine) {
         super(null);
@@ -99,13 +98,14 @@ public class StandaloneRecogClient extends RecogListenerDecorator {
     }
 
     /**
-     * @param mediaLocator
-     * @return
-     * @throws IOException
-     * @throws NoProcessorException
-     * @throws CannotRealizeException
-     * @throws InterruptedException
-     * @throws NoDataSourceException
+     * @param mediaLocator the media locator
+     * @param examplePhrase example phrase
+     * @return recognition result
+     * @throws IOException error reading from the media locator
+     * @throws NoProcessorException no recognizer avaialble
+     * @throws CannotRealizeException unable to create the recognizer
+     * @throws InterruptedException interrutpted
+     * @throws NoDataSourceException no valid data source provided
      */
     public synchronized RecognitionResult doRecognize(MediaLocator mediaLocator, String examplePhrase)
       throws IOException, NoProcessorException, CannotRealizeException, InterruptedException, NoDataSourceException {
