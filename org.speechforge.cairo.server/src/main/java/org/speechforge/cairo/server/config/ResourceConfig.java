@@ -47,8 +47,8 @@ public abstract class ResourceConfig {
 
     /**
      * TODOC
-     * @param index 
-     * @param config 
+     * @param index index of the instance
+     * @param config the configuration to use
      */
     public ResourceConfig(int index, XMLConfiguration config) {
         _mrcpPort = config.getInt("resources.resource(" + index + ").mrcpPort");
@@ -101,10 +101,10 @@ public abstract class ResourceConfig {
 
     /**
      * TODOC
-     * @param config
-     * @param key
-     * @return
-     * @throws ConfigurationException
+     * @param config the configuration
+     * @param key the key to look for
+     * @return file configured for the key
+     * @throws ConfigurationException error in the c
      */
     public static File getConfigDir(XMLConfiguration config, String key) throws ConfigurationException {
         try {
@@ -118,8 +118,8 @@ public abstract class ResourceConfig {
 
     /**
      * TODOC
-     * @param dir
-     * @throws ConfigurationException
+     * @param dir directory to check
+     * @throws ConfigurationException error in the configuration
      */
     public static void ensureDir(File dir) throws ConfigurationException {
         

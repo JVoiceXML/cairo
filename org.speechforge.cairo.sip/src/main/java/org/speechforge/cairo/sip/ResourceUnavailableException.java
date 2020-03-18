@@ -28,14 +28,8 @@ package org.speechforge.cairo.sip;
  * @author Spencer Lord {@literal <}<a href="salord@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class ResourceUnavailableException extends Exception {
-
     /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * TODOC
+     * Constructs a enw object.
      */
     public ResourceUnavailableException() {
         super();
@@ -43,7 +37,7 @@ public class ResourceUnavailableException extends Exception {
 
     /**
      * TODOC
-     * @param message
+     * @param message the detail message
      */
     public ResourceUnavailableException(String message) {
         super(message);
@@ -51,8 +45,8 @@ public class ResourceUnavailableException extends Exception {
 
     /**
      * TODOC
-     * @param message
-     * @param cause
+     * @param message the detail message
+     * @param cause the root cause
      */
     public ResourceUnavailableException(String message, Throwable cause) {
         super(message, cause);
@@ -60,7 +54,7 @@ public class ResourceUnavailableException extends Exception {
 
     /**
      * TODOC
-     * @param cause
+     * @param cause the root cause
      */
     public ResourceUnavailableException(Throwable cause) {
         super(cause);

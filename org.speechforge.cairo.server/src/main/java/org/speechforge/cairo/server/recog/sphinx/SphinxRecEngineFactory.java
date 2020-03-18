@@ -63,9 +63,9 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
 
     /**
      * TODOC
-     * @param sphinxConfigURL
-     * @param instances
-     * @return
+     * @param sphinxConfigURL URL of the sphinx configuration
+     * @param instances number of instances
+     * @return created pool
      * @throws InstantiationException if initializing the object pool triggers an exception.
      */
     public static ObjectPool createObjectPool(URL sphinxConfigURL, int instances)

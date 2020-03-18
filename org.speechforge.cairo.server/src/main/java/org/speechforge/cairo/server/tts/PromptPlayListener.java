@@ -30,17 +30,18 @@ package org.speechforge.cairo.server.tts;
 public interface PromptPlayListener {
 
     /**
-     * TODOC
+     * Notification that playing a prompt has completed.
      */
     public void playCompleted();
 
     /**
-     * TODOC
+     * Notification that playing a prompt has been interrupted
      */
     public void playInterrupted();
 
     /**
-     * TODOC
+     * Notification that playing a prompt has failed.
+     * @param cause error causing the failed play back
      */
     public void playFailed(Exception cause);
 

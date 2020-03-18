@@ -143,11 +143,11 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
     /**
      * TODOC
-     * @param grammarLocation
-     * @throws IOException
-     * @throws GrammarException
-     * @throws JSGFGrammarException 
-     * @throws JSGFGrammarParseException 
+     * @param grammarLocation the location of the grammar to load
+     * @throws IOException error reading from the grammar location
+     * @throws GrammarException error parsing the grammar
+     * @throws JSGFGrammarException error parsing the grammar
+     * @throws JSGFGrammarParseException error parsing the grammar
      */
     public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException, JSGFGrammarParseException, JSGFGrammarException {
     	
@@ -159,10 +159,10 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
     /**
      * TODOC
-     * @param text
-     * @param ruleName
-     * @return
-     * @throws GrammarException
+     * @param text the recognized input text
+     * @param ruleName the rule name to use for parsing
+     * @return parsed rule
+     * @throws GrammarException error in the grammar or while parsing
      */
     public synchronized RuleParse parse(String text, String ruleName) throws GrammarException {
         if (_rawAudioTransferHandler != null) {
@@ -175,9 +175,10 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
     /**
      * TODOC
-     * @param dataSource
-     * @param listener 
-     * @throws UnsupportedEncodingException 
+     * @param dataSource the data source
+     * @param listener  the listener
+     * @throws UnsupportedEncodingException
+     * 			encoding not supported 
      */
     public synchronized void startRecognition(PushBufferDataSource dataSource, RecogListener listener)
       throws UnsupportedEncodingException {

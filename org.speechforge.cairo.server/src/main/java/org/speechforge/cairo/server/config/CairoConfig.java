@@ -40,8 +40,8 @@ public class CairoConfig {
 
     /**
      * TODOC
-     * @param cairoConfigURL 
-     * @throws ConfigurationException 
+     * @param cairoConfigURL  URL of the cairo configuration
+     * @throws ConfigurationException error in the configuration
      */
     public CairoConfig(URL cairoConfigURL) throws ConfigurationException {
         _config = new XMLConfiguration(cairoConfigURL);
@@ -49,9 +49,9 @@ public class CairoConfig {
 
     /**
      * TODOC
-     * @param name
-     * @return
-     * @throws ConfigurationException
+     * @param name name of the receiver
+     * @return created receiver
+     * @throws ConfigurationException error in the configuration
      */
     public ReceiverConfig getReceiverConfig(String name) throws ConfigurationException {
         return new ReceiverConfig(this.getConfigIndex(name), _config);
@@ -59,9 +59,9 @@ public class CairoConfig {
 
     /**
      * TODOC
-     * @param name
-     * @return
-     * @throws ConfigurationException
+     * @param name name of the transmitter
+     * @return created transmitter
+     * @throws ConfigurationException error in the configuration
      */
     public TransmitterConfig getTransmitterConfig(String name) throws ConfigurationException {
         return new TransmitterConfig(this.getConfigIndex(name), _config);

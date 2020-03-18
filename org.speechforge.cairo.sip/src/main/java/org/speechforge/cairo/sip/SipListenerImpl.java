@@ -333,6 +333,7 @@ public class SipListenerImpl implements SipListener {
 
     /**
      * Process the ACK request.
+     * @param requestEvent the event to acknowledge
      */
     public void processAck(RequestEvent requestEvent) {
         // _logger.info("Got a ACK event");
@@ -343,6 +344,7 @@ public class SipListenerImpl implements SipListener {
 
     /**
      * Process the invite request.
+     * @param requestEvent the invite event
      */
     public void processInvite(RequestEvent requestEvent) {
         SipProvider sipProvider = (SipProvider) requestEvent.getSource();
@@ -474,6 +476,7 @@ public class SipListenerImpl implements SipListener {
 
     /**
      * Process the invite request.
+     * @param requestEvent the info request
      */
     public void processInfo(RequestEvent requestEvent) {
 
@@ -613,6 +616,7 @@ public class SipListenerImpl implements SipListener {
     
     /**
      * Process the bye request.
+     * @param requestEvent the BYE message
      */
     public void processBye(RequestEvent requestEvent) {
         // SipProvider sipProvider = (SipProvider) requestEvent.getSource();

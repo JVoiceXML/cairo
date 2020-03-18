@@ -40,9 +40,9 @@ public class TransmitterConfig extends ResourceConfig {
 
     /**
      * TODOC
-     * @param index
-     * @param config
-     * @throws ConfigurationException 
+     * @param index index of the instance
+     * @param config the configuration to use
+     * @throws ConfigurationException error in the configuration
      */
     public TransmitterConfig(int index, XMLConfiguration config) throws ConfigurationException {
         super(index, config);
