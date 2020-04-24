@@ -42,7 +42,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes('Implementation-Title': 'The module that provides RTP capabilities for speech recognition applications, clients and servers.',
+        attributes('Implementation-Title': 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.',
                    'Implementation-Vendor': 'switch',
                    'Implementation-Version': version,
                    'Built-By'       : System.properties['user.name'],
@@ -51,7 +51,7 @@ jar {
                    'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
                    'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}")
     }
-    baseName 'org.speechforge.cairo.rtp'
+    baseName 'org.speechforge.cairo.server'
 }
 
 task javadocJar(type: Jar) {
@@ -88,10 +88,10 @@ uploadArchives {
             }
     
             pom.project {
-                name 'org.speechforge.cairo.rtp'
+                name 'org.speechforge.cairo.server'
                 groupId = JVOICEXML_GROUP
                 packaging 'jar'
-                description 'The module that provides RTP capabilities for speech recognition applications, clients and servers.'
+                description 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.'
                 url 'https://github.com/JVoiceXML/cairo'
                 
                 scm {
