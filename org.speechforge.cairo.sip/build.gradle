@@ -4,6 +4,9 @@ apply plugin: 'signing'
 
 repositories {
     mavenCentral()
+    maven { 
+        url "https://oss.sonatype.org/content/repositories/snapshots" 
+    }
 }
 
 dependencies {
@@ -34,7 +37,7 @@ jar {
                    'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
                    'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}")
     }
-    baseName 'org.speechforge.cairo.rtp'
+    baseName 'org.speechforge.cairo.sip'
 }
 
 task javadocJar(type: Jar) {
@@ -71,11 +74,11 @@ uploadArchives {
             }
     
             pom.project {
-                name 'JVoiceXML'
+                name 'org.speechforge.cairo.sip'
                 groupId = JVOICEXML_GROUP
                 packaging 'jar'
-                description 'The Open Source Voice Brwoser'
-                url 'https://github.com/JVoiceXML/JVoiceXML'
+                description 'The module that provides sip capabilities for speech recognition applications, clients and servers.'
+                url 'https://github.com/JVoiceXML/cairo'
                 
                 scm {
                     connection 'git@github.com:JVoiceXML/cairo.git'
