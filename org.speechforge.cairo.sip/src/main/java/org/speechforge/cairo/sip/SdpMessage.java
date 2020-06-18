@@ -56,9 +56,10 @@ import gov.nist.javax.sdp.fields.SessionNameField;
  * 
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
  */
+@SuppressWarnings("serial")
 public class SdpMessage implements Serializable {
 
-    private static Logger _logger = Logger.getLogger(SdpMessage.class);
+    private static Logger LOGGER = Logger.getLogger(SdpMessage.class);
 
     public static final String SDP_AUDIO_MEDIA = "audio";
 
@@ -134,15 +135,16 @@ public class SdpMessage implements Serializable {
     private List<MediaDescription> getChannels(String protocol) throws SdpException {
         List<MediaDescription> chans = new ArrayList<MediaDescription>();
         try {
-            Enumeration e = _sd.getMediaDescriptions(true).elements();
+            @SuppressWarnings("unchecked")
+            Enumeration<MediaDescription> e = _sd.getMediaDescriptions(true).elements();
             while (e.hasMoreElements()) {
-                MediaDescription md = (MediaDescription) e.nextElement();
+                MediaDescription md = e.nextElement();
                 if (md.getMedia().getProtocol().equals(protocol)) {
                     chans.add(md);
                 }
             }
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return chans;
@@ -152,9 +154,10 @@ public class SdpMessage implements Serializable {
         List<MediaDescription> chans = new ArrayList<MediaDescription>();
 
         try {
-            Enumeration e = _sd.getMediaDescriptions(true).elements();
+            @SuppressWarnings("unchecked")
+            Enumeration<MediaDescription> e = _sd.getMediaDescriptions(true).elements();
             while (e.hasMoreElements()) {
-                MediaDescription md = (MediaDescription) e.nextElement();
+                MediaDescription md = e.nextElement();
                 if (md.getMedia().getProtocol().equals(protocol)) {
                     // if it is a request, then the setup is passive and then
                     // there will be a resource attribute. else get the resource
@@ -173,7 +176,7 @@ public class SdpMessage implements Serializable {
                 }
             }
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return chans;
@@ -191,9 +194,10 @@ public class SdpMessage implements Serializable {
                 idToMatch = control.getAttribute(SDP_CMID_ATTR_NAME);
                 protocolToMatch = SDP_RTP_PROTOCOL;
                 attributeNameToMatch = SDP_MID_ATTR_NAME;
-                Enumeration e = _sd.getMediaDescriptions(true).elements();      
+                @SuppressWarnings("unchecked")
+                Enumeration<MediaDescription> e = _sd.getMediaDescriptions(true).elements();      
                 while (e.hasMoreElements()) {
-                    MediaDescription md = (MediaDescription) e.nextElement();
+                    MediaDescription md = e.nextElement();
                     if (md.getMedia().getProtocol().equals(protocolToMatch)) {
                         if (md.getAttribute(attributeNameToMatch).equalsIgnoreCase(idToMatch)) {
                             chans.add(md);
@@ -201,12 +205,12 @@ public class SdpMessage implements Serializable {
                     }
                 }            
             } else {
-                _logger.error(control.toString() + " not a MRCP control channel");
+                LOGGER.error(control.toString() + " not a MRCP control channel");
                 throw new SdpException(control.toString() + " not a MRCP control channel");
             }
 
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return chans;
@@ -240,7 +244,7 @@ public class SdpMessage implements Serializable {
         try {
             address = _sd.getConnection().getAddress();
         } catch (SdpParseException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return address;
@@ -271,7 +275,7 @@ public class SdpMessage implements Serializable {
                 _sd.setConnection(c);
             }
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
     }
@@ -328,7 +332,7 @@ public class SdpMessage implements Serializable {
             message._sd.setSessionName(sn);
 
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return message;
@@ -340,7 +344,7 @@ public class SdpMessage implements Serializable {
      * <p>
      * This factory method should be used upon receipt of a sdp message
      * (probably from the payload of a SIP message). The cairo sdpSessionMessage
-     * implements the simpler SessionMessage interface that is used by cario
+     * implements the simpler SessionMessage interface that is used by cairo
      * clients and servers.
      * 
      * @param sd
@@ -390,7 +394,7 @@ public class SdpMessage implements Serializable {
                 md.setAttribute(SDP_RESOURCE_ATTR_NAME, SDP_RECORDER_RESOURCE);
              }
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return md;
@@ -428,7 +432,7 @@ public class SdpMessage implements Serializable {
             // md.setAttribute("sendonly", null);
 
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return md;
@@ -472,7 +476,7 @@ public class SdpMessage implements Serializable {
             // md.setAttribute("sendonly", null);
 
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
         return md;

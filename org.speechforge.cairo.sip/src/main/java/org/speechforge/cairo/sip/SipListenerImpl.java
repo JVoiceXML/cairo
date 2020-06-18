@@ -371,29 +371,28 @@ public class SipListenerImpl implements SipListener {
         }
         
         try {
-
             stx = requestEvent.getServerTransaction();
             if (stx == null) {
                 stx = sipProvider.getNewServerTransaction(request);
             }
            
 
-            byte[] contentBytes = request.getRawContent();
-            SdpFactory sdpFactory = SdpFactory.getInstance();
+            final byte[] contentBytes = request.getRawContent();
+            final SdpFactory sdpFactory = SdpFactory.getInstance();
 
             boolean noOffer = false;
             if (contentBytes == null) {
                 // TODO: How to deal with the absense of an offer in the invite
-                // the sepc says that the UAS should send an offer in the 2xx
+                // the sepc says that the UAs should send an offer in the 2xx
                 // response and
                 // expect a response to the offer in the ACK (Does it make sense
                 // here what should the server offer
                 // two mrcp channels and a rtp channel?
                 noOffer = true;
-                LOGGER.info("No offer in the invite request.  Should provide offer in response but not supported yet.");
+                LOGGER.warn("No offer in the invite request.  Should provide offer in response but not supported yet.");
             } else {
                 Dialog dialog = requestEvent.getDialog();
-                if ( dialog == null) {
+                if (dialog == null) {
                    // Send a provisional Response: Session Progress -- establishes the dialog id
                    Response response = sipClient.getMessageFactory().createResponse(Response.SESSION_PROGRESS, request);
                    ToHeader provToHeader = (ToHeader) response.getHeader(ToHeader.NAME);
@@ -446,30 +445,28 @@ public class SipListenerImpl implements SipListener {
                 //validate the sdp message (throw sdpException if the message is invalid)
                 SdpMessageValidator.validate(sdpMessage);
                 
-                //process the invitaion (the resource manager processInviteRequest method)
+                //process the invitation (the resource manager processInviteRequest method)
                 sipClient.getSessionListener().processInviteRequest(sdpMessage, session);
                 
-                //----- REmoved the response sending
+                //----- Removed the response sending
                 //------Must send yourself. 
                 //------To do so use the SipAgent.sendResponse()
-
-
             }
         } catch (SipException e) {
             OfferRejected(requestEvent, session, stx);
-            LOGGER.info("Could not process invite: " + e, e);
+            LOGGER.warn("Could not process invite: " + e, e);
         } catch (ParseException e) {
             OfferRejected(requestEvent,session, stx);
-            LOGGER.info("Could not process invite: " + e, e);
+            LOGGER.warn("Could not process invite: " + e, e);
         } catch (ResourceUnavailableException e) {
             OfferRejected(requestEvent,session, stx);
-            LOGGER.info("Could not process invite: " + e, e);
+            LOGGER.warn("Could not process invite: " + e, e);
         } catch (RemoteException e) {
             OfferRejected(requestEvent,session, stx);
-            LOGGER.info("Could not process invite: " + e, e);
+            LOGGER.warn("Could not process invite: " + e, e);
         } catch (SdpException e) {
             OfferRejected(requestEvent,session, stx);
-            LOGGER.info("Could not process invite: " + e, e);
+            LOGGER.warn("Could not process invite: " + e, e);
         }
     }
     
@@ -659,7 +656,6 @@ public class SipListenerImpl implements SipListener {
         Request request = requestEvent.getRequest();
         ServerTransaction stx = requestEvent.getServerTransaction();
         Dialog dialog = requestEvent.getDialog();
-  
         
         try {
             //TODO:  to be able to forward calls to this device need to maintain a registry

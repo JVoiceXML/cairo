@@ -60,7 +60,7 @@ public class ResourceServerImpl implements SessionListener {
 
     public static final String NAME = "ResourceServer";
 
-    private static Logger _logger = Logger.getLogger(ResourceServerImpl.class);
+    private static Logger LOGGER = Logger.getLogger(ResourceServerImpl.class);
 
 
     private static final String SIPPORT_OPTION = "sipPort";
@@ -82,12 +82,12 @@ public class ResourceServerImpl implements SessionListener {
     /**
      * Constructs a new object
      * 
-     * @param registryImpl the tegistry to use 
+     * @param registryImpl the registry to use 
      * @param sipPort the port to use
      * @param sipTransport the transport to use, e.g. UDP
-     * @param hostIpAddress the address of th host
-     * @param publicAddress th epublic address
-     * @throws RemoteException error exporting the bject to the registry
+     * @param hostIpAddress the address of the host
+     * @param publicAddress the public address
+     * @throws RemoteException error exporting the object to the registry
      * @throws SipException error creating the SIP agent
      */
     public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, 
@@ -101,7 +101,7 @@ public class ResourceServerImpl implements SessionListener {
 	            //host = addr.getCanonicalHostName();
 	        } catch (UnknownHostException e) {
 	            this.hostIpAddress = "127.0.0.1";
-	            _logger.debug(e, e);
+	            LOGGER.debug(e, e);
 	            e.printStackTrace();
 	        } catch (SocketException e) {
 				// TODO Auto-generated catch block
@@ -177,7 +177,7 @@ public class ResourceServerImpl implements SessionListener {
                 transmitter = true;
             }
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw e;
         }
 
@@ -202,7 +202,7 @@ public class ResourceServerImpl implements SessionListener {
                 e.printStackTrace();
                 throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
             }
-            _logger.info("Calling receiver.invite(sdpMessage)");
+            LOGGER.info("Calling receiver.invite(sdpMessage)");
             request = resource.invite(request, session.getId());
             session.getResources().add(resource);
         } // TODO: catch exception and release transmitter resources
@@ -296,7 +296,7 @@ public class ResourceServerImpl implements SessionListener {
         }
 
         
-        _logger.debug("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
+        LOGGER.debug("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
        
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
         ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport,hostName, publicAddress);
@@ -305,7 +305,7 @@ public class ResourceServerImpl implements SessionListener {
         registry.rebind(ResourceRegistry.NAME, rr);
         // registry.rebind(ResourceServer.NAME, rs);
 
-        _logger.info("Server and registry bound and waiting...");
+        LOGGER.info("Server and registry bound and waiting...");
 
     }
 
