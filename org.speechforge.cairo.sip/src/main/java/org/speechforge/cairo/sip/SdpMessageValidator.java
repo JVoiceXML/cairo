@@ -25,45 +25,55 @@ package org.speechforge.cairo.sip;
 import java.util.Enumeration;
 import java.util.Vector;
 import javax.sdp.Attribute;
+import javax.sdp.Connection;
 import javax.sdp.Media;
 import javax.sdp.MediaDescription;
 import javax.sdp.Origin;
+import javax.sdp.SdpConstants;
 import javax.sdp.SdpException;
+import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 
 /**
- * Validates the sdp message.  Throws exception if the message is invalid.  
+ * Validates the SDP message.  Throws exception if the message is invalid.  
  * 
- * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
+ * @author Spencer Lord 
+ * @author Dirk Schnelle-Walka
  */
 public class SdpMessageValidator {
-    
-    private static Logger LOGGER = Logger.getLogger(SdpMessageValidator.class);
+    private final static Logger LOGGER =
+        Logger.getLogger(SdpMessageValidator.class);
 
-    public static void validate(SdpMessage message)  throws SdpException {
-
-        SessionDescription sd = null;
+    public static void validate(final SdpMessage message)  throws SdpException {
+        final SessionDescription sd = message.getSessionDescription();
         String text = "";
         int problemCount = 0;
         try {
-            sd = message.getSessionDescription();
-            Origin origin = sd.getOrigin();
+            final Origin origin = sd.getOrigin();
             if (origin == null) {
                 text =text+"no origin line\n";
                 problemCount++;
             }
-            Enumeration e = sd.getMediaDescriptions(true).elements();
-            while (e.hasMoreElements()) {
-                MediaDescription md = (MediaDescription) e.nextElement();
-                Media media = md.getMedia();
+            final Connection connection = sd.getConnection();
+            if (connection == null) {
+                boolean success = tryCorrectConnectionOrder(sd);
+                if (!success) {
+                    text =text+"no connection line\n";
+                    problemCount++;
+                }
+            }
+            @SuppressWarnings("unchecked")
+            final Vector<MediaDescription> descriptions = sd.getMediaDescriptions(true);
+            for (MediaDescription md : descriptions) {
+                final Media media = md.getMedia();
                 //int port = media.getMediaPort();
                 //Vector mFormats = media.getMediaFormats(true);
                 Vector attributes = md.getAttributes(true);
                 final String mediaType = media.getMediaType();
                 final String protocol = media.getProtocol();
-                if (mediaType.equals("audio") && ((protocol.equals("RTP/AVP") || protocol.equals("RTP/AVPF")))) {
+                if (mediaType.equals("audio") && ((protocol.equals(SdpConstants.RTP_AVP) || protocol.equals("RTP/AVPF")))) {
                     LOGGER.warn("protocol '" + protocol + "' not implemented, yet");
                        // TODO: Check if the RTP Encoding in the request is supported by cairos codecs and streaming reosurces. 
                        //       Should offers be rejected if encoding not supported -- or counter-offered?  Maybe this is not a validation task
@@ -139,19 +149,31 @@ public class SdpMessageValidator {
                     problemCount++;
                 }
             }
-            
         } catch (SdpException e) {
             LOGGER.warn(e, e);
             throw e;
         } 
         if (problemCount > 0) {
             LOGGER.warn("The following " + problemCount +
-            		" validation problems were found in the sdp Message\n"+ text);
+                " validation problems were found in the sdp Message\n"+ text);
             LOGGER.warn(sd.toString());
             throw new SdpException(text);
         }
-        LOGGER.debug("returning from Sdp message validate method. No problems found");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("returning from SDP message validate method. No problems found");
+        }
     }
     
-    
+    private static boolean tryCorrectConnectionOrder(final SessionDescription description) throws SdpException {
+        @SuppressWarnings("unchecked")
+        final Vector<MediaDescription> descriptions = description.getMediaDescriptions(true);
+        for (MediaDescription md : descriptions) {
+            final Connection connection = md.getConnection();
+            if (connection != null) {
+                description.setConnection(connection);
+                return true;
+            }
+        }
+        return false;
+    }
 }
