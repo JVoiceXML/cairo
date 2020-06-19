@@ -22,8 +22,8 @@
  */
 package org.speechforge.cairo.sip;
 
-import java.util.Enumeration;
 import java.util.Vector;
+
 import javax.sdp.Attribute;
 import javax.sdp.Connection;
 import javax.sdp.Media;
@@ -33,6 +33,7 @@ import javax.sdp.SdpConstants;
 import javax.sdp.SdpException;
 import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
+
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 
@@ -46,134 +47,233 @@ public class SdpMessageValidator {
     private final static Logger LOGGER =
         Logger.getLogger(SdpMessageValidator.class);
 
+    /**
+     * Validates the provided SDP message.
+     * @param message the message to validate
+     * @throws SdpException error validating the message
+     */
     public static void validate(final SdpMessage message)  throws SdpException {
         final SessionDescription sd = message.getSessionDescription();
-        String text = "";
+        final StringBuilder errors = new StringBuilder();
         int problemCount = 0;
         try {
-            final Origin origin = sd.getOrigin();
-            if (origin == null) {
-                text =text+"no origin line\n";
-                problemCount++;
-            }
-            final Connection connection = sd.getConnection();
-            if (connection == null) {
-                boolean success = tryCorrectConnectionOrder(sd);
-                if (!success) {
-                    text =text+"no connection line\n";
-                    problemCount++;
-                }
-            }
-            @SuppressWarnings("unchecked")
-            final Vector<MediaDescription> descriptions = sd.getMediaDescriptions(true);
-            for (MediaDescription md : descriptions) {
-                final Media media = md.getMedia();
-                //int port = media.getMediaPort();
-                //Vector mFormats = media.getMediaFormats(true);
-                Vector attributes = md.getAttributes(true);
-                final String mediaType = media.getMediaType();
-                final String protocol = media.getProtocol();
-                if (mediaType.equals("audio") && ((protocol.equals(SdpConstants.RTP_AVP) || protocol.equals("RTP/AVPF")))) {
-                    LOGGER.warn("protocol '" + protocol + "' not implemented, yet");
-                       // TODO: Check if the RTP Encoding in the request is supported by cairos codecs and streaming reosurces. 
-                       //       Should offers be rejected if encoding not supported -- or counter-offered?  Maybe this is not a validation task
-                       //       but a session negotiation task.
-                } else if (mediaType.equals("application")
-                        && protocol.equals("TCP/MRCPv2")) {
-                    for (Enumeration attrEnum = attributes.elements(); attrEnum.hasMoreElements();) {
-                        Attribute attribute = (Attribute) attrEnum.nextElement();
-                        if (attribute.getName().equals("setup")) {
-                            // value should be "active" in request and "passive"
-                            // in response
-                        } else if (attribute.getName().equals("connection")) {
-                            // can either be new or existing
-                        } else if (attribute.getName().equals("channel")) {
-                            if (attribute.getValue().endsWith(MrcpResourceType.SPEECHRECOG.toString())) {
-                                //supported
-                            } else if (attribute.getValue().endsWith(MrcpResourceType.SPEECHSYNTH.toString())) {
-                                //supported
-                            } else if (attribute.getValue().endsWith(MrcpResourceType.RECORDER.toString())) {
-                               //supported
-                            } else if (attribute.getValue().endsWith(MrcpResourceType.DTMFRECOG.toString())) {
-                                text = text+"Cairo does not support dtmfrecog resource.\n";
-                                problemCount++;
-                            } else if (attribute.getValue().endsWith(MrcpResourceType.BASICSYNTH.toString())) {
-                                text = text+"Cairo does not support basicsynth resource.\n";
-                                problemCount++;
-                            } else if (attribute.getValue().endsWith(MrcpResourceType.SPEAKVERIFY.toString())) {
-                                text = text+"Cairo does not support speakverify resource.\n";
-                                problemCount++;
-                            } else {
-                                text = text+"Invalid Resource type: "+attribute.getValue()+"\n";
-                                problemCount++;
-                            }
-                        } else if (attribute.getName().equals("cmid")) {
-                            // the value matches the media channel that this
-                            // channel is controlling
-                        } else if (attribute.getName().equals("resource")) {
-                            // in the request. The values can be either
-                            // speechrecog or speechsynth
-                            if (attribute.getValue().equals(MrcpResourceType.SPEECHRECOG.toString())) {
-                                //supportted
-                            } else if (attribute.getValue().equals(MrcpResourceType.SPEECHSYNTH.toString())) {
-                                //supportted
-                            } else if (attribute.getValue().equals(MrcpResourceType.BASICSYNTH.toString())) {
-                                text = text+"Cairo does not support basicsynth resource.\n";
-                                problemCount++;
-                            } else if (attribute.getValue().equals(MrcpResourceType.SPEAKVERIFY.toString())) {
-                                text = text+"Cairo does not support speakverify resource.\n";
-                                problemCount++;
-                            } else if (attribute.getValue().equals(MrcpResourceType.RECORDER.toString())) {
-                                //supportted
-                            } else if (attribute.getValue().equals(MrcpResourceType.DTMFRECOG.toString())) {
-                                text = text+"Cairo does not support dtmfrecog resource.\n";
-                                problemCount++;
-                            } else if (attribute.getValue().equals(MrcpResourceType.BASICSYNTH.toString())) {
-                                text = text+"Cairo does not support basicsynth resource.\n";
-                                problemCount++;
-                            } else if (attribute.getValue().equals(MrcpResourceType.SPEAKVERIFY.toString())) {
-                                text = text+"Cairo does not support speakverify resource.\n";
-                                problemCount++;
-                            } else {
-                                text = text+"Invalid Resource type: "+attribute.getValue()+"\n";
-                                problemCount++;
-                            }
-                        } else {
-                            //no validation for this attribute
-                        }
-                    }
-
-                } else {
-                    text = text + "Unrecognized media type/protocol pair in sdp message. type = "+
-                                  mediaType + " proto= " + protocol + "\n";
-                    problemCount++;
-                }
-            }
+            problemCount += validateOrigin(sd, errors);
+            problemCount += validateConnection(sd, errors);
+            problemCount += validateMediaDescriptions(sd, errors);
         } catch (SdpException e) {
             LOGGER.warn(e, e);
             throw e;
         } 
         if (problemCount > 0) {
             LOGGER.warn("The following " + problemCount +
-                " validation problems were found in the sdp Message\n"+ text);
+                " validation problems were found in the SDP message");
+            LOGGER.warn(errors);
             LOGGER.warn(sd.toString());
-            throw new SdpException(text);
+            throw new SdpException(errors.toString());
         }
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("returning from SDP message validate method. No problems found");
+            LOGGER.debug("no problems in SDP message found");
         }
     }
-    
-    private static boolean tryCorrectConnectionOrder(final SessionDescription description) throws SdpException {
+
+    /**
+     * Checks all available media descriptors
+     * @param description the session description
+     * @param errors error message
+     * @return number of errors found
+     * @throws SdpException error accessing SDP message attributes
+     * @throws SdpParseException error parsing the SDP message
+     */
+    private static int validateMediaDescriptions(final SessionDescription sd,
+            final StringBuilder errors)
+            throws SdpException, SdpParseException {
+        int problemCount = 0;
         @SuppressWarnings("unchecked")
-        final Vector<MediaDescription> descriptions = description.getMediaDescriptions(true);
+        final Vector<MediaDescription> descriptions = sd.getMediaDescriptions(true);
         for (MediaDescription md : descriptions) {
-            final Connection connection = md.getConnection();
-            if (connection != null) {
-                description.setConnection(connection);
-                return true;
+            final Media media = md.getMedia();
+            final String mediaType = media.getMediaType();
+            final String protocol = media.getProtocol();
+            if (mediaType.equals("audio") && ((protocol.equals(SdpConstants.RTP_AVP) || protocol.equals("RTP/AVPF")))) {
+                LOGGER.warn("protocol '" + protocol + "' not implemented, yet");
+                   // TODO: Check if the RTP Encoding in the request is supported by cairos codecs and streaming reosurces. 
+                   //       Should offers be rejected if encoding not supported -- or counter-offered?  Maybe this is not a validation task
+                   //       but a session negotiation task.
+            } else if (mediaType.equals("application")
+                    && protocol.equals("TCP/MRCPv2")) {
+                problemCount += validateApplicationMRCPv2(md, errors);
+            } else {
+                if (errors.length() != 0) {
+                    errors.append(System.lineSeparator());
+                }
+                errors.append("Unrecognized media type/protocol pair in sdp message. type = ");
+                errors.append(mediaType);
+                errors.append(" proto= ");
+                errors.append(protocol);
+                problemCount++;
             }
         }
-        return false;
+        return problemCount;
+    }
+
+    /**
+     * Checks the settings for application tcp/mrcpv2
+     * @param media the media description
+     * @param errors error message
+     * @return number of errors found
+     * @throws SdpException error accessing SDP message attributes
+     */
+    private static int validateApplicationMRCPv2(final MediaDescription media,
+            final StringBuilder errors) throws SdpParseException {
+        int problemCount = 0;
+        @SuppressWarnings("unchecked")
+        Vector<Attribute> attributes = media.getAttributes(true);
+        for (Attribute attribute : attributes) {
+            if (attribute.getName().equals("setup")) {
+                // value should be "active" in request and "passive"
+                // in response
+            } else if (attribute.getName().equals("connection")) {
+                // can either be new or existing
+            } else if (attribute.getName().equals("channel")) {
+                if (attribute.getValue().endsWith(MrcpResourceType.SPEECHRECOG.toString())) {
+                    //supported
+                } else if (attribute.getValue().endsWith(MrcpResourceType.SPEECHSYNTH.toString())) {
+                    //supported
+                } else if (attribute.getValue().endsWith(MrcpResourceType.RECORDER.toString())) {
+                   //supported
+                } else if (attribute.getValue().endsWith(MrcpResourceType.DTMFRECOG.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support dtmfrecog resource.");
+                    problemCount++;
+                } else if (attribute.getValue().endsWith(MrcpResourceType.BASICSYNTH.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support basicsynth resource.");
+                    problemCount++;
+                } else if (attribute.getValue().endsWith(MrcpResourceType.SPEAKVERIFY.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support speakverify resource.");
+                    problemCount++;
+                } else {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Invalid Resource type: ");
+                    errors.append(attribute.getValue());
+                    problemCount++;
+                }
+            } else if (attribute.getName().equals("cmid")) {
+                // the value matches the media channel that this
+                // channel is controlling
+            } else if (attribute.getName().equals("resource")) {
+                // in the request. The values can be either
+                // speechrecog or speechsynth
+                if (attribute.getValue().equals(MrcpResourceType.SPEECHRECOG.toString())) {
+                    //supported
+                } else if (attribute.getValue().equals(MrcpResourceType.SPEECHSYNTH.toString())) {
+                    //supported
+                } else if (attribute.getValue().equals(MrcpResourceType.BASICSYNTH.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support basicsynth resource.");
+                    problemCount++;
+                } else if (attribute.getValue().equals(MrcpResourceType.SPEAKVERIFY.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support speakverify resource.");
+                    problemCount++;
+                } else if (attribute.getValue().equals(MrcpResourceType.RECORDER.toString())) {
+                    //supported
+                } else if (attribute.getValue().equals(MrcpResourceType.DTMFRECOG.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support dtmfrecog resource.");
+                    problemCount++;
+                } else if (attribute.getValue().equals(MrcpResourceType.BASICSYNTH.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support basicsynth resource.");
+                    problemCount++;
+                } else if (attribute.getValue().equals(MrcpResourceType.SPEAKVERIFY.toString())) {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Cairo does not support speakverify resource.");
+                    problemCount++;
+                } else {
+                    if (errors.length() != 0) {
+                        errors.append(System.lineSeparator());
+                    }
+                    errors.append("Invalid Resource type: ");
+                    errors.append(attribute.getValue());
+                    problemCount++;
+                }
+            } else {
+                //no validation for this attribute
+            }
+        }
+        return problemCount;
+    }
+    
+    /**
+     * Checks the presence of an origin attribute.
+     * @param description the session description
+     * @param errors error message
+     * @return number of errors found
+     * @throws SdpException error accessing SDP message attributes
+     */
+    private static int validateOrigin(final SessionDescription description,
+            final StringBuilder errors) {
+        final Origin origin = description.getOrigin();
+        if (origin == null) {
+            if (errors.length() != 0) {
+                errors.append(System.lineSeparator());
+            }
+            errors.append("No origin line");
+            return 1;
+        }
+        return 0;
+    }
+    
+    /**
+     * Checks the presence of connection information.
+     * @param description the session description
+     * @param errors error message
+     * @return number of errors found
+     * @throws SdpException error accessing SDP message attributes
+     */
+    private static int validateConnection(final SessionDescription description,
+            final StringBuilder errors) throws SdpException {
+        final Connection sessionConnection = description.getConnection();
+        if (sessionConnection != null) {
+            return 0;
+        }
+        // If no general connection is provided, each media descriptor should own one
+        int errorCount = 0;
+        @SuppressWarnings("unchecked")
+        final Vector<MediaDescription> descriptions = 
+        description.getMediaDescriptions(true);
+        for (MediaDescription md : descriptions) {
+            final Connection connection = md.getConnection();
+            if (connection == null) {
+                final Media media = md.getMedia();
+                if (errors.length() != 0) {
+                    errors.append(System.lineSeparator());
+                }
+                errors.append("No connection for media ");
+                errors.append(media.getMediaType());
+                errors.append('.');
+            }
+        }
+        return errorCount;
     }
 }
