@@ -261,7 +261,7 @@ public class SdpMessageValidator {
         int errorCount = 0;
         @SuppressWarnings("unchecked")
         final Vector<MediaDescription> descriptions = 
-        description.getMediaDescriptions(true);
+            description.getMediaDescriptions(true);
         for (MediaDescription md : descriptions) {
             final Connection connection = md.getConnection();
             if (connection == null) {
