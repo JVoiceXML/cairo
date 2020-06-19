@@ -27,7 +27,6 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -35,17 +34,14 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-
-import java.util.Random;
-
 import java.util.Properties;
+import java.util.Random;
 import java.util.TooManyListenersException;
 
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
 import javax.sip.ClientTransaction;
 import javax.sip.Dialog;
-
 import javax.sip.InvalidArgumentException;
 import javax.sip.ListeningPoint;
 import javax.sip.ObjectInUseException;
@@ -68,19 +64,16 @@ import javax.sip.header.CallIdHeader;
 import javax.sip.header.ContactHeader;
 import javax.sip.header.ContentTypeHeader;
 import javax.sip.header.FromHeader;
-
 import javax.sip.header.HeaderFactory;
 import javax.sip.header.MaxForwardsHeader;
 import javax.sip.header.RouteHeader;
 import javax.sip.header.ToHeader;
 import javax.sip.header.ViaHeader;
-
 import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
 import org.apache.log4j.Logger;
-import org.mrcp4j.MrcpResourceType;
 
 
 
@@ -91,7 +84,7 @@ import org.mrcp4j.MrcpResourceType;
  */
 public class SipAgent {
 
-    private static Logger _logger = Logger.getLogger(SipAgent.class);
+    private static final Logger LOGGER = Logger.getLogger(SipAgent.class);
 
     // SIP protocol objects
     static AddressFactory addressFactory;
@@ -208,7 +201,7 @@ public class SipAgent {
             } catch (UnknownHostException e) {
                 host = "127.0.0.1";
                 //host = "localhost";
-                _logger.debug(e, e);
+                LOGGER.debug(e, e);
                 e.printStackTrace();
             } catch (SocketException e) {
 				// TODO Auto-generated catch block
@@ -239,7 +232,7 @@ public class SipAgent {
         try {
             sipStack = sipFactory.createSipStack(properties);
         } catch (PeerUnavailableException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw new SipException("Stack failed to initialize", e);
         }
 
@@ -248,7 +241,7 @@ public class SipAgent {
             addressFactory = sipFactory.createAddressFactory();
             messageFactory = sipFactory.createMessageFactory();
         } catch (SipException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not create SIP factories", e);
         }
 
@@ -256,13 +249,13 @@ public class SipAgent {
             listeningPoint = sipStack.createListeningPoint(host, port, transport);
             sipProvider = sipStack.createSipProvider(listeningPoint);
         } catch (TransportNotSupportedException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not create listening point. Transport not supported.", e);
         } catch (InvalidArgumentException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not create listening point. Invalid argument.", e);
         } catch (ObjectInUseException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not create listening point. Object in use.", e);
         }
 
@@ -270,7 +263,7 @@ public class SipAgent {
             listener = (SipListener) new SipListenerImpl(this);
             sipProvider.addSipListener(listener);
         } catch (TooManyListenersException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not add listener. Too many listeners.", e);
         }
 
@@ -279,7 +272,7 @@ public class SipAgent {
         try {
             URI uri = addressFactory.createURI(mySipAddress);
             if (uri.isSipURI() == false) {
-                _logger.error("Invalid sip uri: " + mySipAddress);
+                LOGGER.error("Invalid sip uri: " + mySipAddress);
                 throw new SipException("Invalid sip uri: " + mySipAddress);
             }
             myAddress = addressFactory.createAddress(uri);
@@ -301,7 +294,7 @@ public class SipAgent {
             contactUri.setTransportParam(transport);
             contactAddress = addressFactory.createAddress(contactUri);
         } catch (ParseException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not create contact URI.", e);
         }
     }
@@ -332,7 +325,7 @@ public class SipAgent {
            // add the message body (sdp)
            infoRequest.setContent(content, contentTypeHeader);
         } catch (ParseException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw new SipException("Parse Exception when trying to add content to info message.", e);
         }
         
@@ -361,7 +354,7 @@ public class SipAgent {
             }
             
             if (toUri.isSipURI() == false) {
-                _logger.error("Invalid sip uri: " + mySipAddress);
+                LOGGER.error("Invalid sip uri: " + mySipAddress);
                 throw new SipException("Invalid sip uri: " + mySipAddress);
             }
             toAddress = addressFactory.createAddress(toUri);
@@ -431,10 +424,10 @@ public class SipAgent {
             // Create the client transaction.
             ClientTransaction ctx = sipProvider.getNewClientTransaction(request);
 
-            _logger.debug("Just before Send request: "+peerHost+":"+peerPort);
+            LOGGER.debug("Just before Send request: "+peerHost+":"+peerPort);
             
 
-            if (_logger.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
                 StringBuilder sb = new StringBuilder(); 
                 sb.append("------------- SENDING A SIP REQUEST ---------------");
                 sb.append("\nSending a "+ ctx.getRequest().getMethod()+" SIP Request");
@@ -451,7 +444,7 @@ public class SipAgent {
                    sb.append("\n");
                    sb.append(contentString);
                 } 
-                _logger.debug(sb);
+                LOGGER.debug(sb);
              } 
             
             // send the request out.
@@ -466,16 +459,16 @@ public class SipAgent {
             session.setSdpMessage(message);            
 
         } catch (TransactionUnavailableException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw e;
         } catch (SipException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw e;
         } catch (ParseException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw new SipException("Could not send invite due to a parse error in SIP stack.", e);
         } catch (InvalidArgumentException e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
             throw new SipException("Could not send invite due to invalid argument in SIP stack.", e);
         }
 
@@ -534,18 +527,17 @@ public class SipAgent {
             session.setSdpMessage(sdpMessage);            
             
         } catch (SipException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw e;
         } catch (SdpException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not send reinvite due to SdpException in SIP stack.", e);
         } catch (ParseException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new SipException("Could not send reinvite due to a parse error in SIP stack.", e);        
-	    } catch (InvalidArgumentException e) {
-	        _logger.error(e, e);
-	    }
-	    
+        } catch (InvalidArgumentException e) {
+            LOGGER.error(e, e);
+        }
     }
 
     public String getGUID() {
@@ -601,33 +593,32 @@ public class SipAgent {
         this.myAddress = myAddress;
     }
     
-    public void sendResponse(SipSession session, SdpMessage sdpResponse) {
-
+    public void sendResponse(SipSession session, SdpMessage sdpResponse) throws SipException {
         // send the ok (assuming that the offer is accepted with the response in the sdpMessaage)
         //TODO what if the offer is not accepted?  Do all non-ok response come thru the exception path?
         Response okResponse = null;
         try {
             okResponse = getMessageFactory().createResponse(Response.OK, session.getRequest().getRequest());
-        } catch (ParseException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (ParseException e) {
+            LOGGER.warn("error creating OK response", e);
+            throw new SipException("error creating OK response", e);
         }
 
         // Create a application/sdp ContentTypeHeader
         ContentTypeHeader contentTypeHeader = null;
         try {
             contentTypeHeader = getHeaderFactory().createContentTypeHeader("application", "sdp");
-        } catch (ParseException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (ParseException e) {
+            LOGGER.warn("error creating SDP header", e);
+            throw new SipException("error creating OK response", e);
         }
 
-        // add the sdp response to the message
+        // add the SDP response to the message
         try {
             okResponse.setContent(sdpResponse.getSessionDescription().toString(), contentTypeHeader);
-        } catch (ParseException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (ParseException e) {
+            LOGGER.warn("error setting SDP header in OK response", e);
+            throw new SipException("error creating OK response", e);
         }
 
         ToHeader toHeader = (ToHeader) okResponse.getHeader(ToHeader.NAME);
@@ -637,20 +628,18 @@ public class SipAgent {
         okResponse.addHeader(contactHeader);
         
         // Now if there were no exceptions, we were able to process the invite
-        // request and we have a valid reponse to send back
+        // request and we have a valid response to send back
         // if there is an exception here, not much that can be done.
         try {
             SipAgent.sendResponse(session.getStx(), okResponse);
-        } catch (SipException e) {
-            _logger.error(e, e);
         } catch (InvalidArgumentException e) {
-            _logger.error(e, e);
+            LOGGER.error(e.getMessage(), e);
+            throw new SipException(e.getMessage(), e);
         }
-        
     }
     
-	public static void sendResponse(ServerTransaction serverTransaction, Response response) throws SipException, InvalidArgumentException {
-        if (_logger.isDebugEnabled()) {
+    public static void sendResponse(ServerTransaction serverTransaction, Response response) throws SipException, InvalidArgumentException {
+        if (LOGGER.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder(); 
             sb.append("------------- SENDING A SIP RESPONSE ---------------");
             sb.append("\nSending a SIP Response.  Status: "+response.getStatusCode()+", "+response.getReasonPhrase());
@@ -667,16 +656,16 @@ public class SipAgent {
                 String contentString = new String(contentBytes);
                 sb.append(contentString);
             } 
-            _logger.debug(sb);
+            LOGGER.debug(sb);
          }
         serverTransaction.sendResponse(response);
     }
 
-	public static void sendRequest(Dialog dialog, ClientTransaction ctx) throws TransactionDoesNotExistException, SipException {
-        if (_logger.isDebugEnabled()) {
-        	StringBuilder sb = new StringBuilder(); 
-        	sb.append("------------- SENDING A SIP REQUEST ---------------");
-        	sb.append("\nSending a "+ ctx.getRequest().getMethod()+" SIP Request");
+    public static void sendRequest(Dialog dialog, ClientTransaction ctx) throws TransactionDoesNotExistException, SipException {
+        if (LOGGER.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder(); 
+            sb.append("------------- SENDING A SIP REQUEST ---------------");
+            sb.append("\nSending a "+ ctx.getRequest().getMethod()+" SIP Request");
             Iterator headers = ctx.getRequest().getHeaderNames();
             while (headers.hasNext()) {
             	sb.append("\n");
@@ -690,26 +679,24 @@ public class SipAgent {
            	   sb.append("\n");
                sb.append(contentString);
             } 
-            _logger.debug(sb);
+            LOGGER.debug(sb);
          } 
         dialog.sendRequest(ctx);
     }
 
-	public static InetAddress getLocalHost() throws SocketException, UnknownHostException {
-		Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-		while (networkInterfaces.hasMoreElements()) {
-			NetworkInterface networkInterface = networkInterfaces.nextElement();
-			for (Enumeration en2 = networkInterface.getInetAddresses(); en2.hasMoreElements();) {
-	            InetAddress addr = (InetAddress) en2.nextElement();
-	            if (!addr.isLoopbackAddress()) {
-	                if (addr instanceof Inet4Address) {
-	                    return addr;
-	                }
-	            }
-			}
-
-		}
-		return InetAddress.getLocalHost();
-	}
-	
+    public static InetAddress getLocalHost() throws SocketException, UnknownHostException {
+        Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+        while (networkInterfaces.hasMoreElements()) {
+            NetworkInterface networkInterface = networkInterfaces.nextElement();
+            for (Enumeration en2 = networkInterface.getInetAddresses(); en2.hasMoreElements();) {
+                InetAddress addr = (InetAddress) en2.nextElement();
+                if (!addr.isLoopbackAddress()) {
+                    if (addr instanceof Inet4Address) {
+                        return addr;
+                    }
+                }
+            }
+        }
+        return InetAddress.getLocalHost();
+    }
 }
