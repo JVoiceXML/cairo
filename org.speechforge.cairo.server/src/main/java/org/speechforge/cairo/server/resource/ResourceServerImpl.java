@@ -55,6 +55,7 @@ import org.speechforge.cairo.util.CairoUtil;
  * clients for establishing and managing connections to MRCPv2 resource implementations.
  * 
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class ResourceServerImpl implements SessionListener {
 
@@ -71,7 +72,7 @@ public class ResourceServerImpl implements SessionListener {
   
     private long _channelID = System.currentTimeMillis();
 
-    private ResourceRegistry _registryImpl;
+    private ResourceRegistry registryImpl;
 
     private SipAgent _ua;
 
@@ -90,41 +91,41 @@ public class ResourceServerImpl implements SessionListener {
      * @throws RemoteException error exporting the object to the registry
      * @throws SipException error creating the SIP agent
      */
-    public ResourceServerImpl(ResourceRegistry registryImpl, int sipPort, 
+    public ResourceServerImpl(ResourceRegistry registry, int sipPort, 
     		String sipTransport, String hostIpAddress, String publicAddress) throws RemoteException, SipException {
         super();
         this.hostIpAddress = hostIpAddress;
         if( hostIpAddress == null ) {
-	        try {
-	            InetAddress addr = CairoUtil.getLocalHost();
-	            this.hostIpAddress = addr.getHostAddress();
-	            //host = addr.getCanonicalHostName();
-	        } catch (UnknownHostException e) {
-	            this.hostIpAddress = "127.0.0.1";
-	            LOGGER.debug(e, e);
-	            e.printStackTrace();
-	        } catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            try {
+                InetAddress addr = CairoUtil.getLocalHost();
+                this.hostIpAddress = addr.getHostAddress();
+                //host = addr.getCanonicalHostName();
+            } catch (UnknownHostException | SocketException e) {
+                this.hostIpAddress = "127.0.0.1";
+                LOGGER.warn("unable to determine IP address. using fedault " + this.hostIpAddress, e);
+            }
         }
-        if (sipPort == 0) sipPort = 5050;
-        if (sipTransport == null) sipTransport = "tcp";
-        cairoSipAddress = "sip:cairo@"+this.hostIpAddress;
+        if (sipPort == 0) {
+            sipPort = 5050;
+        }
+        if (sipTransport == null) {
+            sipTransport = "tcp";
+        }
+        cairoSipAddress = "sip:cairo@" + this.hostIpAddress;
         _ua = new SipAgent(this, cairoSipAddress, "Cairo SIP Stack", this.hostIpAddress, publicAddress, sipPort, sipTransport);
 
-        _registryImpl = registryImpl;
+        registryImpl = registry;
     }
 
     /**
-     * Contrsucts a new object
+     * Constructs a new object
      * 
      * @param port the port to use
      * @param registryImpl the registry to use
      * @throws RemoteException error exporting the object to the registry
      */
-    public ResourceServerImpl(int port, ResourceRegistryImpl registryImpl) throws RemoteException {
-        _registryImpl = registryImpl;
+    public ResourceServerImpl(int port, ResourceRegistryImpl registry) throws RemoteException {
+        registryImpl = registry;
     }
 
     private synchronized String getNextChannelID() { // TODO: convert from synchronized to atomic
@@ -177,17 +178,17 @@ public class ResourceServerImpl implements SessionListener {
                 transmitter = true;
             }
         } catch (SdpException e) {
-            LOGGER.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw e;
         }
 
-        // process the invitation (transmiiiter and/or receiver)
+        // process the invitation (transmitter and/or receiver)
         if (transmitter) {
             Resource resource;
             try {
-                resource = _registryImpl.getResource(Resource.Type.TRANSMITTER);
+                resource = registryImpl.getResource(Resource.Type.TRANSMITTER);
             } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
                 throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a transmitter resource");
             }
             request = resource.invite(request, session.getId());
@@ -197,9 +198,9 @@ public class ResourceServerImpl implements SessionListener {
         if (receiver) {
             Resource resource;
             try {
-                resource = _registryImpl.getResource(Resource.Type.RECEIVER);
+                resource = registryImpl.getResource(Resource.Type.RECEIVER);
             } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
                 throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
             }
             LOGGER.info("Calling receiver.invite(sdpMessage)");
@@ -231,6 +232,7 @@ public class ResourceServerImpl implements SessionListener {
         try {
             _ua.sendResponse(session, m);
         } catch (SipException e) {
+            LOGGER.warn("error processing invite: " + e.getMessage(), e);
             throw new SdpException(e.getMessage(), e);
         }
         return m;
@@ -300,17 +302,18 @@ public class ResourceServerImpl implements SessionListener {
         }
 
         
-        LOGGER.debug("Command line specified sip port: "+sipPort+ " and sip transport: "+ sipTransport);
+        LOGGER.info("Using sip port: "
+                + sipPort + " and sip transport: " + sipTransport);
        
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
-        ResourceServerImpl rs = new ResourceServerImpl(rr,sipPort,sipTransport,hostName, publicAddress);
+        ResourceServerImpl rs = new ResourceServerImpl(rr, sipPort,
+                sipTransport, hostName, publicAddress);
 
         Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         registry.rebind(ResourceRegistry.NAME, rr);
-        // registry.rebind(ResourceServer.NAME, rs);
+//        registry.rebind(ResourceServerImpl.NAME, rs);
 
         LOGGER.info("Server and registry bound and waiting...");
-
     }
 
     public void processTimeout(TimeoutEvent event) {
