@@ -296,8 +296,7 @@ public class SipAgent {
             LOGGER.warn(e, e);
             throw new SipException("Could not create contact URI.", e);
         }
-        LOGGER.info("initialized user agent for " + mySipAddress + " at "
-                + host + ":" + port);
+        LOGGER.info("initialized user agent for " + contactAddress);
     }
 
     public void dispose() throws ObjectInUseException {
