@@ -130,8 +130,24 @@ run {
                "-XX:+UseConcMarkSweepGC",
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000"]
-    args = ["-sipPort 5050",
-            "-sipTransport udp"]
+    args = ["--sipPort=5050",
+            "--sipTransport=udp"]
+}
+
+
+task(runDebug, type: JavaExec) {
+    dependsOn jar
+    
+    main = "org.speechforge.cairo.server.resource.ResourceServerImpl"
+    classpath = sourceSets.main.runtimeClasspath \
+                + files("${project.rootDir}/config-template")
+    jvmArgs = ["-Xmx2048m",
+               "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=12368" ]
+    args = ["--sipPort=5050",
+            "--sipTransport=udp"]
 }
 
 task(runReceiver, type: JavaExec) {

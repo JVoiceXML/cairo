@@ -37,8 +37,9 @@ import javax.sip.TimeoutEvent;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
@@ -78,7 +79,7 @@ public class ResourceServerImpl implements SessionListener {
 
     private String cairoSipAddress = "sip:cairo@speechforge.org";
 
-	private String hostIpAddress;
+    private String hostIpAddress;
 
     /**
      * Constructs a new object
@@ -246,16 +247,36 @@ public class ResourceServerImpl implements SessionListener {
     private static Options getOptions() {
         Options options = ResourceImpl.getOptions();
 
-        Option option = new Option(SIPPORT_OPTION, true, "The port the sip agent uses to listen for requests.");
+        Option option = Option.builder("p")
+                .argName(SIPPORT_OPTION)
+                .longOpt(SIPPORT_OPTION)
+                .hasArg(true)
+                .desc("The port the sip agent uses to listen for requests.")
+                .build();
         options.addOption(option);
 
-        option = new Option(SIPTRANSPORT_OPTION, true, "The transport used by the sip agent udp or tcp.");
+        option = Option.builder("t")
+                .argName(SIPTRANSPORT_OPTION)
+                .longOpt(SIPTRANSPORT_OPTION)
+                .hasArg(true)
+                .desc("The transport used by the sip agent udp or tcp.")
+                .build();
         options.addOption(option);
 
-        option = new Option(SIPPUBLICADDRESS_OPTION, true, "The public address of the server (use this if the server is using NAT).");
+        option = Option.builder("P")
+                .argName(SIPPUBLICADDRESS_OPTION)
+                .longOpt(SIPPUBLICADDRESS_OPTION)
+                .hasArg(true)
+                .desc("The public address of the server (use this if the server is using NAT).")
+                .build();
         options.addOption(option);
         
-        option = new Option(LOCALADDRESS_OPTION, true, "The local address of the server (sometimes there is a problem getting the local address -- ie.e VMWare virtual ip).");
+        option = Option.builder("L")
+                .argName(LOCALADDRESS_OPTION)
+                .longOpt(LOCALADDRESS_OPTION)
+                .hasArg(true)
+                .desc("The local address of the server (sometimes there is a problem getting the local address -- ie.e VMWare virtual ip).")
+                .build();
         options.addOption(option);
 
         return options;
@@ -268,7 +289,7 @@ public class ResourceServerImpl implements SessionListener {
      * @throws Exception error running the program
      */
     public static void main(String[] args) throws Exception {
-        CommandLineParser parser = new GnuParser();
+        CommandLineParser parser = new DefaultParser();
         Options options = getOptions();
         CommandLine line = parser.parse(options, args, true);
         args = line.getArgs();
@@ -278,7 +299,6 @@ public class ResourceServerImpl implements SessionListener {
             formatter.printHelp("ResourceServerImpl [options] ", options);
             return;
         }*/
-
 
         int sipPort = 0;
         String sipTransport = null;
@@ -298,13 +318,15 @@ public class ResourceServerImpl implements SessionListener {
         
         String hostName = null;
         if (line.hasOption(LOCALADDRESS_OPTION)) {
-        	hostName = line.getOptionValue(LOCALADDRESS_OPTION);
+            hostName = line.getOptionValue(LOCALADDRESS_OPTION);
         }
 
-        
-        LOGGER.info("Using sip port: "
-                + sipPort + " and sip transport: " + sipTransport);
-       
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("command line options: ");
+            for (String option : line.getArgs()) {
+                LOGGER.debug("- '" + option + "'");
+            }
+        }
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
         ResourceServerImpl rs = new ResourceServerImpl(rr, sipPort,
                 sipTransport, hostName, publicAddress);
