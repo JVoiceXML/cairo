@@ -23,6 +23,7 @@
 
     <Loggers>
         <Logger name="org.speechforge.cairo" level="debug"/>
+        <Logger name="gov.nist" level="info"/>
 		<Logger
 			name="org.speechforge.cairo.server.rtp.PBDSReplicator"
 			level="trace" />

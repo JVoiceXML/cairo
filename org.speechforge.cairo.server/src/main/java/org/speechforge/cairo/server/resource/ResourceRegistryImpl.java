@@ -44,35 +44,35 @@ import org.apache.log4j.Logger;
  * used to register resources with the resource server.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
+@SuppressWarnings("serial")
 public class ResourceRegistryImpl extends UnicastRemoteObject implements ResourceRegistry {
 
-    private static Logger _logger = Logger.getLogger(ResourceRegistryImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(ResourceRegistryImpl.class);
 
-    private ResourceList _receivers = new ResourceList();
-    private ResourceList _transmitters = new ResourceList();
+    private ResourceList receivers = new ResourceList();
+    private ResourceList transmitters = new ResourceList();
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @throws RemoteException error publishing on the registry
      */
     public ResourceRegistryImpl() throws RemoteException {
         super();
-        // TODO Auto-generated constructor stub
     }
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @param port the port to use
      * @throws RemoteException error publishing on the registry
      */
     public ResourceRegistryImpl(int port) throws RemoteException {
         super(port);
-        // TODO Auto-generated constructor stub
     }
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @param port the port
      * @param csf the client socket factory
      * @param ssf the server socket factory
@@ -81,7 +81,6 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
     public ResourceRegistryImpl(int port, RMIClientSocketFactory csf,
             RMIServerSocketFactory ssf) throws RemoteException {
         super(port, csf, ssf);
-        // TODO Auto-generated constructor stub
     }
 
     /* (non-Javadoc)
@@ -89,7 +88,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
      */
     public String hello(String name) throws RemoteException {
         String greeting = "Hello " + name;
-        _logger.debug(greeting);
+        LOGGER.debug(greeting);
         //if (_resource != null) {
             //_logger.debug(_resource.hello("registry"));
         //}
@@ -100,18 +99,15 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
      * @see org.speechforge.cairo.server.manager.ResourceRegistry#bind(org.speechforge.cairo.server.resource.Resource)
      */
     public synchronized void register(Resource resource, Resource.Type type) throws RemoteException {
-
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("register(): registering resource of type " + type);
-        }
+        LOGGER.info("registering resource of type " + type);
 
         switch (type) {
         case RECEIVER:
-            _receivers.register(resource);
+            receivers.register(resource);
             break;
 
         case TRANSMITTER:
-            _transmitters.register(resource);
+            transmitters.register(resource);
             break;
 
         default:
@@ -122,10 +118,10 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
     public Resource getResource(Resource.Type type) throws ResourceUnavailableException {
         switch (type) {
         case RECEIVER:
-            return _receivers.getResource();
+            return receivers.getResource();
 
         case TRANSMITTER:
-            return _transmitters.getResource();
+            return transmitters.getResource();
 
         default:
             throw new IllegalArgumentException("Invalid type or type not specified!");
@@ -153,7 +149,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
                     _index++;
                     return resource;
                 } catch (RemoteException e) {
-                    _logger.debug(e, e);
+                    LOGGER.debug(e, e);
                     _resources.remove(_index);
                 }
             }
@@ -173,7 +169,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
         Registry registry = LocateRegistry.createRegistry(Registry.REGISTRY_PORT);
         registry.rebind(NAME, impl);
 
-        _logger.info("ResourceRegistry bound and waiting...");
+        LOGGER.info("ResourceRegistry bound and waiting...");
         Thread.sleep(90000);
     }
 
@@ -187,9 +183,9 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
         public static void main(String[] args) throws Exception {
             InetAddress host = CairoUtil.getLocalHost();
             String url = "rmi://" + host.getHostName() + '/' + NAME;
-            _logger.info("looking up: " + url);
+            LOGGER.info("looking up: " + url);
             ResourceRegistry rr = (ResourceRegistry) Naming.lookup(url);
-            _logger.info(rr.hello("Niels"));
+            LOGGER.info(rr.hello("Niels"));
         }
 
     }

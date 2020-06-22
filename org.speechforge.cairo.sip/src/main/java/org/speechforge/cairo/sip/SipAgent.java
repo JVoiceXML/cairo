@@ -191,7 +191,6 @@ public class SipAgent {
     }
 
     private void init() throws SipException {
-
         if (host == null) {
             try {
                 //InetAddress addr = InetAddress.getLocalHost();
@@ -232,7 +231,7 @@ public class SipAgent {
         try {
             sipStack = sipFactory.createSipStack(properties);
         } catch (PeerUnavailableException e) {
-            LOGGER.debug(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw new SipException("Stack failed to initialize", e);
         }
 
@@ -241,7 +240,7 @@ public class SipAgent {
             addressFactory = sipFactory.createAddressFactory();
             messageFactory = sipFactory.createMessageFactory();
         } catch (SipException e) {
-            LOGGER.warn(e, e);
+            LOGGER.warn(e.getMessage(), e);
             throw new SipException("Could not create SIP factories", e);
         }
 
@@ -297,6 +296,8 @@ public class SipAgent {
             LOGGER.warn(e, e);
             throw new SipException("Could not create contact URI.", e);
         }
+        LOGGER.info("initialized user agent for " + mySipAddress + " at "
+                + host + ":" + port);
     }
 
     public void dispose() throws ObjectInUseException {

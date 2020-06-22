@@ -73,11 +73,11 @@ public class SipListenerImpl implements SipListener {
     }
 
     public void processDialogTerminated(DialogTerminatedEvent arg0) {
-        LOGGER.info("Got a dialog terminated event");
+        LOGGER.warn("Got a dialog terminated event");
     }
 
     public void processIOException(IOExceptionEvent arg0) {
-        LOGGER.info("Got an IO Exception");
+        LOGGER.warn("Got an IO Exception");
     }
 
     public void processRequest(RequestEvent requestEvent) {
@@ -87,31 +87,40 @@ public class SipListenerImpl implements SipListener {
     /*
          * 
          * TODO: Check if the request is really addressed to me. check To header
-         * ot route or contact header? ToHeader to = (ToHeader)
+         * or route or contact header? ToHeader to = (ToHeader)
          * request.getHeader(ToHeader.NAME); if
          * (sipClient.getMyAddress().getURI().toString().equals(
          * to.getAddress().getURI().getScheme())) {
          */
         
         if (LOGGER.isDebugEnabled()) {
-        	  StringBuilder sb = new StringBuilder(); 
-        	  sb.append("\n------------- RECEIVED A SIP REQUEST ---------------");
+            StringBuilder sb = new StringBuilder();
+            sb.append(System.lineSeparator());
+            sb.append("------------- RECEIVED A SIP REQUEST ---------------");
 
-        	  sb.append("\nReceived a "+ request.getMethod() +" SIP request");
+            sb.append(System.lineSeparator());
+            sb.append("Received a ");
+            sb.append(request.getMethod());
+            sb.append(" SIP request");
             if (requestEvent.getDialog() != null) {
-            	sb.append("\nPre-existing Dialog: "+requestEvent.getDialog().toString());
+                sb.append(System.lineSeparator());
+                sb.append("Pre-existing Dialog: ");
+                sb.append(requestEvent.getDialog().toString());
             }
-            Iterator headers = request.getHeaderNames();
+            @SuppressWarnings("unchecked")
+            Iterator<String> headers = request.getHeaderNames();
             while (headers.hasNext()) {
-           	    sb.append("\n");
-            	sb.append(request.getHeader((String) headers.next()).toString());
+                sb.append(System.lineSeparator());
+                final String header = headers.next();
+                sb.append(header);
             }
             byte[] contentBytes = request.getRawContent();
             if (contentBytes == null) {
-            	sb.append("\nNo content in the request.");
+                sb.append(System.lineSeparator());
+                sb.append("No content in the request.");
             } else {
                String contentString = new String(contentBytes);
-               sb.append("\n");
+               sb.append(System.lineSeparator());
                sb.append(contentString);
             }
             LOGGER.debug(sb);
@@ -131,9 +140,9 @@ public class SipListenerImpl implements SipListener {
             processInfo(requestEvent);
         } else {
             // TODO: this snippet is taken from the shootist example. Shootme
-            // only has teh first line
+            // only has the first line
             // I dont really undersatnd why it is sending an accepted response
-            // and thaen a REFER request
+            // and then a REFER request
             // and why the shootist example just sends the response. I would
             // think it should be symetrical.
             try {
@@ -453,19 +462,19 @@ public class SipListenerImpl implements SipListener {
                 //------To do so use the SipAgent.sendResponse()
             }
         } catch (SipException e) {
-            OfferRejected(requestEvent, session, stx);
+            offerRejected(requestEvent, session, stx);
             LOGGER.warn("Could not process invite: " + e, e);
         } catch (ParseException e) {
-            OfferRejected(requestEvent,session, stx);
+            offerRejected(requestEvent,session, stx);
             LOGGER.warn("Could not process invite: " + e, e);
         } catch (ResourceUnavailableException e) {
-            OfferRejected(requestEvent,session, stx);
+            offerRejected(requestEvent,session, stx);
             LOGGER.warn("Could not process invite: " + e, e);
         } catch (RemoteException e) {
-            OfferRejected(requestEvent,session, stx);
+            offerRejected(requestEvent,session, stx);
             LOGGER.warn("Could not process invite: " + e, e);
         } catch (SdpException e) {
-            OfferRejected(requestEvent,session, stx);
+            offerRejected(requestEvent,session, stx);
             LOGGER.warn("Could not process invite: " + e, e);
         }
     }
@@ -536,7 +545,7 @@ public class SipListenerImpl implements SipListener {
 
     
 
-    private void OfferRejected(RequestEvent requestEvent, SipSession session, ServerTransaction stx) {
+    private void offerRejected(RequestEvent requestEvent, SipSession session, ServerTransaction stx) {
         // TODO: Distinguish between a rejected offer(488) and a busy here (486)
         // At present the code below just sends a 488 if there was any exception
         // Should handle a rsource unavalable exception differently for a resource that
