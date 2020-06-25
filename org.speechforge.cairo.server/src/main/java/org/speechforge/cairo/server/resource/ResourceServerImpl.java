@@ -84,7 +84,7 @@ public class ResourceServerImpl implements SessionListener {
     /**
      * Constructs a new object
      * 
-     * @param registryImpl the registry to use 
+     * @param registry the registry to use 
      * @param sipPort the port to use
      * @param sipTransport the transport to use, e.g. UDP
      * @param hostIpAddress the address of the host
@@ -122,7 +122,7 @@ public class ResourceServerImpl implements SessionListener {
      * Constructs a new object
      * 
      * @param port the port to use
-     * @param registryImpl the registry to use
+     * @param registry the registry to use
      * @throws RemoteException error exporting the object to the registry
      */
     public ResourceServerImpl(int port, ResourceRegistryImpl registry) throws RemoteException {
@@ -185,28 +185,11 @@ public class ResourceServerImpl implements SessionListener {
 
         // process the invitation (transmitter and/or receiver)
         if (transmitter) {
-            Resource resource;
-            try {
-                resource = registryImpl.getResource(Resource.Type.TRANSMITTER);
-            } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
-                LOGGER.warn(e.getMessage(), e);
-                throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a transmitter resource");
-            }
-            request = resource.invite(request, session.getId());
-            session.getResources().add(resource);
+            request = processTransmitterInvite(request, session);
         }
 
         if (receiver) {
-            Resource resource;
-            try {
-                resource = registryImpl.getResource(Resource.Type.RECEIVER);
-            } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
-                LOGGER.warn(e.getMessage(), e);
-                throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
-            }
-            LOGGER.info("Calling receiver.invite(sdpMessage)");
-            request = resource.invite(request, session.getId());
-            session.getResources().add(resource);
+            request = processReceiverInvite(request, session);
         } // TODO: catch exception and release transmitter resources
 
         // post process the message
@@ -218,6 +201,56 @@ public class ResourceServerImpl implements SessionListener {
         // message.getSessionDescription().getConnection().setAddress(host);
 
         request.getSessionDescription().getConnection().setAddress(hostIpAddress);
+        return request;
+    }
+
+    /**
+     * Process the INVITE at a receiver.
+     * @param request the received request.
+     * @param session the SIP session
+     * @return modified request after processing from the receiver.
+     * @throws RemoteException error accessing the receiver
+     * @throws ResourceUnavailableException resource not available
+     */
+    private SdpMessage processReceiverInvite(SdpMessage request,
+            SipSession session)
+            throws RemoteException, ResourceUnavailableException {
+        Resource resource;
+        try {
+            resource = registryImpl.getResource(Resource.Type.RECEIVER);
+        } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
+            LOGGER.warn(e.getMessage(), e);
+            throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a receiver resource");
+        }
+        final String id = session.getId();
+        LOGGER.info("inviting receiver for " + id);
+        request = resource.invite(request, id);
+        session.getResources().add(resource);
+        return request;
+    }
+
+    /**
+     * Process the INVITE at a transmitter.
+     * @param request the received request.
+     * @param session the SIP session
+     * @return modified request after processing from the transmitter.
+     * @throws RemoteException error accessing the transmitter
+     * @throws ResourceUnavailableException resource not available
+     */
+    private SdpMessage processTransmitterInvite(SdpMessage request,
+            SipSession session)
+            throws RemoteException, ResourceUnavailableException {
+        Resource resource;
+        try {
+            resource = registryImpl.getResource(Resource.Type.TRANSMITTER);
+        } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
+            LOGGER.warn(e.getMessage(), e);
+            throw new org.speechforge.cairo.sip.ResourceUnavailableException("Could not get a transmitter resource");
+        }
+        final String id = session.getId();
+        LOGGER.info("inviting transmitter for " + id);
+        request = resource.invite(request, id);
+        session.getResources().add(resource);
         return request;
     }
 

@@ -99,8 +99,6 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
      * @see org.speechforge.cairo.server.manager.ResourceRegistry#bind(org.speechforge.cairo.server.resource.Resource)
      */
     public synchronized void register(Resource resource, Resource.Type type) throws RemoteException {
-        LOGGER.info("registering resource of type " + type);
-
         switch (type) {
         case RECEIVER:
             receivers.register(resource);
@@ -113,6 +111,7 @@ public class ResourceRegistryImpl extends UnicastRemoteObject implements Resourc
         default:
             throw new IllegalArgumentException("Invalid type or type not specified!");
         }
+        LOGGER.info("registered resource of type '" + type + "'");
     }
 
     public Resource getResource(Resource.Type type) throws ResourceUnavailableException {
