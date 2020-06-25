@@ -23,27 +23,6 @@
 package org.speechforge.cairo.server.resource;
 
 
-import org.speechforge.cairo.server.config.CairoConfig;
-import org.speechforge.cairo.server.config.ReceiverConfig;
-import org.speechforge.cairo.server.recog.MrcpRecogChannel;
-import org.speechforge.cairo.server.recog.RTPRecogChannel;
-import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
-import org.speechforge.cairo.server.recorder.MrcpRecorderChannel;
-import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
-import org.speechforge.cairo.server.recorder.RTPRecorderChannelImpl;
-import org.speechforge.cairo.server.recorder.RTPRecorderChannelS4Impl;
-import org.speechforge.cairo.server.recorder.sphinx.SphinxRecorderFactory;
-import org.speechforge.cairo.server.resource.session.ChannelResources;
-import org.speechforge.cairo.server.resource.session.RecognizerResources;
-import org.speechforge.cairo.server.resource.session.RecorderResources;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicatorFactory;
-import org.speechforge.cairo.util.CairoUtil;
-import org.speechforge.cairo.rtp.AudioFormats;
-import org.speechforge.cairo.sip.ResourceUnavailableException;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SipSession;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -63,11 +42,28 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
-import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
+import org.speechforge.cairo.rtp.AudioFormats;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicatorFactory;
+import org.speechforge.cairo.server.config.CairoConfig;
+import org.speechforge.cairo.server.config.ReceiverConfig;
+import org.speechforge.cairo.server.recog.MrcpRecogChannel;
+import org.speechforge.cairo.server.recog.RTPRecogChannel;
+import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngineFactory;
+import org.speechforge.cairo.server.recorder.MrcpRecorderChannel;
+import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
+import org.speechforge.cairo.server.recorder.RTPRecorderChannelS4Impl;
+import org.speechforge.cairo.server.recorder.sphinx.SphinxRecorderFactory;
+import org.speechforge.cairo.server.resource.session.ChannelResources;
+import org.speechforge.cairo.server.resource.session.RecognizerResources;
+import org.speechforge.cairo.server.resource.session.RecorderResources;
+import org.speechforge.cairo.sip.ResourceUnavailableException;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Implements a {@link org.speechforge.cairo.server.resource.Resource} for handling MRCPv2 requests
@@ -75,9 +71,10 @@ import org.mrcp4j.server.MrcpServerSocket;
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
+@SuppressWarnings("serial")
 public class ReceiverResource extends ResourceImpl {
 
-    private static Logger _logger = Logger.getLogger(ReceiverResource.class);
+    private static final Logger LOGGER = Logger.getLogger(ReceiverResource.class);
 
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.RECEIVER;
 
@@ -114,7 +111,8 @@ public class ReceiverResource extends ResourceImpl {
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
     public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException {
-        _logger.debug("Resource received invite() request.");
+        LOGGER.debug("receiver invite for");
+        LOGGER.debug(request.getSessionDescription());
 
         // Create a resource session object
         // TODO: Check if there is already a session (ie. This is a re-invite)        
@@ -123,7 +121,6 @@ public class ReceiverResource extends ResourceImpl {
         // get the map that holds list of the channels and the resources used for each channel
         // the key is the dialogID
         Map<String, ChannelResources> sessionChannels = session.getChannels();
-        
         
         try {
             List<MediaDescription> channels = request.getMrcpReceiverChannels();
@@ -136,7 +133,7 @@ public class ReceiverResource extends ResourceImpl {
                     String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
                     String rt =  md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
                     MrcpResourceType resourceType = null;
-                    _logger.debug("Resource Type: " +rt);
+                    LOGGER.debug("Resource Type: " +rt);
                     if (rt.equalsIgnoreCase("speechrecog")) {
                         resourceType = MrcpResourceType.SPEECHRECOG;
                     } else if (rt.equalsIgnoreCase("speechsynth")) {
@@ -189,7 +186,7 @@ public class ReceiverResource extends ResourceImpl {
                         break;
 
                      case RECORDER:
-                    	 _logger.info("processing recorder request...");
+                    	 LOGGER.info("processing recorder request...");
                          rtpmd = request.getAudioChansForThisControlChan(md);
                          //TODO: Check if audio format is supported.  If not resource not available exception should be shown.
                          //      maybe this could be part of the up-front validation
@@ -220,7 +217,7 @@ public class ReceiverResource extends ResourceImpl {
                         _mrcpServer.openChannel(channelID, new MrcpRecorderChannel(recorder));
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
                         rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());   
-                        _logger.info(_mrcpServer.getPort());
+                        LOGGER.info(_mrcpServer.getPort());
   
                         // Create a channel resources object and put it in the channel map (which is in the session).  
                         // These resources must be returned to the pool when the channel is closed.  In the case of a 
@@ -242,10 +239,10 @@ public class ReceiverResource extends ResourceImpl {
                 }
             }
         } catch (ResourceUnavailableException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw e;
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new ResourceUnavailableException(e);
         }
         // Add the session to the session list
@@ -271,7 +268,7 @@ public class ReceiverResource extends ResourceImpl {
 	            try {
 	                _replicatorPool.returnObject(r.getReplicator());
 	            } catch (Exception e) {
-	                _logger.debug(e, e);
+	                LOGGER.debug(e, e);
 	                throw new RemoteException(e.getMessage(), e);
 	            }
             } else if (channel instanceof RecorderResources) {
@@ -280,11 +277,11 @@ public class ReceiverResource extends ResourceImpl {
 	            try {
 	                _replicatorPool.returnObject(r.getRecorderReplicator());
 	            } catch (Exception e) {
-	                _logger.debug(e, e);
+	                LOGGER.debug(e, e);
 	                throw new RemoteException(e.getMessage(), e);
 	            }
             } else {
-            	_logger.warn("Unsupported channle resource of type "+channel.toString());
+            	LOGGER.warn("Unsupported channle resource of type "+channel.toString());
             }
             
         }
@@ -318,15 +315,15 @@ public class ReceiverResource extends ResourceImpl {
         }
         rmiUrl.append('/').append(ResourceRegistry.NAME);
 
-        _logger.info("looking up: " + rmiUrl);
+        LOGGER.info("looking up: " + rmiUrl);
         ResourceRegistry resourceRegistry = (ResourceRegistry) Naming.lookup(rmiUrl.toString());
 
         ReceiverResource impl = new ReceiverResource(resourceConfig);
 
-        _logger.info("binding receiver resource...");
+        LOGGER.info("binding receiver resource...");
         resourceRegistry.register(impl, RESOURCE_TYPE);
 
-        _logger.info("Resource bound and waiting...");
+        LOGGER.info("Resource bound and waiting...");
 
     }
 }

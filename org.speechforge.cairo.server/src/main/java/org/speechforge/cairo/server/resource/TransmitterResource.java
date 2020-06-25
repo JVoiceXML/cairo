@@ -22,21 +22,6 @@
  */
 package org.speechforge.cairo.server.resource;
 
-import org.speechforge.cairo.server.config.CairoConfig;
-import org.speechforge.cairo.server.config.TransmitterConfig;
-import org.speechforge.cairo.server.resource.session.ChannelResources;
-import org.speechforge.cairo.server.resource.session.RecognizerResources;
-import org.speechforge.cairo.server.resource.session.RecorderResources;
-import org.speechforge.cairo.server.resource.session.TransmitterResources;
-import org.speechforge.cairo.rtp.server.PortPairPool;
-import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
-import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
-import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
-import org.speechforge.cairo.util.CairoUtil;
-import org.speechforge.cairo.rtp.AudioFormats;
-import org.speechforge.cairo.sip.ResourceUnavailableException;
-import org.speechforge.cairo.sip.SdpMessage;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -59,16 +44,30 @@ import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
+import org.speechforge.cairo.rtp.AudioFormats;
+import org.speechforge.cairo.rtp.server.PortPairPool;
+import org.speechforge.cairo.server.config.CairoConfig;
+import org.speechforge.cairo.server.config.TransmitterConfig;
+import org.speechforge.cairo.server.resource.session.ChannelResources;
+import org.speechforge.cairo.server.resource.session.TransmitterResources;
+import org.speechforge.cairo.server.tts.MrcpSpeechSynthChannel;
+import org.speechforge.cairo.server.tts.PromptGeneratorFactory;
+import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
+import org.speechforge.cairo.sip.ResourceUnavailableException;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Implements a {@link org.speechforge.cairo.server.resource.Resource} for handling MRCPv2 requests
  * that require generation of audio data to be streamed to the MRCPv2 client.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
+@SuppressWarnings("serial")
 public class TransmitterResource extends ResourceImpl {
 
-    private static Logger _logger = Logger.getLogger(TransmitterResource.class);
+    private static final Logger LOGGER = Logger.getLogger(TransmitterResource.class);
 
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.TRANSMITTER;
 
@@ -96,7 +95,7 @@ public class TransmitterResource extends ResourceImpl {
         //if (_myIpAddress == null) {
         	_myIpAddress = CairoUtil.getLocalHost();
         //}
-        _logger.info(_myIpAddress);
+        LOGGER.info(_myIpAddress);
     }
 
     /* (non-Javadoc)
@@ -104,8 +103,8 @@ public class TransmitterResource extends ResourceImpl {
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
     public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException, RemoteException {
-        _logger.debug("Resource received invite() request.");
-        _logger.debug(request.getSessionDescription().toString());
+        LOGGER.debug("transmitter invite for");
+        LOGGER.debug(request.getSessionDescription());
         InetAddress remoteHost = null;
 
         // Create a resource session object
@@ -116,11 +115,9 @@ public class TransmitterResource extends ResourceImpl {
         // the key is the dialogID
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         
-        
         try {
             List<MediaDescription> channels = request.getMrcpTransmitterChannels();
             if (channels.size() > 0) {
-
                 remoteHost = InetAddress.getByName(request.getSessionAddress());
                 InetAddress mediaHost = remoteHost;
                 int localPort = 0;
@@ -154,26 +151,25 @@ public class TransmitterResource extends ResourceImpl {
                         // InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
                         remotePort = rtpmd.get(0).getMedia().getMediaPort();
                         
-                        //get the host for the rtp channel.  maybe the media is going to a differnet host.
-                        //if so tehre will be a c-line in the media block
+                        //get the host for the rtp channel.  maybe the media is going to a different host.
+                        //if so there will be a c-line in the media block
                         if (rtpmd.get(0).getConnection()!= null)
                             mediaHost = InetAddress.getByName(rtpmd.get(0).getConnection().getAddress());
                         
                     } else {
-                        _logger.warn("No Media channel specified in the invite request");
+                        LOGGER.warn("No Media channel specified in the invite request");
                         // TODO: handle no media channel in the request corresponding to the mrcp channel (sip error)
                     }
 
                     switch (resourceType) {
                     case BASICSYNTH:
                     case SPEECHSYNTH:
-
                         rtpscc = new RTPSpeechSynthChannel(localPort, _myIpAddress, mediaHost, remotePort,af);
                         MrcpSpeechSynthChannel mrcpChannel = new MrcpSpeechSynthChannel(channelID, rtpscc, _basePromptDir, _promptGeneratorPool);
                         _mrcpServer.openChannel(channelID, mrcpChannel);
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
                         rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
-                        _logger.debug("Created a SPEECHSYNTH Channel.  id is: "+channelID+" rtp remotehost:port is: "+ mediaHost+":"+remotePort);
+                        LOGGER.debug("Created a SPEECHSYNTH Channel.  id is: "+channelID+" rtp remotehost:port is: "+ mediaHost+":"+remotePort);
                         break;
 
                     default:
@@ -192,17 +188,16 @@ public class TransmitterResource extends ResourceImpl {
                     sessionChannels.put(channelID, cr);
                 }
             } else {
-                _logger.warn("Invite request had no channels.");
+                LOGGER.warn("Invite request had no channels.");
             }
         } catch (ResourceUnavailableException e) {
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw e;
         } catch (UnknownHostException e) {
-            _logger.debug("Specified host for media stream not found: " + remoteHost, e);
+            LOGGER.warn("Specified host for media stream not found: " + remoteHost, e);
             throw new RemoteException(e.getMessage(), e);
         } catch (Exception e) {
-            e.printStackTrace();
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             throw new ResourceUnavailableException(e);
         }
         // Add the session to the session list
@@ -231,7 +226,7 @@ public class TransmitterResource extends ResourceImpl {
                 _portPairPool.returnPort(r.getPort());
 
             } else {
-            	_logger.warn("Unsupported channel resource of type: "+channel.toString());
+            	LOGGER.warn("Unsupported channel resource of type: "+channel.toString());
             }
    
         }
@@ -265,15 +260,15 @@ public class TransmitterResource extends ResourceImpl {
         }
         rmiUrl.append('/').append(ResourceRegistry.NAME);
 
-        _logger.info("looking up: " + rmiUrl);
+        LOGGER.info("looking up: " + rmiUrl);
         ResourceRegistry resourceRegistry = (ResourceRegistry) Naming.lookup(rmiUrl.toString());
 
         TransmitterResource impl = new TransmitterResource(resourceConfig);
 
-        _logger.info("binding transmitter resource...");
+        LOGGER.info("binding transmitter resource...");
         resourceRegistry.register(impl, RESOURCE_TYPE);
 
-        _logger.info("Resource bound and waiting...");
+        LOGGER.info("Resource bound and waiting...");
 
     }
 

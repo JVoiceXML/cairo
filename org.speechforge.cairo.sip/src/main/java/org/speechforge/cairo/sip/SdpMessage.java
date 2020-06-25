@@ -51,10 +51,11 @@ import gov.nist.javax.sdp.fields.ProtoVersionField;
 import gov.nist.javax.sdp.fields.SessionNameField;
 
 /**
- * Encapsulates the sdp message used to to describe session (within SIP
+ * Encapsulates the SDP message used to to describe session (within SIP
  * messages)
  * 
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 @SuppressWarnings("serial")
 public class SdpMessage implements Serializable {
@@ -95,10 +96,10 @@ public class SdpMessage implements Serializable {
 
     public static final String SDP_ACTIVE_SETUP = "active";
 
-    private SessionDescription _sd;
+    private SessionDescription description;
 
     public SdpMessage() {
-        _sd = new SessionDescriptionImpl();
+        description = new SessionDescriptionImpl();
     }
 
     public List<MediaDescription> getMrcpChannels() throws SdpException {
@@ -136,7 +137,7 @@ public class SdpMessage implements Serializable {
         List<MediaDescription> chans = new ArrayList<MediaDescription>();
         try {
             @SuppressWarnings("unchecked")
-            Enumeration<MediaDescription> e = _sd.getMediaDescriptions(true).elements();
+            Enumeration<MediaDescription> e = description.getMediaDescriptions(true).elements();
             while (e.hasMoreElements()) {
                 MediaDescription md = e.nextElement();
                 if (md.getMedia().getProtocol().equals(protocol)) {
@@ -155,7 +156,7 @@ public class SdpMessage implements Serializable {
 
         try {
             @SuppressWarnings("unchecked")
-            Enumeration<MediaDescription> e = _sd.getMediaDescriptions(true).elements();
+            Enumeration<MediaDescription> e = description.getMediaDescriptions(true).elements();
             while (e.hasMoreElements()) {
                 MediaDescription md = e.nextElement();
                 if (md.getMedia().getProtocol().equals(protocol)) {
@@ -195,7 +196,7 @@ public class SdpMessage implements Serializable {
                 protocolToMatch = SDP_RTP_PROTOCOL;
                 attributeNameToMatch = SDP_MID_ATTR_NAME;
                 @SuppressWarnings("unchecked")
-                Enumeration<MediaDescription> e = _sd.getMediaDescriptions(true).elements();      
+                Enumeration<MediaDescription> e = description.getMediaDescriptions(true).elements();      
                 while (e.hasMoreElements()) {
                     MediaDescription md = e.nextElement();
                     if (md.getMedia().getProtocol().equals(protocolToMatch)) {
@@ -220,7 +221,7 @@ public class SdpMessage implements Serializable {
      * @return the sdp session description
      */
     public SessionDescription getSessionDescription() {
-        return _sd;
+        return description;
     }
 
     /**
@@ -228,7 +229,7 @@ public class SdpMessage implements Serializable {
      *            the session description to set
      */
     public void setSessionDescription(SessionDescription sd) {
-        this._sd = sd;
+        this.description = sd;
     }
 
     /**
@@ -242,7 +243,7 @@ public class SdpMessage implements Serializable {
     public String getSessionAddress() throws SdpException {
         String address = null;
         try {
-            address = _sd.getConnection().getAddress();
+            address = description.getConnection().getAddress();
         } catch (SdpParseException e) {
             LOGGER.warn(e.getMessage(), e);
             throw e;
@@ -261,7 +262,7 @@ public class SdpMessage implements Serializable {
      */
     public void setSessionAddress(String address) throws SdpException {
 
-        Connection c = _sd.getConnection();
+        Connection c = description.getConnection();
         try {
             if (c != null) {
                 c.setAddress(address);
@@ -272,7 +273,7 @@ public class SdpMessage implements Serializable {
                 c.setAddress(address);
                 c.setAddressType("IP4");
                 c.setNetworkType("IN");
-                _sd.setConnection(c);
+                description.setConnection(c);
             }
         } catch (SdpException e) {
             LOGGER.warn(e.getMessage(), e);
@@ -311,7 +312,7 @@ public class SdpMessage implements Serializable {
         try {
             Version v = new ProtoVersionField();
             v.setVersion(0);
-            message._sd.setVersion(v);
+            message.description.setVersion(v);
             Origin o = new OriginField();
             o.setAddress(address);
             o.setAddressType("IP4");
@@ -319,17 +320,17 @@ public class SdpMessage implements Serializable {
             o.setSessionId(sessionId);
             o.setSessionVersion(sessionVersion);
             o.setUsername(user);
-            message._sd.setOrigin(o);
+            message.description.setOrigin(o);
 
             Connection c = new ConnectionField();
             c.setAddress(address);
             c.setAddressType("IP4");
             c.setNetworkType("IN");
-            message._sd.setConnection(c);
+            message.description.setConnection(c);
 
             SessionName sn = new SessionNameField();
             sn.setValue(sessionName);
-            message._sd.setSessionName(sn);
+            message.description.setSessionName(sn);
 
         } catch (SdpException e) {
             LOGGER.warn(e.getMessage(), e);

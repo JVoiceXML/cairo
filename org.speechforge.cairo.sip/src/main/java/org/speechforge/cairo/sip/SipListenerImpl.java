@@ -72,12 +72,12 @@ public class SipListenerImpl implements SipListener {
         this.sipClient = sipClient;
     }
 
-    public void processDialogTerminated(DialogTerminatedEvent arg0) {
-        LOGGER.warn("Got a dialog terminated event");
+    public void processDialogTerminated(DialogTerminatedEvent e) {
+        LOGGER.warn("Got a dialog terminated event: " + e);
     }
 
-    public void processIOException(IOExceptionEvent arg0) {
-        LOGGER.warn("Got an IO Exception");
+    public void processIOException(IOExceptionEvent e) {
+        LOGGER.warn("Got an IO Exception: " + e);
     }
 
     public void processRequest(RequestEvent requestEvent) {

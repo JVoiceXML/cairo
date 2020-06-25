@@ -125,12 +125,13 @@ run {
     dependsOn jar
     
     mainClassName = "org.speechforge.cairo.server.resource.ResourceServerImpl"
-    classpath += files("${project.rootDir}/config-template")
+    classpath = sourceSets.main.runtimeClasspath \
+                + files("${project.rootDir}/config-template")
     jvmArgs = ["-Xmx2048m",
                "-XX:+UseConcMarkSweepGC",
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000"]
-    args = ["--sipPort=5050",
+    args = ["--sipPort=15050",
             "--sipTransport=udp"]
 }
 
@@ -146,7 +147,7 @@ task(runDebug, type: JavaExec) {
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000",
                "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=12368" ]
-    args = ["--sipPort=5050",
+    args = ["--sipPort=15050",
             "--sipTransport=udp"]
 }
 
