@@ -22,13 +22,6 @@
  */
 package org.speechforge.cairo.rtp.server.sphinx;
 
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
-import org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor;
-import org.speechforge.cairo.rtp.server.sphinx.RawAudioTransferHandler;
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.rtp.server.sphinx.AbstractTestCase;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -40,48 +33,38 @@ import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
 
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataEndSignal;
 import edu.cmu.sphinx.frontend.DataStartSignal;
 import edu.cmu.sphinx.frontend.DoubleData;
 
-import org.apache.log4j.Logger;
-
 /**
  * Unit test for RawAudioProcessor.
  */
-public class TtestRawAudioProcessor extends AbstractTestCase {
+public class TestRawAudioProcessor  {
 
-    private static Logger _logger = Logger.getLogger(TtestRawAudioProcessor.class);
+    private static final Logger LOGGER = 
+            Logger.getLogger(TestRawAudioProcessor.class);
 
     /**
      * Create the test case
-     * 
-     * @param testName
-     *            name of the test case
      */
-    public TtestRawAudioProcessor(String testName) {
-        super(testName);
+    public TestRawAudioProcessor() {
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TtestRawAudioProcessor.class);
-    }
-
+    @Test
     public void test12345() throws Exception {
-        debugTestName(_logger);
-
         URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
-        assertNotNull(audioFileURL);
+        Assert.assertNotNull(audioFileURL);
 
         URL speechDataURL = this.getClass().getResource("/prompts/12345.speechdata.txt");
-        assertNotNull(speechDataURL);
+        Assert.assertNotNull(speechDataURL);
 
         Reader r = new BufferedReader(new InputStreamReader(speechDataURL.openStream()));
         StreamTokenizer tokenizer = new StreamTokenizer(r);
@@ -94,8 +77,8 @@ public class TtestRawAudioProcessor extends AbstractTestCase {
         processor.start();
 
         PushBufferStream[] streams = pbds.getStreams();
-        assertEquals("Should be single stream in data source.", 1, streams.length);
-        _logger.debug("PushBufferStream format: " + streams[0].getFormat());
+        Assert.assertEquals("Should be single stream in data source.", 1, streams.length);
+        LOGGER.debug("PushBufferStream format: " + streams[0].getFormat());
 
         RawAudioProcessor rawAudioProcessor = RawAudioProcessor.getInstanceForTesting();
 
@@ -103,37 +86,37 @@ public class TtestRawAudioProcessor extends AbstractTestCase {
         rawAudioTransferHandler.startProcessing(streams[0]);
 
         int ttype = tokenizer.nextToken();
-        assertEquals(StreamTokenizer.TT_WORD, ttype);
+        Assert.assertEquals(StreamTokenizer.TT_WORD, ttype);
 
-        _logger.debug("expected=edu.cmu.sphinx.frontend.DataStartSignal actual=" + tokenizer.sval);
-        assertEquals("edu.cmu.sphinx.frontend.DataStartSignal", tokenizer.sval);
+        LOGGER.debug("expected=edu.cmu.sphinx.frontend.DataStartSignal actual=" + tokenizer.sval);
+        Assert.assertEquals("edu.cmu.sphinx.frontend.DataStartSignal", tokenizer.sval);
 
         Data data = rawAudioProcessor.getData();
-        assertTrue(data instanceof DataStartSignal);
+        Assert.assertTrue(data instanceof DataStartSignal);
 
         ttype = tokenizer.nextToken();
 
         while (ttype == StreamTokenizer.TT_NUMBER) {
 
             data = rawAudioProcessor.getData();
-            assertTrue(data instanceof DoubleData);
+            Assert.assertTrue(data instanceof DoubleData);
 
             double[] values = ((DoubleData) data).getValues();
             for (int i=0; i < values.length; i++) {
-                if (_logger.isTraceEnabled()) {
-                    _logger.trace("expected=" + tokenizer.nval + " actual=" + values[i]);
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("expected=" + tokenizer.nval + " actual=" + values[i]);
                 }
-                assertEquals(tokenizer.nval, values[i]);
+                Assert.assertEquals(tokenizer.nval, values[i]);
                 ttype = tokenizer.nextToken();
             }
 
         }
 
-        _logger.debug("expected=edu.cmu.sphinx.frontend.DataEndSignal actual=" + tokenizer.sval);
-        assertEquals("edu.cmu.sphinx.frontend.DataEndSignal", tokenizer.sval);
+        LOGGER.debug("expected=edu.cmu.sphinx.frontend.DataEndSignal actual=" + tokenizer.sval);
+        Assert.assertEquals("edu.cmu.sphinx.frontend.DataEndSignal", tokenizer.sval);
 
         data = rawAudioProcessor.getData();
-        assertTrue(data instanceof DataEndSignal);
+        Assert.assertTrue(data instanceof DataEndSignal);
 
     }
 

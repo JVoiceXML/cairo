@@ -22,48 +22,24 @@
  */
 package org.speechforge.cairo.server.recog;
 
-import org.mrcp4j.MrcpResourceType;
-import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
-import org.speechforge.cairo.util.rule.RuleMatch;
-import org.speechforge.cairo.sip.SdpMessage;
-import javax.sdp.Media;
-import javax.sdp.MediaDescription;
-import javax.sdp.Origin;
-import javax.sdp.SdpException;
-import javax.sdp.SdpParseException;
-import javax.sdp.SessionName;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.speechforge.cairo.util.rule.RuleMatch;
+
 
 /**
  * Unit test for RecognitionResult.
  */
-public class TestRecognitionResult extends AbstractTestCase {
-
-    private static Logger _logger = Logger.getLogger(TestRecognitionResult.class);
-
+public class TestRecognitionResult {
     /**
      * Create the test case
-     * 
-     * @param testName
-     *            name of the test case
      */
-    public TestRecognitionResult(String testName) {
-        super(testName);
+    public TestRecognitionResult() {
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestRecognitionResult.class);
-    }
-
+    @Test
     public void testValidResultWithTwoRuleMatches()  {
-        debugTestName(_logger);
         String str = "one cheeseburger and a pepsi<food:cheeseburger><drink:pepsi>";
         RecognitionResult result = null;
         try {
@@ -75,34 +51,25 @@ public class TestRecognitionResult extends AbstractTestCase {
         RuleMatch food = new RuleMatch("food","cheeseburger");
         RuleMatch drink = new RuleMatch("drink","pepsi");
     
-        assertEquals(result.getText(), "one cheeseburger and a pepsi");
-        assertEquals(result.getRuleMatches().size(), 2);
-        assertTrue(result.getRuleMatches().contains(food));
-        assertTrue(result.getRuleMatches().contains(drink));
+        Assert.assertEquals(result.getText(), "one cheeseburger and a pepsi");
+        Assert.assertEquals(result.getRuleMatches().size(), 2);
+        Assert.assertTrue(result.getRuleMatches().contains(food));
+        Assert.assertTrue(result.getRuleMatches().contains(drink));
     }
 
    
-    public void testNullResult()  {
-        debugTestName(_logger);
+    @Test(expected = InvalidRecognitionResultException.class)
+    public void testNullResult() throws InvalidRecognitionResultException  {
         String str = null;
         RecognitionResult result = null;
-        try {
-            result = RecognitionResult.constructResultFromString(str);
-            fail("Should raise an InvalidRecognitionResultException"); 
-        } catch (InvalidRecognitionResultException e) {
-        }
+        result = RecognitionResult.constructResultFromString(str);
     }
 
-    public void testInvalidResult1()  {
-        debugTestName(_logger);
+    @Test(expected = InvalidRecognitionResultException.class)
+    public void testInvalidResult1() throws InvalidRecognitionResultException  {
         String str = "one cheeseburger and a pepsi<food;cheeseburger><drink;pepsi>";
         RecognitionResult result = null;
-        try {
-            result = RecognitionResult.constructResultFromString(str);
-            fail("Should raise an InvalidRecognitionResultException"); 
-        } catch (InvalidRecognitionResultException e) {
-        }
-
+        result = RecognitionResult.constructResultFromString(str);
     }
     
 }

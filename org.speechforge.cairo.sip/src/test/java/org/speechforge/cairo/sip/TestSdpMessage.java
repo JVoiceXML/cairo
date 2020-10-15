@@ -24,47 +24,29 @@ package org.speechforge.cairo.sip;
 
 import java.util.Vector;
 
-import org.mrcp4j.MrcpResourceType;
-
 import javax.sdp.Media;
 import javax.sdp.MediaDescription;
 import javax.sdp.Origin;
 import javax.sdp.SdpConstants;
 import javax.sdp.SdpException;
-import javax.sdp.SdpParseException;
 import javax.sdp.SessionName;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
-
-import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mrcp4j.MrcpResourceType;
 
 /**
  * Unit test for SIPAgent.
  */
-public class TestSdpMessage extends AbstractTestCase {
-
-    private static Logger _logger = Logger.getLogger(TestSdpMessage.class);
-
+public class TestSdpMessage {
     /**
      * Create the test case
-     * 
-     * @param testName
-     *            name of the test case
      */
-    public TestSdpMessage(String testName) {
-        super(testName);
+    public TestSdpMessage() {
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestSdpMessage.class);
-    }
-
+    @Test
     public void testCreateNewSdpSessionMessage() throws SdpException {
-        debugTestName(_logger);
         String user = "slord";
         String address = "a.b.com";
         String sessionName = "mySession";
@@ -72,79 +54,52 @@ public class TestSdpMessage extends AbstractTestCase {
         // String sdpString = s.getSessionDescription().toString();
         Origin o = s.getSessionDescription().getOrigin();
         SessionName sn = s.getSessionDescription().getSessionName();
-        try {
-            assertEquals(o.getAddress(), address);
-            assertEquals(o.getUsername(), user);
-            assertEquals(sn.getValue(), sessionName);
-        } catch (SdpParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        Assert.assertEquals(o.getAddress(), address);
+        Assert.assertEquals(o.getUsername(), user);
+        Assert.assertEquals(sn.getValue(), sessionName);
     }
 
+    @Test
     public void testCreateMrcpChannelRequest() throws SdpException {
-        debugTestName(_logger);
-
         MrcpResourceType resourceType = MrcpResourceType.SPEECHRECOG;
         MediaDescription md = SdpMessage.createMrcpChannelRequest(resourceType);
         Media m = md.getMedia();
-        try {
-            assertEquals(m.getMediaPort(), 9);
-            assertEquals(m.getMediaType(), "application");
-            assertEquals(m.getProtocol(), "TCP/MRCPv2");
-            // assertEquals(m.getPortCount(),1);
+        Assert.assertEquals(m.getMediaPort(), 9);
+        Assert.assertEquals(m.getMediaType(), "application");
+        Assert.assertEquals(m.getProtocol(), "TCP/MRCPv2");
+        // assertEquals(m.getPortCount(),1);
 
-            assertEquals(md.getAttribute("setup"), "active");
-            assertEquals(md.getAttribute("connection"), "new");
-            assertEquals(md.getAttribute("resource"), "speechrecog");
-
-        } catch (SdpParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        Assert.assertEquals(md.getAttribute("setup"), "active");
+        Assert.assertEquals(md.getAttribute("connection"), "new");
+        Assert.assertEquals(md.getAttribute("resource"), "speechrecog");
 
         resourceType = MrcpResourceType.SPEECHSYNTH;
         md = SdpMessage.createMrcpChannelRequest(resourceType);
         m = md.getMedia();
-        try {
-            assertEquals(m.getMediaPort(), 9);
-            assertEquals(m.getMediaType(), "application");
-            assertEquals(m.getProtocol(), "TCP/MRCPv2");
-            // assertEquals(m.getPortCount(),1);
+        Assert.assertEquals(m.getMediaPort(), 9);
+        Assert.assertEquals(m.getMediaType(), "application");
+        Assert.assertEquals(m.getProtocol(), "TCP/MRCPv2");
+        // assertEquals(m.getPortCount(),1);
 
-            assertEquals(md.getAttribute("setup"), "active");
-            assertEquals(md.getAttribute("connection"), "new");
-            assertEquals(md.getAttribute("resource"), "speechsynth");
-
-        } catch (SdpParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+        Assert.assertEquals(md.getAttribute("setup"), "active");
+        Assert.assertEquals(md.getAttribute("connection"), "new");
+        Assert.assertEquals(md.getAttribute("resource"), "speechsynth");
     }
 
+    @Test
     public void testCreateRtpChannelRequest() throws SdpException {
-        debugTestName(_logger);
-
         int localPort = 12345;
         Vector format = new Vector();
         format.add(SdpConstants.PCMU);
         MediaDescription md = SdpMessage.createRtpChannelRequest(localPort,format);
         Media m = md.getMedia();
-        try {
-            assertEquals(m.getMediaPort(), localPort);
-            assertEquals(m.getMediaType(), "audio");
-            assertEquals(m.getProtocol(), "RTP/AVP");
-            // assertEquals(m.getPortCount(),1);
+        Assert.assertEquals(m.getMediaPort(), localPort);
+        Assert.assertEquals(m.getMediaType(), "audio");
+        Assert.assertEquals(m.getProtocol(), "RTP/AVP");
+        // assertEquals(m.getPortCount(),1);
 
-            assertEquals(md.getAttribute("sendrecv"), null); // bogus test...
-            // assertEquals(md.getAttribute("sendonly"),null);
-            // System.out.println(md.toString());
-
-        } catch (SdpParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        Assert.assertEquals(md.getAttribute("sendrecv"), null); // bogus test...
+        // assertEquals(md.getAttribute("sendonly"),null);
+        // System.out.println(md.toString());
     }
-
 }

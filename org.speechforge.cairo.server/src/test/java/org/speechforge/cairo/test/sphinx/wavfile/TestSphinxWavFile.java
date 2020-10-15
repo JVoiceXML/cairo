@@ -29,62 +29,50 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
 import org.apache.log4j.Logger;
-import org.speechforge.cairo.server.recog.sphinx.AbstractTestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import edu.cmu.sphinx.frontend.util.StreamDataSource;
 import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Unit test for basic recognition with Sphinx (no Cairo classes).
  */
-public class TestSphinxWavFile extends AbstractTestCase {
+public class TestSphinxWavFile {
 
-    private static Logger _logger = Logger.getLogger(TestSphinxWavFile.class);
+    private static final Logger LOGGER =
+            Logger.getLogger(TestSphinxWavFile.class);
 
     /**
      * Create the test case
-     *
-     * @param testName name of the test case
      */
-    public TestSphinxWavFile(String testName){
-        super(testName);
+    public TestSphinxWavFile(){
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestSphinxWavFile.class );
-    }
-
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         System.setProperty("frontend", "mfcFrontEnd");
     }
 
+    @Test
     public void test12345() throws Exception {
-        debugTestName(_logger);
-
         URL audioFileURL = this.getClass().getResource("/prompts/12345-alt2.wav");
         String expected = "one two three four five";
 //        recognize(audioFileURL, expected);
     }
 
+    @Test
     public void test65536() throws Exception {
-        debugTestName(_logger);
-
         URL audioFileURL = this.getClass().getResource("/prompts/65536.wav");
         String expected = "six five five three six";
 //        recognize(audioFileURL, expected);
     }
 
+    @Test
     public void test1984() throws Exception {
-        debugTestName(_logger);
-
         URL audioFileURL = this.getClass().getResource("/prompts/1984.wav");
         String expected = "one nine eight four";
 //        recognize(audioFileURL, expected);
@@ -92,9 +80,9 @@ public class TestSphinxWavFile extends AbstractTestCase {
 
     private void recognize(URL audioFileURL, String expected) throws Exception {
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
-        _logger.debug("configURL: " + sphinxConfigURL);
+        LOGGER.debug("configURL: " + sphinxConfigURL);
 
-        _logger.debug("Loading Recognizer...");
+        LOGGER.debug("Loading Recognizer...");
 
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
 
@@ -103,8 +91,8 @@ public class TestSphinxWavFile extends AbstractTestCase {
 
         StreamDataSource source = (StreamDataSource) cm.lookup("streamDataSource");
 
-        _logger.debug("Decoding " + audioFileURL.getFile());
-        _logger.debug(AudioSystem.getAudioFileFormat(audioFileURL));
+        LOGGER.debug("Decoding " + audioFileURL.getFile());
+        LOGGER.debug(AudioSystem.getAudioFileFormat(audioFileURL));
 
         /* set the stream data source to read from the audio file */
         AudioInputStream ais = AudioSystem.getAudioInputStream(audioFileURL);
@@ -113,10 +101,10 @@ public class TestSphinxWavFile extends AbstractTestCase {
         /* decode the audio file */
         Result result = recognizer.recognize();
 
-        assertNotNull(result);
+        Assert.assertNotNull(result);
 
-        _logger.debug("Result: " + result.getBestFinalResultNoFiller() + '\n');
-        assertEquals(expected, result.getBestFinalResultNoFiller());
+        LOGGER.debug("Result: " + result.getBestFinalResultNoFiller() + '\n');
+        Assert.assertEquals(expected, result.getBestFinalResultNoFiller());
 
     }
 
