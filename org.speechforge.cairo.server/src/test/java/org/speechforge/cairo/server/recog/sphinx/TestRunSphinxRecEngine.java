@@ -22,51 +22,40 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.server.recog.RecognitionResult;
-
 import java.net.URL;
 
 import javax.media.MediaLocator;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.speechforge.cairo.server.recog.RecognitionResult;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * Unit test for RunSphinxRecEngine.
  */
-public class TestRunSphinxRecEngine extends AbstractTestCase {
+public class TestRunSphinxRecEngine {
 
-    private static Logger _logger = Logger.getLogger(TestSphinxRecEngineReplicated.class);
+    private static final Logger LOGGER =
+            Logger.getLogger(TestSphinxRecEngineReplicated.class);
 
     private RunSphinxRecEngine _runner = null;
 
     /**
      * Create the test case
-     *
-     * @param testName name of the test case
      */
-    public TestRunSphinxRecEngine(String testName){
-        super(testName);
+    public TestRunSphinxRecEngine(){
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestRunSphinxRecEngine.class );
-    }
-
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         // configure sphinx
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
-        assertNotNull(sphinxConfigURL);
-        _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
+        Assert.assertNotNull(sphinxConfigURL);
+        LOGGER.debug("sphinxConfigURL: " + sphinxConfigURL);
 
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
         SphinxRecEngine engine = new SphinxRecEngine(cm,1);
@@ -74,18 +63,16 @@ public class TestRunSphinxRecEngine extends AbstractTestCase {
 
     }
 
+    @Test
     public void test12345() throws Exception {
-        debugTestName(_logger);
-
         String promptFile = "/prompts/12345.wav";
         String expected = "one two three four five";
 
         doRecognize(promptFile, expected);
     }
 
+    @Test
     public void test12345Alt2() throws Exception {
-        debugTestName(_logger);
-
         String promptFile = "/prompts/12345-alt2.wav";
         String expected = "one two three four five";
 
@@ -95,14 +82,13 @@ public class TestRunSphinxRecEngine extends AbstractTestCase {
     private void doRecognize(String promptFile, String expected) throws Exception {
 
         URL audioFileURL = this.getClass().getResource(promptFile);
-        assertNotNull(audioFileURL);
+        Assert.assertNotNull(audioFileURL);
 
-        assertTrue(_runner != null);
+        Assert.assertTrue(_runner != null);
 
         RecognitionResult result = _runner.doRecognize(new MediaLocator(audioFileURL));
-        _logger.debug(result);
-        assertEquals(expected, result.toString());
-
+        LOGGER.debug(result);
+        Assert.assertEquals(expected, result.toString());
     }
 
 }

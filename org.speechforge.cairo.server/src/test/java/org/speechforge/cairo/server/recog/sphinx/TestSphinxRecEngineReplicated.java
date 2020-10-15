@@ -22,13 +22,6 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.rtp.server.PBDSReplicator;
-import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
-
 import java.net.URL;
 
 import javax.media.Manager;
@@ -39,42 +32,36 @@ import javax.media.format.AudioFormat;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * Unit test for SphinxRecEngine using replicated audio data from a prompt file for input.
  */
-public class TestSphinxRecEngineReplicated extends AbstractTestCase {
+public class TestSphinxRecEngineReplicated {
 
-    private static Logger _logger = Logger.getLogger(TestSphinxRecEngineReplicated.class);
+    private static final Logger LOGGER =
+            Logger.getLogger(TestSphinxRecEngineReplicated.class);
 
     /**
      * Create the test case
-     * 
-     * @param testName
-     *            name of the test case
      */
-    public TestSphinxRecEngineReplicated(String testName) {
-        super(testName);
+    public TestSphinxRecEngineReplicated() {
     }
 
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestSphinxRecEngineReplicated.class);
-    }
-
+    @Test
     public void test12345() throws Exception {
-        debugTestName(_logger);
-
         URL audioFileURL = this.getClass().getResource("/prompts/12345.wav");
-        assertNotNull(audioFileURL);
+        Assert.assertNotNull(audioFileURL);
         String expected = "one two three four five";
         recognizeAudioFile(audioFileURL, expected);
     }
@@ -83,8 +70,8 @@ public class TestSphinxRecEngineReplicated extends AbstractTestCase {
 
         // configure sphinx
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
-        assertNotNull(sphinxConfigURL);
-        _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
+        Assert.assertNotNull(sphinxConfigURL);
+        LOGGER.debug("sphinxConfigURL: " + sphinxConfigURL);
 
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
         SphinxRecEngine engine = new SphinxRecEngine(cm,1);
@@ -103,9 +90,9 @@ public class TestSphinxRecEngineReplicated extends AbstractTestCase {
                 JMFUtil.CONTENT_DESCRIPTOR_RAW
         );
 
-        _logger.debug("Creating realized processor...");
+        LOGGER.debug("Creating realized processor...");
         Processor processor2 = Manager.createRealizedProcessor(pm);
-        _logger.debug("Processor realized.");
+        LOGGER.debug("Processor realized.");
 
         processor2.addControllerListener(new ProcessorStarter(true));
         PushBufferDataSource pbds2 = (PushBufferDataSource) processor2.getDataOutput();
@@ -118,7 +105,7 @@ public class TestSphinxRecEngineReplicated extends AbstractTestCase {
         processor2.start();
         Thread.sleep(1000);  // give processor2 a chance to start
         processor1.start();
-        _logger.debug("Starting recog thread...");
+        LOGGER.debug("Starting recog thread...");
         engine.startRecogThread();
 
         // wait for result
@@ -131,8 +118,8 @@ public class TestSphinxRecEngineReplicated extends AbstractTestCase {
 
         engine.passivate();
 
-        _logger.debug("result=" + result);
-        assertEquals(expected, result.toString());
+        LOGGER.debug("result=" + result);
+        Assert.assertEquals(expected, result.toString());
 
     }
 }

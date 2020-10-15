@@ -22,29 +22,27 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
-
 import java.net.URL;
 
 import javax.media.MediaLocator;
 import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * Unit test for SphinxRecEngine using raw (un-replicated) audio data from a prompt file for input.
  */
-public class TestSphinxRecEngineRaw extends AbstractTestCase {
+public class TestSphinxRecEngineRaw {
 
     private static Logger _logger = Logger.getLogger(TestSphinxRecEngineRaw.class);
     
@@ -56,27 +54,14 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 
     /**
      * Create the test case
-     * 
-     * @param testName
-     *            name of the test case
      */
-    public TestSphinxRecEngineRaw(String testName) {
-        super(testName);
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestSphinxRecEngineRaw.class);
+    public TestSphinxRecEngineRaw() {
     }
 
     /**
      * The following test is disabled since TIDIGITS is not available for 8k sample rate
      */
     public void xtest12345() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
 
@@ -90,8 +75,6 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
      * The following test is disabled since TIDIGITS is not available for 8k sample rate
      */
     public void xtest12345Alt() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
 
@@ -105,8 +88,6 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
      * The following test is disabled since TIDIGITS is not available for 8k sample rate
      */
     public void xtest12345Alt2() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
 
@@ -120,8 +101,6 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
      * The following test is disabled since TIDIGITS is not available for 8k sample rate
      */
     public void xtestSilence12345() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
 
@@ -135,8 +114,6 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
      * The following test is disabled since TIDIGITS is not available for 8k sample rate
      */
     public void xtest123456() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
 
@@ -150,8 +127,6 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
      * The following test is disabled since TIDIGITS is not available for 8k sample rate
      */
     public void xtest123456NoSpeechClassifier() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, NO_EP_FRONTEND);
 
@@ -161,9 +136,8 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 //        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
+    @Test
     public void testHelloRita() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "hello");
@@ -174,9 +148,8 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 //        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
+    @Test
     public void testGetMeAStockQuote() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "example");
@@ -187,9 +160,8 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 //        recognizeAudioFile(sphinxConfigURL, audioFileURL, expected);
     }
 
+    @Test
     public void testIWouldLikeSportsNews() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "example");
@@ -201,8 +173,6 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
     }
 
     public void saltestMultiRecog() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "example");
@@ -228,9 +198,9 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
         _logger.debug("audioFileURL: " + audioFileURL1);
         _logger.debug("expected: \"" + expected1 + '"');
 
-        assertNotNull(sphinxConfigURL);
-        assertNotNull(audioFileURL1);
-        assertNotNull(expected1);
+        Assert.assertNotNull(sphinxConfigURL);
+        Assert.assertNotNull(audioFileURL1);
+        Assert.assertNotNull(expected1);
 
         // configure sphinx
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
@@ -238,7 +208,7 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 
         RecognitionResult result1 = doRecognize(engine, audioFileURL1);
         _logger.debug("result=" + result1);
-        assertEquals(expected1, result1.toString());
+        Assert.assertEquals(expected1, result1.toString());
 
         if (audioFileURL2 != null && expected2 != null) {
             _logger.debug("audioFileURL2: " + audioFileURL2);
@@ -246,7 +216,7 @@ public class TestSphinxRecEngineRaw extends AbstractTestCase {
 
             RecognitionResult result2 = doRecognize(engine, audioFileURL2);
             _logger.debug("result2=" + result2);
-            assertEquals(expected2, result2.toString());
+            Assert.assertEquals(expected2, result2.toString());
 
         }
 

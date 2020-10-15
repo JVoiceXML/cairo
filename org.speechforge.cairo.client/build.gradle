@@ -23,7 +23,7 @@ dependencies {
     compile project(':org.speechforge.cairo.sip')
     compile project(':org.speechforge.cairo.rtp')
     
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'junit', name: 'junit', version: '4.13.1'
     testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 
 }
