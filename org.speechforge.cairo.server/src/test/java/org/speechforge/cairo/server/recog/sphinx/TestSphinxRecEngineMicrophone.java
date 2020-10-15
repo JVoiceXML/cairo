@@ -24,30 +24,29 @@ package org.speechforge.cairo.server.recog.sphinx;
 
 import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
 
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
-
 import java.net.URL;
 
 import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+import org.speechforge.cairo.server.recog.RecognitionResult;
+import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
 
 import edu.cmu.sphinx.util.props.ConfigurationManager;
-
-import org.apache.log4j.Logger;
 
 /**
  * Unit test for SphinxRecEngine using local microphone for input.
  */
-public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
+public class TestSphinxRecEngineMicrophone {
 
-    private static Logger _logger = Logger.getLogger(TestSphinxRecEngineMicrophone.class);
+    private static Logger LOGGER =
+            Logger.getLogger(TestSphinxRecEngineMicrophone.class);
 
     private static final String PROP_FRONTEND =     "frontend";
     private static final String EP_FRONTEND =       "epFrontEnd";
@@ -57,25 +56,12 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
 
     /**
      * Create the test case
-     * 
-     * @param testName
-     *            name of the test case
      */
-    public TestSphinxRecEngineMicrophone(String testName) {
-        super(testName);
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(TestSphinxRecEngineMicrophone.class);
+    public TestSphinxRecEngineMicrophone() {
     }
 
     // TODO: rewrite config file "sphinx-config-TIDIGITS.xml" to support batch or live CMN.
     public void XtestTidigits12345() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-TIDIGITS.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
 
@@ -84,9 +70,8 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
         recognizeMicrophone(sphinxConfigURL, expected);
     }
 
+    @Test
     public void testWsj12345() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "digits");
@@ -96,9 +81,8 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
         recognizeMicrophone(sphinxConfigURL, expected);
     }
 
+    @Test
     public void testHelloRita() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "hello");
@@ -108,9 +92,8 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
         recognizeMicrophone(sphinxConfigURL, expected);
     }
 
+    @Test
     public void testGetMeAStockQuote() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "example");
@@ -120,9 +103,8 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
         recognizeMicrophone(sphinxConfigURL, expected);
     }
 
+    @Test
     public void testIWouldLikeSportsNews() throws Exception {
-        debugTestName(_logger);
-
         URL sphinxConfigURL = this.getClass().getResource("sphinx-config-WSJ.xml");
         System.setProperty(PROP_FRONTEND, EP_FRONTEND);
         System.setProperty(PROP_GRAMMAR_NAME, "example");
@@ -134,20 +116,20 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
 
     private static void recognizeMicrophone(URL sphinxConfigURL, String expected) throws Exception {
 
-        _logger.debug("sphinxConfigURL: " + sphinxConfigURL);
-        _logger.debug("expected: \"" + expected + '"');
+        LOGGER.debug("sphinxConfigURL: " + sphinxConfigURL);
+        LOGGER.debug("expected: \"" + expected + '"');
 
-        assertNotNull(sphinxConfigURL);
-        assertNotNull(expected);
+        Assert.assertNotNull(sphinxConfigURL);
+        Assert.assertNotNull(expected);
 
         // configure sphinx
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
         SphinxRecEngine engine = new SphinxRecEngine(cm,1);
 
         RecognitionResult result = doRecognize(engine, expected);
-        _logger.debug("result=" + result);
+        LOGGER.debug("result=" + result);
 
-        assertEquals(expected, result.toString());
+        Assert.assertEquals(expected, result.toString());
 
     }
 
@@ -166,9 +148,9 @@ public class TestSphinxRecEngineMicrophone extends AbstractTestCase {
 
 
         engine.startRecognition(pbds, listener);
-        _logger.debug("Starting recog thread...");
+        LOGGER.debug("Starting recog thread...");
         engine.startRecogThread();
-        _logger.info("\n\nWaiting for you to say \"" + expected + "\"...\n\n");
+        LOGGER.info("\n\nWaiting for you to say \"" + expected + "\"...\n\n");
 
         // wait for result
         synchronized (listener) {
