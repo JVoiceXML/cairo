@@ -55,7 +55,7 @@ import org.apache.log4j.Logger;
  */
 public class SpeechDataRecorder extends BaseDataProcessor {
 
-    private static Logger _logger = Logger.getLogger(SpeechDataRecorder.class);
+    private static Logger LOGGER = Logger.getLogger(SpeechDataRecorder.class);
 
     private SpeechEventListener _speechEventListener = null;
 
@@ -87,16 +87,16 @@ public class SpeechDataRecorder extends BaseDataProcessor {
         Data data = getPredecessor().getData();
         if (data instanceof SpeechStartSignal) {
             isInSpeech = true;
-            _logger.debug("*************** SpeechStartSignal encountered!");
+            LOGGER.debug("*************** SpeechStartSignal encountered!");
         } else if (data instanceof SpeechEndSignal) {
             stopRecordingData(data);
-            _logger.debug("*************** SpeechEndSignal encountered!");
+            LOGGER.debug("*************** SpeechEndSignal encountered!");
         } else if (data instanceof DataStartSignal) {
             baos = new ByteArrayOutputStream();
             dos = new DataOutputStream(baos);
-            _logger.debug("<<<<<<<<<<<<<<< DataStartSignal encountered!");
+            LOGGER.debug("<<<<<<<<<<<<<<< DataStartSignal encountered!");
         } else if (data instanceof DataEndSignal) {
-            _logger.debug(">>>>>>>>>>>>>>> DataEndSignal encountered!");
+            LOGGER.debug(">>>>>>>>>>>>>>> DataEndSignal encountered!");
         }
         
         //if inspeech we want to write to a file.  
@@ -108,7 +108,7 @@ public class SpeechDataRecorder extends BaseDataProcessor {
                 try {
                     dos.writeShort(new Short((short) value));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
         }        
@@ -160,8 +160,8 @@ public class SpeechDataRecorder extends BaseDataProcessor {
         AudioFileFormat.Type outputType = getTargetType("wav");
         String wavName = dumpFilePath + getNextFreeIndex(dumpFilePath) + ".wav";
         
-        _logger.debug("created audio Format Object "+wavFormat.toString());
-        _logger.debug("filename:" + wavName);
+        LOGGER.debug("created audio Format Object "+wavFormat.toString());
+        LOGGER.debug("filename:" + wavName);
 
         byte[] abAudioData = baos.toByteArray();
         ByteArrayInputStream bais = new ByteArrayInputStream(abAudioData);
@@ -173,10 +173,10 @@ public class SpeechDataRecorder extends BaseDataProcessor {
             try {
                 AudioSystem.write(ais, outputType, outWavFile);
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         } else {
-           System.out.println("output type not supported..."); 
+           LOGGER.error("output type not supported..."); 
         }
 
         /*Player player;

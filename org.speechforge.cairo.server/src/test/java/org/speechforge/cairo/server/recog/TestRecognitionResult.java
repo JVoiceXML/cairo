@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.recog;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.speechforge.cairo.rtp.server.sphinx.SpeechDataRecorder;
 import org.speechforge.cairo.util.rule.RuleMatch;
 
 
@@ -32,6 +33,9 @@ import org.speechforge.cairo.util.rule.RuleMatch;
  * Unit test for RecognitionResult.
  */
 public class TestRecognitionResult {
+
+    private static Logger LOGGER = Logger.getLogger(TestRecognitionResult.class);
+
     /**
      * Create the test case
      */
@@ -45,8 +49,7 @@ public class TestRecognitionResult {
         try {
             result = RecognitionResult.constructResultFromString(str);
         } catch (InvalidRecognitionResultException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         RuleMatch food = new RuleMatch("food","cheeseburger");
         RuleMatch drink = new RuleMatch("drink","pepsi");

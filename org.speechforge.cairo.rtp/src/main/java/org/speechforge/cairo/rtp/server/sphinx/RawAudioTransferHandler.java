@@ -41,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 public class RawAudioTransferHandler implements BufferTransferHandler {
 
-    private static Logger _logger = Logger.getLogger(RawAudioTransferHandler.class);
+    private static Logger LOGGER = Logger.getLogger(RawAudioTransferHandler.class);
 
     private RawAudioProcessor _rawAudioProcessor;
 
@@ -52,14 +52,14 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
     public synchronized void startProcessing(PushBufferStream pbStream)
       throws UnsupportedEncodingException, IllegalStateException {
 
-    	_logger.debug("STARTING PROCESSING IN RAWAUDIO PROCESSOR");
+    	LOGGER.debug("STARTING PROCESSING IN RAWAUDIO PROCESSOR");
         if (_rawAudioProcessor == null) {
             throw new IllegalStateException("RawAudioProcessor is null!");
         }
 
         Format format = pbStream.getFormat();
         if (!(format instanceof AudioFormat)) {
-        	_logger.info("Bad format "+format);
+        	LOGGER.info("Bad format "+format);
             throw new UnsupportedEncodingException("RawAudioTransferHandler can only process audio formats!");
         }
 
@@ -68,14 +68,14 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
             _rawAudioProcessor.startProcessing((AudioFormat) format);
         } catch (UnsupportedEncodingException e) {
             pbStream.setTransferHandler(null);
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             throw e;
         }
 
     }
 
     public synchronized void stopProcessing() {
-        _logger.debug("Stopping RawAudioProcessor...");
+        LOGGER.debug("Stopping RawAudioProcessor...");
         if (_rawAudioProcessor != null) {
             _rawAudioProcessor.stopProcessing();
             _rawAudioProcessor = null;
@@ -86,42 +86,42 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
      * @see javax.media.protocol.BufferTransferHandler#transferData(javax.media.protocol.PushBufferStream)
      */
     public synchronized void transferData(PushBufferStream stream) {
-        if (_logger.isTraceEnabled()) {
-            _logger.trace("transferData callback entered with stream format = " + stream.getFormat());
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("transferData callback entered with stream format = " + stream.getFormat());
         }
 
         if (stream.endOfStream()) {
-            _logger.debug("transferData(): end of stream reached.");
+            LOGGER.debug("transferData(): end of stream reached.");
             //stopProcessing();
         } else {
             try {
                 Buffer buffer = new Buffer();
-                _logger.trace("transferData(): reading stream into buffer...");
+                LOGGER.trace("transferData(): reading stream into buffer...");
                 stream.read(buffer);
-                if (_logger.isTraceEnabled()) {
-                    _logger.trace("transferData(): stream read into buffer : offset=" + buffer.getOffset() + " length=" + buffer.getLength());
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("transferData(): stream read into buffer : offset=" + buffer.getOffset() + " length=" + buffer.getLength());
                 }
                 if (buffer.isEOM()) {
-                    _logger.debug("transferData(): buffer is EOM.");
+                    LOGGER.debug("transferData(): buffer is EOM.");
                     stopProcessing();
                 } else if (buffer.isDiscard()) {
-                    _logger.debug("transferData(): buffer is discard!");
+                    LOGGER.debug("transferData(): buffer is discard!");
                 } else {
                     byte[] data = (byte[]) buffer.getData();
                     if (_rawAudioProcessor != null) {
                         if (buffer.getLength() > 0) {
                             _rawAudioProcessor.addRawData(data, buffer.getOffset(), buffer.getLength());
                         } else {
-                            _logger.debug("transferData(): buffer length is zero!");
+                            LOGGER.debug("transferData(): buffer length is zero!");
                         }
                     } else {
-                        _logger.trace("transferData(): _rawAudioProcessor is null, discarding data.");
+                        LOGGER.trace("transferData(): _rawAudioProcessor is null, discarding data.");
                     }
                 }
             } catch (IOException e){
-                _logger.warn("transferData() encountered IOException!", e);
+                LOGGER.warn("transferData() encountered IOException!", e);
             } catch (RuntimeException e){
-                _logger.warn("transferData() encountered RuntimeException!", e);
+                LOGGER.warn("transferData() encountered RuntimeException!", e);
             }
         }
         

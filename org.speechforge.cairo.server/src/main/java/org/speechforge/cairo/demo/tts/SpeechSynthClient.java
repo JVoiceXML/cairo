@@ -68,7 +68,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class SpeechSynthClient implements MrcpEventListener {
 
-    private static Logger _logger = Logger.getLogger(SpeechSynthClient.class);
+    private static Logger LOGGER = Logger.getLogger(SpeechSynthClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String REPETITIONS_OPTION = "reps";
@@ -104,8 +104,8 @@ public class SpeechSynthClient implements MrcpEventListener {
      * @see org.mrcp4j.client.MrcpEventListener#eventReceived(org.mrcp4j.message.MrcpEvent)
      */
     public void eventReceived(MrcpEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP event received:\n" + event.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP event received:\n" + event.toString());
         }
 
         try {
@@ -115,11 +115,11 @@ public class SpeechSynthClient implements MrcpEventListener {
                 break;
 
             default:
-                _logger.warn("Unexpected value for event resource type!");
+                LOGGER.warn("Unexpected value for event resource type!");
                 break;
             }
         } catch (IllegalValueException e) {
-            _logger.warn("Illegal value for event resource type!", e);
+            LOGGER.warn("Illegal value for event resource type!", e);
         }
     }
 
@@ -128,7 +128,7 @@ public class SpeechSynthClient implements MrcpEventListener {
             try {
                 Thread.sleep(500);
             } catch (InterruptedException e) {
-                _logger.debug("InterruptedException encountered!", e);
+                LOGGER.debug("InterruptedException encountered!", e);
             }
             System.exit(0);
         }
@@ -146,8 +146,8 @@ public class SpeechSynthClient implements MrcpEventListener {
             _toolkit.beep();
         }
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
 
         return response.getRequestState();
@@ -165,8 +165,8 @@ public class SpeechSynthClient implements MrcpEventListener {
           _toolkit.beep();
       }
 
-      if (_logger.isDebugEnabled()) {
-          _logger.debug("MRCP response received:\n" + response.toString());
+      if (LOGGER.isDebugEnabled()) {
+          LOGGER.debug("MRCP response received:\n" + response.toString());
       }
 
       return response.getRequestState();
@@ -189,8 +189,8 @@ public class SpeechSynthClient implements MrcpEventListener {
         _toolkit.beep();
     }
 
-    if (_logger.isDebugEnabled()) {
-        _logger.debug("MRCP response received:\n" + response.toString());
+    if (LOGGER.isDebugEnabled()) {
+        LOGGER.debug("MRCP response received:\n" + response.toString());
     }
 
     return response.getRequestState();
@@ -244,8 +244,7 @@ public class SpeechSynthClient implements MrcpEventListener {
                         sipAgent.sendBye();
                         sipAgent.dispose();
                     } catch (SipException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
 
                 }
@@ -267,7 +266,7 @@ public class SpeechSynthClient implements MrcpEventListener {
             try {
                 _repetitions = Integer.parseInt(line.getOptionValue(REPETITIONS_OPTION));
             } catch (NumberFormatException e) {
-                _logger.debug("Could not parse repetitions parameter to int!", e);
+                LOGGER.debug("Could not parse repetitions parameter to int!", e);
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("SpeechSynthClient [options] <prompt-text> <local-rtp-port>", options);
                 return;
@@ -285,7 +284,7 @@ public class SpeechSynthClient implements MrcpEventListener {
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -312,11 +311,11 @@ public class SpeechSynthClient implements MrcpEventListener {
         SdpMessage message = constructResourceMessage(localRtpPort,format);
 
         // Send the sip invitation (This method on the SipAgent blocks until a response is received or a timeout occurs) 
-        _logger.info("Sending a SIP invitation to the cairo server.");
+        LOGGER.info("Sending a SIP invitation to the cairo server.");
         SdpMessage inviteResponse = sipAgent.sendInviteWithoutProxy(_cairoSipAddress, message, peerAddress, _peerPort);
 
         if (inviteResponse != null) {
-            _logger.info("Received the SIP Response.");
+            LOGGER.info("Received the SIP Response.");
 
             // Get the MRCP media channels (need the port number and the channelID that are sent
             // back from the server in the response in order to setup the MRCP channel)
@@ -331,7 +330,7 @@ public class SpeechSynthClient implements MrcpEventListener {
             MrcpChannel ttsChannel = provider.createChannel(channelId, rserverHost, port, protocol);
 
             //Setup a media client to receive and play the sythesized voice data streamed over the RTP channel
-            _logger.debug("Starting NativeMediaClient for receive only...");
+            LOGGER.debug("Starting NativeMediaClient for receive only...");
             _mediaClient = new NativeMediaClient(localHost, localRtpPort); 
 
             SpeechSynthClient client = new SpeechSynthClient(ttsChannel);
@@ -349,9 +348,9 @@ public class SpeechSynthClient implements MrcpEventListener {
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
                     MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                    _logger.warn("MRCP response received:\n" + response);
+                    LOGGER.warn("MRCP response received:\n" + response);
                 }
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
                 sipAgent.sendBye();
                 sipAgent.dispose();
                 sentBye = true;
@@ -360,7 +359,7 @@ public class SpeechSynthClient implements MrcpEventListener {
 
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out or failed.  Is server running?");
+            LOGGER.info("Sip Invitation timed out or failed.  Is server running?");
         }
         Thread.sleep(1000000); 
     }

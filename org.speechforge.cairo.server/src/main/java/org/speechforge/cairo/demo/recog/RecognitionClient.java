@@ -73,7 +73,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class RecognitionClient implements MrcpEventListener {
 
-    private static Logger _logger = Logger.getLogger(RecognitionClient.class);
+    private static Logger LOGGER = Logger.getLogger(RecognitionClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String URL_OPTION = "url";
@@ -107,8 +107,8 @@ public class RecognitionClient implements MrcpEventListener {
      * @see org.mrcp4j.client.MrcpEventListener#eventReceived(org.mrcp4j.message.MrcpEvent)
      */
     public void eventReceived(MrcpEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP event received:\n" + event.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP event received:\n" + event.toString());
         }
 
         try {
@@ -119,11 +119,11 @@ public class RecognitionClient implements MrcpEventListener {
                 break;
 
             default:
-                _logger.warn("Unexpected value for event resource type!");
+                LOGGER.warn("Unexpected value for event resource type!");
                 break;
             }
         } catch (IllegalValueException e) {
-            _logger.warn("Illegal value for event resource type!", e);
+            LOGGER.warn("Illegal value for event resource type!", e);
         }
    }
 
@@ -162,19 +162,19 @@ public class RecognitionClient implements MrcpEventListener {
             _toolkit.beep();
         }
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
         
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
             throw new RuntimeException("Recognition failed to start!");
         }
         
-        if (_logger.isInfoEnabled()) {
+        if (LOGGER.isInfoEnabled()) {
             if (examplePhrase == null) {
-                _logger.info("\nStart speaking now...");
+                LOGGER.info("\nStart speaking now...");
             } else {
-                _logger.info("\nStart speaking now... (e.g. \"" + examplePhrase + "\")");
+                LOGGER.info("\nStart speaking now... (e.g. \"" + examplePhrase + "\")");
             }
         }
 
@@ -228,7 +228,7 @@ public class RecognitionClient implements MrcpEventListener {
         // unexpected crash (ie ctrl-c)
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                _logger.debug("Running shutdown hook");
+                LOGGER.debug("Running shutdown hook");
                 if (mediaClient != null)
                    mediaClient.shutdown();
                 if (!sentBye && sipAgent!=null) {
@@ -236,8 +236,7 @@ public class RecognitionClient implements MrcpEventListener {
                         sipAgent.sendBye();
                         sipAgent.dispose();
                     } catch (SipException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
 
                 }
@@ -267,7 +266,7 @@ public class RecognitionClient implements MrcpEventListener {
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -299,10 +298,10 @@ public class RecognitionClient implements MrcpEventListener {
         SdpMessage message = constructResourceMessage(localRtpPort,format);
 
         // Send the sip invitation (This method on the SipAgent blocks until a response is received or a timeout occurs) 
-        _logger.info("Sending a SIP invitation to the cairo server.");
+        LOGGER.info("Sending a SIP invitation to the cairo server.");
         SdpMessage inviteResponse = sipAgent.sendInviteWithoutProxy(_cairoSipAddress, message, peerAddress, _peerPort);
         if (inviteResponse != null) {
-            _logger.info("Received the SIP Response.");
+            LOGGER.info("Received the SIP Response.");
 
             // Get the MRCP media channels (need the port number and the channelID that are sent
             // back from the server in the response in order to setup the MRCP channel)
@@ -320,11 +319,11 @@ public class RecognitionClient implements MrcpEventListener {
                 remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();
                 //rtpmd.get(1).getMedia().setMediaPort(localPort);
             } else {
-                _logger.warn("No Media channel specified in the invite request");
+                LOGGER.warn("No Media channel specified in the invite request");
                 //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
             }
 
-            _logger.debug("Starting NativeMediaClient...");
+            LOGGER.debug("Starting NativeMediaClient...");
             mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
@@ -338,23 +337,23 @@ public class RecognitionClient implements MrcpEventListener {
 
             try {
                 String result = client.doRecognize(grammarUrl, examplePhrase);
-                if (_logger.isInfoEnabled()) {
+                if (LOGGER.isInfoEnabled()) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("\n**************************************************************");
                     sb.append("\nRecognition result: ").append(result);
                     sb.append("\n**************************************************************\n");
-                    _logger.info(sb);
+                    LOGGER.info(sb);
                 }
 
 
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
                     MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("MRCP response received:\n" + response.toString());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("MRCP response received:\n" + response.toString());
                     }
                 }
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
                 sipAgent.sendBye();
                 sipAgent.dispose();
                 sentBye = true;
@@ -363,7 +362,7 @@ public class RecognitionClient implements MrcpEventListener {
 
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out.  Is server running?");
+            LOGGER.info("Sip Invitation timed out.  Is server running?");
         }
         Thread.sleep(1000000); 
     }

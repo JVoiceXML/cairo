@@ -58,7 +58,7 @@ public class RTPRecogChannel {
     public static final short SPEECH_IN_PROGRESS = 1;
     public static final short COMPLETE = 2;
 
-    static Logger _logger = Logger.getLogger(RTPRecogChannel.class);
+    static Logger LOGGER = Logger.getLogger(RTPRecogChannel.class);
 
     private /*static*/ Timer _timer = new Timer();
 
@@ -108,39 +108,38 @@ public class RTPRecogChannel {
             throw new IllegalStateException("Recognition already in progress!");
             // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
         }
-        _logger.debug("OK, processor was null");
+        LOGGER.debug("OK, processor was null");
 
 
         _pair  = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
         _processor = _pair.getProc();
-        _logger.debug("OK, created new realized processor");
+        LOGGER.debug("OK, created new realized processor");
         
         PushBufferDataSource dataSource = (PushBufferDataSource) _processor.getDataOutput();
-        _logger.debug("OK, created new datasource "+dataSource);
+        LOGGER.debug("OK, created new datasource "+dataSource);
         
         if (dataSource == null) {
             throw new IOException("Processor.getDataOutput() returned null!");
         }
 
         try {
-            _logger.debug("Borrowing recognition engine from object pool...");
+            LOGGER.debug("Borrowing recognition engine from object pool...");
             _recEngine = (SphinxRecEngine) _recEnginePool.borrowObject();
         } catch (Exception e) {
-        	e.printStackTrace();
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
             closeProcessor();
             throw new ResourceUnavailableException("All rec engines are in use!", e);
             // TODO: wait for availability...?
         }
 
-        _logger.debug("Recognize command with a listener: "+listener);
+        LOGGER.debug("Recognize command with a listener: "+listener);
         _recogListener = new Listener(listener);
         
         try {
-            _logger.debug("Loading grammar...");
+            LOGGER.debug("Loading grammar...");
             _recEngine.loadJSGF(grammarLocation);
             _recEngine.setHotword(hotword);
-            _logger.debug("Starting recognition...");
+            LOGGER.debug("Starting recognition...");
             _state = WAITING_FOR_SPEECH;
             _recEngine.startRecognition(dataSource, _recogListener);
 
@@ -196,22 +195,22 @@ public class RTPRecogChannel {
 
     public synchronized void closeProcessor() {
         if (_processor != null) {
-          _logger.debug("Closing processor...");
+          LOGGER.debug("Closing processor...");
             _processor.close();
             _processor = null;
             _replicator.removeReplicant( _pair.getPbds());
         }
         if (_recEngine != null) {
-            _logger.debug("Returning recengine to pool...");
+            LOGGER.debug("Returning recengine to pool...");
             try {
                 _recEnginePool.returnObject(_recEngine);
             } catch (Exception e) {
                 // TODO Auto-generated catch block
-                _logger.debug(e, e);
+                LOGGER.debug(e, e);
             }
             _recEngine = null;
         } else {
-            _logger.warn("No recengine to return to pool!");
+            LOGGER.warn("No recengine to return to pool!");
         }
     }
 
@@ -251,7 +250,7 @@ public class RTPRecogChannel {
          */
         @Override
         public void speechStarted() {
-            _logger.debug("speechStarted()");
+            LOGGER.debug("speechStarted()");
 
             synchronized (RTPRecogChannel.this) {
                 if (_state == WAITING_FOR_SPEECH) {
@@ -270,7 +269,7 @@ public class RTPRecogChannel {
          */
         @Override
         public void recognitionComplete(RecognitionResult result) {
-            _logger.debug("recognitionComplete()");
+            LOGGER.debug("recognitionComplete()");
 
             boolean doit = false;
             synchronized (RTPRecogChannel.this) {
