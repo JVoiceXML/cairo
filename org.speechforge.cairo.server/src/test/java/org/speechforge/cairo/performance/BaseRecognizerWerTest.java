@@ -23,7 +23,7 @@ import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
  */
 public abstract class BaseRecognizerWerTest {
     
-    private static Logger _logger = Logger.getLogger(BaseRecognizerWerTest.class);
+    private static Logger LOGGER = Logger.getLogger(BaseRecognizerWerTest.class);
 
    ConfigurationManager cm;
    Recognizer recognizer;
@@ -50,19 +50,19 @@ public abstract class BaseRecognizerWerTest {
         
         int wordsInExpectedResult = expected.split(" ").length;
         if (expected == null) {
-            _logger.info("Null Expected result!  Check test script.");
+            LOGGER.info("Null Expected result!  Check test script.");
             throw new RuntimeException();
         }
         int distance = wordsInExpectedResult;
         if (actual == null) {
-            _logger.info("Null result.  Counting errors as # of words in expected result.  100% error.");
+            LOGGER.info("Null result.  Counting errors as # of words in expected result.  100% error.");
         } else {
            distance = LevenshteinDistance(actual, expected);
         }
         double WER = (double)distance/(double)wordsInExpectedResult;
         AccumulatedWER = AccumulatedWER + WER;
         testCount++;
-        _logger.info(testCount+" : WER %"+100.0*WER+" ("+actual+"/"+expected+")");
+        LOGGER.info(testCount+" : WER %"+100.0*WER+" ("+actual+"/"+expected+")");
 
         
     }
@@ -107,7 +107,7 @@ public abstract class BaseRecognizerWerTest {
     }
 
     public void runTests(String fname) {
-        _logger.info("Stating up with config file: "+fname);
+        LOGGER.info("Stating up with config file: "+fname);
 
         try {
             BufferedReader in = new BufferedReader(new FileReader(fname));
@@ -117,7 +117,7 @@ public abstract class BaseRecognizerWerTest {
                 linecount++;
                 if (linecount == 1 ) {                // first line just get the sphinx config file
                     URL configURL = this.getClass().getResource(str);
-                    _logger.info(configURL);
+                    LOGGER.info(configURL);
                     setUp(configURL);
                 } else if (linecount == 2 ) {          // second  line just get the grammar file
                     URL grammarFileURL = this.getClass().getResource(str);
@@ -127,8 +127,8 @@ public abstract class BaseRecognizerWerTest {
                 } else {                        // run the test
                     String test[] = str.split(",");
                     if (test.length < 2) {
-                        _logger.info("Bad test. "+test.length+" params.  need at least 2");
-                        _logger.info(str);
+                        LOGGER.info("Bad test. "+test.length+" params.  need at least 2");
+                        LOGGER.info(str);
                     } else {
                        //System.out.println("Test # "+(linecount-2)+ " "+test[1]);
                        String af = test[0];
@@ -142,16 +142,14 @@ public abstract class BaseRecognizerWerTest {
                 }
             }
             in.close();
-            _logger.info("Ran "+testCount+" tests with accumulated Word Error Rate of %"+ 100.0*AccumulatedWER/testCount);
+            LOGGER.info("Ran "+testCount+" tests with accumulated Word Error Rate of %"+ 100.0*AccumulatedWER/testCount);
             shutdown();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (JSGFGrammarParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
 		} catch (JSGFGrammarException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	                LOGGER.warn(e.getMessage(), e);
 		}
         
         

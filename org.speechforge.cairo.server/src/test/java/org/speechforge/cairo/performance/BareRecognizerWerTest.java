@@ -25,7 +25,7 @@ import org.speechforge.cairo.server.recog.GrammarLocation;
  */
 public class BareRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger _logger = Logger.getLogger(BareRecognizerWerTest.class);
+    private static Logger LOGGER = Logger.getLogger(BareRecognizerWerTest.class);
   
     public void  shutdown() {
         
@@ -48,16 +48,15 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
             /* allocate the resource necessary for the recognizer */
             recognizer.allocate();
         } catch (PropertyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
     public  String recognizeAudioFile(URL audioFileURL) {   
       Result result = null;
       try {
-            _logger.info("Test file: "+audioFileURL.getFile());
-            _logger.info(AudioSystem.getAudioFileFormat(audioFileURL));
+            LOGGER.info("Test file: "+audioFileURL.getFile());
+            LOGGER.info(AudioSystem.getAudioFileFormat(audioFileURL));
             StreamDataSource reader = (StreamDataSource) cm.lookup("streamDataSource");
             AudioInputStream ais = AudioSystem.getAudioInputStream(audioFileURL);
             
@@ -67,14 +66,11 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
             result = recognizer.recognize();
 
         } catch (IOException e) {
-            System.err.println("Problem when loading WavFile: " + e);
-            e.printStackTrace();
+            LOGGER.warn("Problem when loading WavFile: " + e, e);
         } catch (PropertyException e) {
-            System.err.println("Problem configuring WavFile: " + e);
-            e.printStackTrace();
+            LOGGER.warn("Problem configuring WavFile: " + e, e);
         } catch (UnsupportedAudioFileException e) {
-            System.err.println("Audio file format not supported: " + e);
-            e.printStackTrace();
+            LOGGER.warn("Audio file format not supported: " + e, e);
         }
         return result.getBestFinalResultNoFiller();
         

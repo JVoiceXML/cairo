@@ -200,12 +200,10 @@ public class SipAgent {
             } catch (UnknownHostException e) {
                 host = "127.0.0.1";
                 //host = "localhost";
-                LOGGER.debug(e, e);
-                e.printStackTrace();
+                LOGGER.warn(e, e);
             } catch (SocketException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+                LOGGER.warn(e.getMessage(), e);
+            }
         }
         
         guidPrefix = host + port + System.currentTimeMillis();

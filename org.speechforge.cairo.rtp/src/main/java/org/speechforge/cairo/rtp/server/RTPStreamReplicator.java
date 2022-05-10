@@ -52,7 +52,7 @@ import org.apache.log4j.Logger;
  */
 public class RTPStreamReplicator extends RTPConsumer {
 
-    private static Logger _logger = Logger.getLogger(RTPStreamReplicator.class);
+    private static Logger LOGGER = Logger.getLogger(RTPStreamReplicator.class);
 
     private PBDSReplicator _replicator;
     private Processor _processor;
@@ -108,7 +108,7 @@ public class RTPStreamReplicator extends RTPConsumer {
                 ProcessorModel pm = new ProcessorModel(
                         dataSource, preferredFormats, CONTENT_DESCRIPTOR_RAW);
                 try {
-                    _logger.debug("Creating realized processor...");
+                    LOGGER.debug("Creating realized processor...");
                     _processor = Manager.createRealizedProcessor(pm);
                     _processor.addControllerListener(new ProcessorStarter());
                 } catch (IOException e){
@@ -119,7 +119,7 @@ public class RTPStreamReplicator extends RTPConsumer {
                     throw (IOException) new IOException(e.getMessage()).initCause(e);
                 }
 
-                _logger.debug("Internal Processor realized.");
+                LOGGER.debug("Internal Processor realized.");
 
                 PushBufferDataSource pbds = (PushBufferDataSource) _processor.getDataOutput();
                 _replicator = new PBDSReplicator(pbds);
@@ -128,7 +128,7 @@ public class RTPStreamReplicator extends RTPConsumer {
             } catch (IOException e) {
                 _processor = null;
                 _replicator = null;  // TODO: close properly
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
             }
         }
     }
@@ -151,12 +151,12 @@ public class RTPStreamReplicator extends RTPConsumer {
             //_replicator.shutdown();
             _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
             if (_processor != null) {
-                if (_logger.isDebugEnabled()) {
-                    _logger.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
                 }
                 _processor.close();
                 _processor = null;
-                if (_logger.isDebugEnabled()) 
+                if (LOGGER.isDebugEnabled()) 
                    recorder.streamInactive(null,false);
             }
         //}
@@ -180,7 +180,7 @@ public class RTPStreamReplicator extends RTPConsumer {
                     this.wait(maxWait); //TODO: make sure timeout period has passed
                 } catch (InterruptedException e) {
                     // TODO: throw this exception?
-                    _logger.warn(e, e);
+                    LOGGER.warn(e, e);
                 }
             }
             if (_replicator == null) {
@@ -194,18 +194,16 @@ public class RTPStreamReplicator extends RTPConsumer {
         		pbds, preferredMediaFormats, outputContentDescriptor);
         Processor processor =null;
         try {
-            _logger.debug("Creating realized processor...");
+            LOGGER.debug("Creating realized processor...");
             processor = Manager.createRealizedProcessor(pm);
-            _logger.debug("Done Creating realized processor...");
+            LOGGER.debug("Done Creating realized processor...");
         } catch (IOException e){
-        	e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
            // throw e;
         } catch (javax.media.CannotRealizeException e){
-           	e.printStackTrace();
-            //throw (IOException) new IOException(e.getMessage()).initCause(e);
+            LOGGER.warn(e.getMessage(), e);
         } catch (javax.media.NoProcessorException e){
-           	e.printStackTrace();
-           //throw (IOException) new IOException(e.getMessage()).initCause(e);
+            LOGGER.warn(e.getMessage(), e);
         }
 
         /*if (_logger.isDebugEnabled()) {
@@ -213,14 +211,14 @@ public class RTPStreamReplicator extends RTPConsumer {
                 recorder = new RecorderMediaClient(_replicator.replicate());
             } catch (NoPlayerException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             } catch (CannotRealizeException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         }*/
 
-        _logger.debug("Processor realized.");
+        LOGGER.debug("Processor realized.");
 
         return new ProcessorReplicatorPair(processor,pbds);
 

@@ -36,7 +36,7 @@ import org.speechforge.cairo.jmf.ProcessorStarter;
  */
 public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger _logger = Logger.getLogger(JMFRecognizerWerTest.class);
+    private static Logger LOGGER = Logger.getLogger(JMFRecognizerWerTest.class);
 
     ConfigurationManager cm;
     Recognizer recognizer;
@@ -67,14 +67,11 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
             engine = new SphinxRecEngine(cm,1);
             
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (PropertyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -85,16 +82,14 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
         AudioFileFormat fileFormat = null;
         try {
              fileFormat = AudioSystem.getAudioFileFormat(audioFileURL);
-        } catch (UnsupportedAudioFileException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (UnsupportedAudioFileException e) {
+            LOGGER.warn(e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.warn(e.getMessage(), e);
         }      
         
-        _logger.info("Test file: "+audioFileURL.getFile());
-        _logger.info(fileFormat.toString());
+        LOGGER.info("Test file: "+audioFileURL.getFile());
+        LOGGER.info(fileFormat.toString());
         javax.media.format.AudioFormat format =  new javax.media.format.AudioFormat(
                 javax.media.format.AudioFormat.LINEAR,                           //encoding
                 fileFormat.getFormat().getSampleRate(),                          //sample rate
@@ -111,17 +106,13 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
         try {
             processor = JMFUtil.createRealizedProcessor(new MediaLocator(audioFileURL), format);  //SourceAudioFormat.PREFERRED_MEDIA_FORMAT);
         } catch (NoProcessorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (NoDataSourceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (CannotRealizeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         processor.addControllerListener(new ProcessorStarter());
         PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
@@ -130,8 +121,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
         try {
             engine.startRecognition(pbds, listener);
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         processor.start();
         engine.startRecogThread();
@@ -143,8 +133,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
                 try {
                     listener.wait(1000);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
         }

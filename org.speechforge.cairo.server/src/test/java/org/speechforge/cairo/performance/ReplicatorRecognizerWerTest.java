@@ -51,7 +51,7 @@ import org.speechforge.cairo.jmf.ProcessorStarter;
  */
 public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger _logger = Logger.getLogger(ReplicatorRecognizerWerTest.class);
+    private static Logger LOGGER = Logger.getLogger(ReplicatorRecognizerWerTest.class);
     ConfigurationManager cm;
     Recognizer recognizer;
     SphinxRecEngine engine;
@@ -78,14 +78,11 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
             engine = new SphinxRecEngine(cm,1);
             
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (PropertyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
     }
 
@@ -96,16 +93,14 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         AudioFileFormat fileFormat = null;
         try {
              fileFormat = AudioSystem.getAudioFileFormat(audioFileURL);
-        } catch (UnsupportedAudioFileException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (UnsupportedAudioFileException e) {
+            LOGGER.warn(e.getMessage(), e);
+        } catch (IOException e) {
+            LOGGER.warn(e.getMessage(), e);
         }      
         
-        _logger.info("Test file: "+audioFileURL.getFile());
-        _logger.info(fileFormat.toString());
+        LOGGER.info("Test file: "+audioFileURL.getFile());
+        LOGGER.info(fileFormat.toString());
         javax.media.format.AudioFormat format =  new javax.media.format.AudioFormat(
                 javax.media.format.AudioFormat.LINEAR,                           //encoding
                 fileFormat.getFormat().getSampleRate(),                          //sample rate
@@ -119,17 +114,13 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         try {
             processor1 = JMFUtil.createRealizedProcessor(new MediaLocator(audioFileURL), format);
         } catch (NoProcessorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (NoDataSourceException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (CannotRealizeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         processor1.addControllerListener(new ProcessorStarter(true));
 
@@ -148,14 +139,11 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         try {
             processor2 = Manager.createRealizedProcessor(pm);
         } catch (NoProcessorException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (CannotRealizeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         processor2.addControllerListener(new ProcessorStarter(true));
         PushBufferDataSource pbds2 = (PushBufferDataSource) processor2.getDataOutput();
@@ -166,16 +154,14 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         try {
             engine.startRecognition(pbds2, listener);
         } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
 
         processor2.start();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }  // give processor2 a chance to start
         processor1.start();
 
@@ -188,8 +174,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
                 try {
                     listener.wait(1000);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
         }
