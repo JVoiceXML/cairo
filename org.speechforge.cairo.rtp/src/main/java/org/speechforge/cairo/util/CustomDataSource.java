@@ -12,7 +12,7 @@ import java.io.InputStream;
  
 public class CustomDataSource extends PushBufferDataSource {
 	
-    	private static Logger _logger = Logger.getLogger(CustomDataSource.class);
+    	private static Logger LOGGER = Logger.getLogger(CustomDataSource.class);
 
 	    protected Object [] controls = new Object[0];
 	    protected boolean started = false;
@@ -32,7 +32,7 @@ public class CustomDataSource extends PushBufferDataSource {
 	    
 	    public String getContentType() {
 		if (!connected){
-	            System.err.println("Error: DataSource not connected");
+	            LOGGER.error("Error: DataSource not connected");
 	            return null;
 	        }
 		return contentType;

@@ -297,7 +297,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	                LOGGER.warn(e.getMessage(), e);
 	            }
 	        } else {
-	           System.out.println("output type not supported..."); 
+	           LOGGER.info("output type not supported..."); 
 	        }
 
 	        /*Player player;

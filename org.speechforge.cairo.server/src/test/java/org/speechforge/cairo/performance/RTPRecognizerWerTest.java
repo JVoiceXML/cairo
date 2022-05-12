@@ -192,14 +192,14 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         // confidence for best path 
         //Path bestPath = confidenceResult.getBestHypothesis(); 
         //double pathConfidence = bestPath.getConfidence();
-        //System.out.println(bestPath.toString()+ " confidence: "+pathConfidence+"/"+bestPath.getScore());
+        //LOGGER.info(bestPath.toString()+ " confidence: "+pathConfidence+"/"+bestPath.getScore());
 
         // confidence for each word in best path 
         //WordResult[] words = bestPath.getWords(); 
         //for (int i = 0; i < words.length; i++) { 
         //    WordResult wordResult = (WordResult) words[i]; 
         //    double wordConfidence = wordResult.getConfidence(); 
-        //    System.out.println(wordResult.toString()+" confidence: "+wordConfidence);
+        //    LOGGER.info(wordResult.toString()+" confidence: "+wordConfidence);
         //} 
 
 
@@ -292,7 +292,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         }
         
         public void playComplete() {
-            //System.out.println("Play Completed");
+            //LOGGER.info("Play Completed");
 
 
             synchronized (this) {
@@ -447,7 +447,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
     
     
     public static void main(String[] args) {
-        System.out.println("Stating up with config file: "+args[0]);
+        LOGGER.info("Stating up with config file: "+args[0]);
         BaseRecognizerWerTest rp = new RTPRecognizerWerTest();
         rp.runTests(args[0]);       
     }

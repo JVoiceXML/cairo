@@ -98,7 +98,7 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         }
         _pbds = pbds;
-        System.out.println("Creating player..");
+        LOGGER.info("Creating player..");
         ProcessorModel pm = new ProcessorModel(pbds, 
                                                new AudioFormat[] {new AudioFormat(javax.media.format.AudioFormat.LINEAR,44100,16,2)}, 
                                                new FileTypeDescriptor(FileTypeDescriptor.BASIC_AUDIO));
@@ -221,9 +221,9 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
             }
         }
        // GlobalTransmissionStats gts = _rtpManager.getGlobalTransmissionStats();
-       // System.out.println("TRANS: "+gts.getTransmitFailed());
+       // LOGGER.info("TRANS: "+gts.getTransmitFailed());
        // GlobalReceptionStats grs = _rtpManager.getGlobalReceptionStats();
-       // System.out.println("RECV: "+grs.toString());
+       // LOGGER.info("RECV: "+grs.toString());
     }
 
     private static String toString(SourceDescription sd) {

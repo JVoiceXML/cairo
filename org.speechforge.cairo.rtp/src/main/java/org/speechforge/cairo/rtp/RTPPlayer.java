@@ -288,12 +288,12 @@ public class RTPPlayer implements ControllerListener {
         }
         
         //ContentDescriptor c = _processor.getContentDescriptor();
-        //System.out.println("Content Descriptor: "+c.toString());
+        //LOGGER.info("Content Descriptor: "+c.toString());
         boolean foundOne = false;
         for (int i=0; i< supported.length; i++) {
 
-            //System.out.println("FORMAT# "+i+" "+supported[i].toString());
-            //System.out.println("FORMAT# "+i+" "+supported[i].getEncoding());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].toString());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].getEncoding());
             if (_af.isSupported(supported[i])) {
                 trackControls[0].setFormat(supported[i]);
                 foundOne = true;

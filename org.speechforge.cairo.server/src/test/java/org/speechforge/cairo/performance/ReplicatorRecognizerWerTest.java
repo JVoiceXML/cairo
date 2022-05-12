@@ -72,7 +72,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         AccumulatedWER = 0.0;
 
         try {
-            System.out.println("Loading Recognizer...\n");
+            LOGGER.info("Loading Recognizer...\n");
             cm = new ConfigurationManager(config);
             jsgfGrammarManager = (JSGFGrammar) cm.lookup("grammar");
             engine = new SphinxRecEngine(cm,1);
@@ -189,7 +189,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
     }
     
     public static void main(String[] args) {
-        System.out.println("Stating up with config file: "+args[0]);
+        LOGGER.info("Stating up with config file: "+args[0]);
         BaseRecognizerWerTest rp = new ReplicatorRecognizerWerTest();
         rp.runTests(args[0]);
         

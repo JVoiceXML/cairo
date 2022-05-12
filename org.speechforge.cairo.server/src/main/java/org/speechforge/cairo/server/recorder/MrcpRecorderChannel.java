@@ -337,10 +337,10 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
     }
 
     static void printUsage() {
-        System.err.println("Usage: MrcpRecorderChannel <recordDir> <mrcpPort> <rtpPort>");
-        System.err.println("     <recordDir>: directory to place recordings of RTP transmissions");
-        System.err.println("     <mrcpPort>: port to listen for MRCP messages");
-        System.err.println("     <rtpPort>: port to listen for RTP transmissions");
+        LOGGER.error("Usage: MrcpRecorderChannel <recordDir> <mrcpPort> <rtpPort>");
+        LOGGER.error("     <recordDir>: directory to place recordings of RTP transmissions");
+        LOGGER.error("     <mrcpPort>: port to listen for MRCP messages");
+        LOGGER.error("     <rtpPort>: port to listen for RTP transmissions");
         System.exit(0);
     }
 

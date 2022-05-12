@@ -196,12 +196,12 @@ public class RTPPlayer2 implements ControllerListener {
         }
         
         ContentDescriptor c = _processor.getContentDescriptor();
-        //System.out.println("Content Descriptor: "+c.toString());
+        //LOGGER.info("Content Descriptor: "+c.toString());
         boolean foundOne = false;
         for (int i=0; i< supported.length; i++) {
 
-            //System.out.println("FORMAT# "+i+" "+supported[i].toString());
-            //System.out.println("FORMAT# "+i+" "+supported[i].getEncoding());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].toString());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].getEncoding());
             if (_af.isSupported(supported[i])) {
                 trackControls[0].setFormat(supported[i]);
                 foundOne = true;
@@ -286,7 +286,7 @@ public class RTPPlayer2 implements ControllerListener {
             }
 
         } else {
-            System.out.println("Null packet controller!");
+            LOGGER.info("Null packet controller!");
         } 
         
         if (trackControls[0].getFormat().getEncoding().equals(AudioFormat.ULAW_RTP)) {
@@ -505,7 +505,7 @@ public class RTPPlayer2 implements ControllerListener {
                 if (b.isEOM()) {
                     endOfStream = true;
                 }
-                //System.out.println("read a buffer: "+b.getLength()+" "+b.getTimeStamp());
+                //LOGGER.info("read a buffer: "+b.getLength()+" "+b.getTimeStamp());
                 outBuffer.copy(b);
             } catch (InterruptedException e) {
                 LOGGER.warn(e.getMessage(), e);

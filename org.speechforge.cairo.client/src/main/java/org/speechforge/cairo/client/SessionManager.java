@@ -66,7 +66,7 @@ import org.speechforge.cairo.sip.SipSession;
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
  */
 public class SessionManager  {
-        private static Logger _logger = Logger.getLogger(SessionManager.class);
+        private static Logger LOGGER = Logger.getLogger(SessionManager.class);
         
         // properties need to be set either
         //   - call setters and then the no arg constructor then startup()(perhaps with SPring) OR
@@ -244,12 +244,12 @@ public class SessionManager  {
             v.add(recogControlChannel);
             v.add(rtpChannel);
             sdpMessage.getSessionDescription().setMediaDescriptions(v);  
-        	System.out.println("before snd invite  " +System.currentTimeMillis());
+        	LOGGER.info("before snd invite  " +System.currentTimeMillis());
         	SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
         	
         	long endTime = System.nanoTime();
         	long duration = (endTime - startTime)/1000000;
-        	System.out.println("sipInvite time: "+duration+" ms  (" +System.currentTimeMillis()+")");
+        	LOGGER.info("sipInvite time: "+duration+" ms  (" +System.currentTimeMillis()+")");
 
         	return s;
         }
@@ -314,12 +314,12 @@ public class SessionManager  {
             SipSession session = _sipAgent.sendInviteWithoutProxy(to, message, peerAddress, peerPort);         
 
             while (session.getState() == SipSession.SessionState.waitingForInviteResponse) {
- 	       _logger.info("in loop not done...");
+ 	       LOGGER.info("in loop not done...");
                synchronized (session) {        
     	       try {
     	           session.wait(); 
                } catch (InterruptedException e) {
-                   _logger.debug("Interupt Exception while blocked in sip invite method.");
+                   LOGGER.debug("Interupt Exception while blocked in sip invite method.");
                }
                }
 	    }
@@ -444,7 +444,7 @@ public class SessionManager  {
             public void processInfoRequest(SipSession session, String contentType, String contentSubType, String content) {
 
             	
-                _logger.debug("SIP INFO request: "+contentType+"/"+contentSubType+"\n"+content);
+                LOGGER.debug("SIP INFO request: "+contentType+"/"+contentSubType+"\n"+content);
                
                 String code = null;
                 int duration = 0 ;
@@ -454,7 +454,7 @@ public class SessionManager  {
 
                     //Handle the client side dtmf signaling
                     if (content == null) {
-                        _logger.warn("sip info request with a dtmf-relay content type with no content.");
+                        LOGGER.warn("sip info request with a dtmf-relay content type with no content.");
                     } else {
 
                         String lines[] = content.toString().split("\n");
@@ -467,8 +467,8 @@ public class SessionManager  {
                                 duration = Integer.parseInt(parse[1].trim());
                             }
                         }
-                        _logger.debug("The DTMF code : "+code);
-                        _logger.debug("The duration: "+ duration);
+                        LOGGER.debug("The DTMF code : "+code);
+                        LOGGER.debug("The duration: "+ duration);
 
                         //TODO:  Pass it along to whoever is interested
                     	//It is unlikely that a dtmf info message will arrive at the client, and if it did, it is not clear what to do with it.
@@ -476,7 +476,7 @@ public class SessionManager  {
                     }
 
                 } else {
-                    _logger.warn("Unhandled SIP INFO request content type: "+contentType+"/"+contentSubType+"\n"+content);
+                    LOGGER.warn("Unhandled SIP INFO request content type: "+contentType+"/"+contentSubType+"\n"+content);
                 }
             }
        
@@ -485,7 +485,7 @@ public class SessionManager  {
              * @see org.speechforge.cairo.sip.SessionListener#processInviteResponse(boolean, org.speechforge.cairo.sip.SdpMessage, org.speechforge.cairo.sip.SipSession)
              */
             public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
-                _logger.debug("Got an invite response, ok is: "+ok + " "+System.currentTimeMillis());
+                LOGGER.debug("Got an invite response, ok is: "+ok + " "+System.currentTimeMillis());
                 
                 SdpMessage pbxResponse = null;
                 if (ok) {
@@ -539,11 +539,11 @@ public class SessionManager  {
 	                                //InetAddress remoteHost = InetAddress.getByName(rtpmd.get(1).getAttribute();
 	                                remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();	                                
 	                                
-	                                _logger.debug("processInviteResponse-remoteRtpHost: " + remoteHostName + "remoteRtpPort:" + remoteRtpPort);
+	                                LOGGER.debug("processInviteResponse-remoteRtpHost: " + remoteHostName + "remoteRtpPort:" + remoteRtpPort);
 	                                //rtpmd.get(1).getMedia().setMediaPort(localPort);
 	                                supportedFormats = rtpChans.get(0).getMedia().getMediaFormats(true);    
 	                            } else {
-	                                _logger.warn("No Media channel specified in the invite request");
+	                                LOGGER.warn("No Media channel specified in the invite request");
 	                                //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
 	                            } 
 	                            session.setRemoteRtpPort(remoteRtpPort);
@@ -555,29 +555,29 @@ public class SessionManager  {
 
                         } catch (UnknownHostException e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Unknown host Excepton while sending sip invite", e);
+                        	LOGGER.warn("Unknown host Excepton while sending sip invite", e);
                         } catch (SdpParseException e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Sdp Parse Excepton while sending sip invite", e);
+                        	LOGGER.warn("Sdp Parse Excepton while sending sip invite", e);
                         } catch (IllegalArgumentException e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Illegal Argument Excepton while sending sip invite", e);
+                        	LOGGER.warn("Illegal Argument Excepton while sending sip invite", e);
                         } catch (IllegalValueException e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Illeagal Value Excepton while sending sip invite", e);
+                        	LOGGER.warn("Illeagal Value Excepton while sending sip invite", e);
                         } catch (IOException e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Io Excepton while sending sip invite", e);
+                        	LOGGER.warn("Io Excepton while sending sip invite", e);
                         } catch (SdpException e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Sdp Excepton while sending sip invite", e);
+                        	LOGGER.warn("Sdp Excepton while sending sip invite", e);
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
-                        	_logger.warn("Excepton while sending sip invite", e);
+                        	LOGGER.warn("Excepton while sending sip invite", e);
                         }
                  
                 } else {
-                    _logger.info("Invite Response not ok");
+                    LOGGER.info("Invite Response not ok");
                 }
 
                 return pbxResponse;
@@ -588,7 +588,7 @@ public class SessionManager  {
              * @see org.speechforge.cairo.sip.SessionListener#processTimeout(javax.sip.TimeoutEvent)
              */
             public synchronized void processTimeout(TimeoutEvent event) {
-               _logger.debug("Timeout occurred");   
+               LOGGER.debug("Timeout occurred");   
                this.notify();
             }
        
@@ -597,14 +597,14 @@ public class SessionManager  {
              * @see org.speechforge.cairo.sip.SessionListener#processByeRequest(org.speechforge.cairo.sip.SipSession)
              */
             public void processByeRequest(SipSession session) throws RemoteException, InterruptedException {
-                _logger.info("Got a bye request.  Not implemented.  Discarding.");
+                LOGGER.info("Got a bye request.  Not implemented.  Discarding.");
             }
 
             /* (non-Javadoc)
              * @see org.speechforge.cairo.sip.SessionListener#processInviteRequest(org.speechforge.cairo.sip.SdpMessage, org.speechforge.cairo.sip.SipSession)
              */
             public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException, ResourceUnavailableException, RemoteException {   
-                _logger.info("Got an invite request.  Not implememted.  Discarding.");          	
+                LOGGER.info("Got an invite request.  Not implememted.  Discarding.");          	
                 return null;
             }
         }
