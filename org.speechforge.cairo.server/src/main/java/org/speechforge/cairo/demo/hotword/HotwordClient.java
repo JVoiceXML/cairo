@@ -273,7 +273,7 @@ public class HotwordClient implements MrcpEventListener {
         MrcpHeader completionCauseHeader = _mrcpEvent.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
         CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();
 
-        System.out.println(_mrcpEvent.toString());
+        LOGGER.info(_mrcpEvent.toString());
         
         return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
     }

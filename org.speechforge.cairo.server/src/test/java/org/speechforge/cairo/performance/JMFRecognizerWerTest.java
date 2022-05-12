@@ -59,7 +59,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
 
         try {
             //URL configURL = new URL(config);
-            System.out.println("Loading Recognizer...\n");
+            LOGGER.info("Loading Recognizer...\n");
             cm = new ConfigurationManager(config);
 
             //recognizer = (Recognizer) cm.lookup("recognizer");
@@ -150,7 +150,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
     }
     
     public static void main(String[] args) {
-        System.out.println("Stating up with config file: "+args[0]);
+        LOGGER.info("Stating up with config file: "+args[0]);
         BaseRecognizerWerTest rp = new JMFRecognizerWerTest();
         rp.runTests(args[0]);
         

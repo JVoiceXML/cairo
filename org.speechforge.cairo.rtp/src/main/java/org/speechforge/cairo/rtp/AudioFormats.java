@@ -4,6 +4,8 @@ import java.util.Vector;
 import javax.media.Format;
 import javax.sound.sampled.AudioFormat;
 
+import org.apache.log4j.Logger;
+
 public class AudioFormats {
     
     /***********************************************************************
@@ -50,7 +52,8 @@ public class AudioFormats {
     Table 2: Payload types (PT) for standard audio and video encodings
     ********************************************************************/
 
-    
+    //private static Logger LOGGER = Logger.getLogger(AudioFormats.class);
+
     private Vector requestedFormatsSDP;
     private Format[] supportedFormatsJMF;
     
@@ -79,8 +82,8 @@ public class AudioFormats {
         Vector v = new Vector();
         boolean foundAtLeastOne = false;
         for (int i=0; i<requestedFormatsSDP.size(); i++) {
-            //System.out.println(i+" format type is: "+requestedFormatsSDP.get(i).getClass().getCanonicalName());
-            //System.out.println("   ...and it is: "+requestedFormatsSDP.get(i).toString());
+            //LOGGER.info(i+" format type is: "+requestedFormatsSDP.get(i).getClass().getCanonicalName());
+            //LOGGER.info("   ...and it is: "+requestedFormatsSDP.get(i).toString());
             if (((String) requestedFormatsSDP.get(i)).equals(PCMU_SDP)) {
                 foundAtLeastOne = true;
                 v.add(requestedFormatsSDP.get(i));

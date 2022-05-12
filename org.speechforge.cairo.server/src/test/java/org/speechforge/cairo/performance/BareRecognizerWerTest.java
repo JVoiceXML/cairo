@@ -38,8 +38,8 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
 
         try {
             //URL configURL = new URL(config);
-            System.out.println("Loading Recognizer...\n");
-            System.out.println(config.toString());
+            LOGGER.info("Loading Recognizer...\n");
+            LOGGER.info(config.toString());
             cm = new ConfigurationManager(config);
 
             recognizer = (Recognizer) cm.lookup("recognizer");
@@ -82,7 +82,7 @@ public class BareRecognizerWerTest extends BaseRecognizerWerTest{
     }
 
     public static void main(String[] args) {
-        System.out.println("Stating up with config file: "+args[0]);
+        LOGGER.info("Stating up with config file: "+args[0]);
         BaseRecognizerWerTest rp = new BareRecognizerWerTest();
         rp.runTests(args[0]);   
     }

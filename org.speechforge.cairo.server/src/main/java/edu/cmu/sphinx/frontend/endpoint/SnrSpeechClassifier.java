@@ -27,7 +27,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
  * <li> Compare SNR to a configurable value rather than to compare the 
  * absolute difference between the RMS signal and the estimated background 
  * noise.
- * <li>  Estamates the background noise differently.  First rms value is
+ * <li>  Estimates the background noise differently.  First rms value is
  * the initial estimate.  All rms values that are declared out of speech are used to
  * adjust the background noise estimate thereafter (does not reset like previous
  * algorithm).
@@ -161,7 +161,7 @@ public class SnrSpeechClassifier extends BaseDataProcessor {
      * Resets this LevelTracker to a starting state.
      */
     private void reset() {
-        System.out.println("SpeechClassifierPatch.reset()");
+        LOGGER.info("SpeechClassifierPatch.reset()");
         level = 0;
         background = 10;
         reset = true;          

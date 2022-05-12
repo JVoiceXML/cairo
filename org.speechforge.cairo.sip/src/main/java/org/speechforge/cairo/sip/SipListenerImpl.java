@@ -282,7 +282,7 @@ public class SipListenerImpl implements SipListener {
                     if (dialog.getState() == DialogState.CONFIRMED) {
                         // oops cancel went in too late. Need to hang up the
                         // dialog.
-                        // System.out.println("Sending BYE -- cancel went in too
+                        // LOGGER.info("Sending BYE -- cancel went in too
                         // late !!");
                         Request byeRequest = dialog.createRequest(Request.BYE);
                         ClientTransaction ct = sipClient.getSipProvider().getNewClientTransaction(byeRequest);

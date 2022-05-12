@@ -131,7 +131,7 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
 				                 DataUtil.bytesToValues(b1, 0, b1.length, audioFormat.getSampleSizeInBits()/8, true) :
 				                 DataUtil.littleEndianBytesToValues(b1, 0, b1.length, audioFormat.getSampleSizeInBits()/8, true);
 				        //for (int i =0; i<samples.length;i++) {
-				        //	System.out.println(i+" : "+samples[i]);
+				        //	LOGGER.info(i+" : "+samples[i]);
 				        //}
 				                 
 			            for (double value : samples) {
@@ -257,7 +257,7 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
 	                LOGGER.warn(e.getMessage(), e);
 	            }
 	        } else {
-	           System.out.println("output type not supported..."); 
+	           LOGGER.info("output type not supported..."); 
 	        }
 	    }
 	    

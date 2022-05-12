@@ -130,7 +130,7 @@ public abstract class BaseRecognizerWerTest {
                         LOGGER.info("Bad test. "+test.length+" params.  need at least 2");
                         LOGGER.info(str);
                     } else {
-                       //System.out.println("Test # "+(linecount-2)+ " "+test[1]);
+                       //LOGGER.info("Test # "+(linecount-2)+ " "+test[1]);
                        String af = test[0];
                        String expected = test[1];
                        String speaker = test[2];
