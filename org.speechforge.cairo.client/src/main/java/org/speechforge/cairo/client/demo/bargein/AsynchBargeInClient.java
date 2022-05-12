@@ -63,7 +63,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class AsynchBargeInClient  {
 
-    private static Logger _logger = Logger.getLogger(AsynchBargeInClient.class);
+    private static Logger LOGGER = Logger.getLogger(AsynchBargeInClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String LOOP_OPTION = "loop";
@@ -132,8 +132,7 @@ public class AsynchBargeInClient  {
                         sipAgent.dispose();
 
                     } catch (SipException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
 
 
@@ -167,7 +166,7 @@ public class AsynchBargeInClient  {
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -199,11 +198,11 @@ public class AsynchBargeInClient  {
         SdpMessage message = SpeechClientImpl.constructResourceMessage(localRtpPort,format, _mySipAddress, _host, "Session Name");
 
         // Send the sip invitation (This method on the SimpleSipAgent blocks until a response is received or timeout occurs) 
-        _logger.info("Sending a SIP invitation to the cairo server.");
+        LOGGER.info("Sending a SIP invitation to the cairo server.");
         SdpMessage inviteResponse = sipAgent.sendInviteWithoutProxy(_cairoSipAddress, message, peerAddress, _peerPort);
 
         if (inviteResponse != null) {
-            _logger.info("Received the SIP Response.");
+            LOGGER.info("Received the SIP Response.");
         
             // Get the MRCP media channels (need the port number and the channelID that are sent
             // back from the server in the response in order to setup the MRCP channel)
@@ -226,12 +225,12 @@ public class AsynchBargeInClient  {
                 remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();
                 //rtpmd.get(1).getMedia().setMediaPort(localPort);
             } else {
-                _logger.warn("No Media channel specified in the invite request");
+                LOGGER.warn("No Media channel specified in the invite request");
                 //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
             }   
 
             //construct a media client to stream the audio (both ways) and start streaming
-            _logger.debug("Starting NativeMediaClient...");
+            LOGGER.debug("Starting NativeMediaClient...");
             mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
@@ -252,12 +251,12 @@ public class AsynchBargeInClient  {
                 do {
                     result = _client.playAndRecognizeBlocking(false, prompt, grammar, false);
 
-                    if (_logger.isInfoEnabled()) {
+                    if (LOGGER.isInfoEnabled()) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("\n**************************************************************");
                         sb.append("\nRecognition result: ").append(result);
                         sb.append("\n**************************************************************\n");
-                        _logger.info(sb);
+                        LOGGER.info(sb);
                     }
 
 
@@ -282,11 +281,11 @@ public class AsynchBargeInClient  {
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
                     MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("MRCP response received:\n" + response.toString());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("MRCP response received:\n" + response.toString());
                     }
                 }
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
                 sipAgent.sendBye();
                 sipAgent.dispose();
                 sentBye = true;
@@ -295,7 +294,7 @@ public class AsynchBargeInClient  {
 
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out.  Is server running?");
+            LOGGER.info("Sip Invitation timed out.  Is server running?");
         }
         
         if (sipAgent != null){

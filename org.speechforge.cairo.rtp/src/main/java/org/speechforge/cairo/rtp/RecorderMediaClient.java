@@ -23,9 +23,9 @@
 package org.speechforge.cairo.rtp;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URL;
 import java.util.Iterator;
+
 import javax.media.CannotRealizeException;
 import javax.media.DataSink;
 import javax.media.Manager;
@@ -68,7 +68,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class RecorderMediaClient implements SessionListener, ReceiveStreamListener { 
 
-    private static Logger _logger = Logger.getLogger(RecorderMediaClient.class);
+    private static Logger LOGGER = Logger.getLogger(RecorderMediaClient.class);
 
     private PushBufferDataSource _pbds;
     
@@ -85,8 +85,8 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
         _targetAddress = _localAddress;
         
         _rtpManager = RTPManager.newInstance();
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("RTPManager class: " + _rtpManager.getClass().getName());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("RTPManager class: " + _rtpManager.getClass().getName());
         }
         //_rtpManager.addSessionListener(this);
         //_rtpManager.addReceiveStreamListener(this);
@@ -94,15 +94,15 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
         try {
             _rtpManager.initialize(_localAddress);
         } catch (InvalidSessionAddressException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             throw (IOException) new IOException(e.getMessage()).initCause(e);
         }
         _pbds = pbds;
-        System.out.println("Creating player..");
+        LOGGER.info("Creating player..");
         ProcessorModel pm = new ProcessorModel(pbds, 
                                                new AudioFormat[] {new AudioFormat(javax.media.format.AudioFormat.LINEAR,44100,16,2)}, 
                                                new FileTypeDescriptor(FileTypeDescriptor.BASIC_AUDIO));
-        _logger.debug("Creating realized processor...");
+        LOGGER.debug("Creating realized processor...");
         _processor = Manager.createRealizedProcessor(pm);        
         
         URL url = new URL("file://temp/cairo/tmp/"+System.nanoTime()+".au");
@@ -111,18 +111,18 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
         try {
             _sink = Manager.createDataSink(_processor.getDataOutput(), dest);
         } catch (NoDataSinkException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
+            throw (IOException) new IOException(e.getMessage()).initCause(e);
         } catch (NotRealizedError e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
+            throw (IOException) new IOException(e.getMessage()).initCause(e);
         } 
         _sink.open();
         _sink.start();
         
-        System.out.println("Starting processor..");
+        LOGGER.info("Starting processor..");
         _processor.start();
-        System.out.println("processor started");
+        LOGGER.info("processor started");
     }
 
 
@@ -148,31 +148,30 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
         try {
             _sink.stop();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         _sink.close();
     }
     
 
     public synchronized void update(SessionEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("SessionEvent received: " + event);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SessionEvent received: " + event);
             if (event instanceof NewParticipantEvent) {
                 Participant p = ((NewParticipantEvent) event).getParticipant();
-                _logger.debug("  - A new participant has just joined: " + p.getCNAME());
+                LOGGER.debug("  - A new participant has just joined: " + p.getCNAME());
             }
         }
     }
 
 
     public synchronized void update(ReceiveStreamEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("ReceiveStreamEvent received: " + event);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("ReceiveStreamEvent received: " + event);
         }
 
         if (event instanceof RemotePayloadChangeEvent) {
-            _logger.warn("  - Received an RTP PayloadChangeEvent.\nSorry, cannot handle payload change.");
+            LOGGER.warn("  - Received an RTP PayloadChangeEvent.\nSorry, cannot handle payload change.");
             //System.exit(0);
             return;
         }
@@ -181,21 +180,21 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
 
         if (event instanceof NewReceiveStreamEvent) {
             if (stream == null) {
-                _logger.debug("NewReceiveStreamEvent: receive stream is null!");
+                LOGGER.debug("NewReceiveStreamEvent: receive stream is null!");
             } else {
                 DataSource dataSource = stream.getDataSource();
                 if (dataSource == null) {
-                    _logger.debug("NewReceiveStreamEvent: data source is null!");
+                    LOGGER.debug("NewReceiveStreamEvent: data source is null!");
                 } else if (!(dataSource instanceof PushBufferDataSource)) {
-                    _logger.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
+                    LOGGER.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
                 } else {
-                    if (_logger.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         // Find out the formats.
                         RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
                         if (control != null) {
-                            _logger.debug("  - Recevied new RTP stream: " + control.getFormat());
+                            LOGGER.debug("  - Recevied new RTP stream: " + control.getFormat());
                         } else {
-                            _logger.debug("  - Recevied new RTP stream: RTPControl is null!");
+                            LOGGER.debug("  - Recevied new RTP stream: RTPControl is null!");
                         }
                     }
                     this.streamReceived(stream, (PushBufferDataSource) dataSource);
@@ -203,16 +202,16 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
             }
         } else if (event instanceof StreamMappedEvent) {
             Participant participant = event.getParticipant();
-            if (participant != null && _logger.isDebugEnabled()) {
+            if (participant != null && LOGGER.isDebugEnabled()) {
                 for (Iterator it = participant.getSourceDescription().iterator(); it.hasNext(); ) {
                     SourceDescription sd = (SourceDescription) it.next();
-                    _logger.debug("Source description: " + toString(sd));
+                    LOGGER.debug("Source description: " + toString(sd));
                 }
             }
             if (stream == null) {
-                _logger.debug("StreamMappedEvent: receive stream is null!");
+                LOGGER.debug("StreamMappedEvent: receive stream is null!");
             } else if (participant == null) {
-                _logger.debug("StreamMappedEvent: participant is null!");
+                LOGGER.debug("StreamMappedEvent: participant is null!");
             } else {
                 this.streamMapped(stream, participant);
             }
@@ -222,9 +221,9 @@ public class RecorderMediaClient implements SessionListener, ReceiveStreamListen
             }
         }
        // GlobalTransmissionStats gts = _rtpManager.getGlobalTransmissionStats();
-       // System.out.println("TRANS: "+gts.getTransmitFailed());
+       // LOGGER.info("TRANS: "+gts.getTransmitFailed());
        // GlobalReceptionStats grs = _rtpManager.getGlobalReceptionStats();
-       // System.out.println("RECV: "+grs.toString());
+       // LOGGER.info("RECV: "+grs.toString());
     }
 
     private static String toString(SourceDescription sd) {

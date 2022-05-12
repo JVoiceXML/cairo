@@ -22,18 +22,12 @@
  */
 package org.speechforge.cairo.client.demo.tts;
 
-import org.speechforge.cairo.client.SessionManager;
-import org.speechforge.cairo.client.SpeechClient;
-import org.speechforge.cairo.client.SpeechClientImpl;
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.sip.SipSession;
-import org.speechforge.cairo.util.CairoUtil;
-
 import java.awt.Toolkit;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 import javax.sip.SipException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -44,6 +38,13 @@ import org.apache.log4j.Logger;
 import org.mrcp4j.client.MrcpChannel;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.MrcpResponse;
+import org.speechforge.cairo.client.SessionManager;
+import org.speechforge.cairo.client.SpeechClient;
+import org.speechforge.cairo.client.SpeechClientImpl;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.sip.SipSession;
+import org.speechforge.cairo.util.CairoUtil;
 
 /**
  * Demo MRCPv2 client application that utilizes a {@code speechsynth} resource to play a TTS prompt.
@@ -52,7 +53,7 @@ import org.mrcp4j.message.MrcpResponse;
  */
 public class SpeechSynthClient {
 
-    private static Logger _logger = Logger.getLogger(SpeechSynthClient.class);
+    private static Logger LOGGER = Logger.getLogger(SpeechSynthClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String REPETITIONS_OPTION = "reps";
@@ -117,8 +118,7 @@ public class SpeechSynthClient {
                         sm.shutdown();
                         endedSession = true;
                     } catch (SipException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
 
                 }
@@ -140,7 +140,7 @@ public class SpeechSynthClient {
             try {
                 _repetitions = Integer.parseInt(line.getOptionValue(REPETITIONS_OPTION));
             } catch (NumberFormatException e) {
-                _logger.debug("Could not parse repetitions parameter to int!", e);
+                LOGGER.debug("Could not parse repetitions parameter to int!", e);
                 HelpFormatter formatter = new HelpFormatter();
                 formatter.printHelp("SpeechSynthClient [options] <prompt-text> <local-rtp-port>", options);
                 return;
@@ -158,7 +158,7 @@ public class SpeechSynthClient {
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -196,7 +196,7 @@ public class SpeechSynthClient {
         if (session != null) {
         
             //Setup a media client to receive and play the sythesized voice data streamed over the RTP channel
-            _logger.debug("Starting NativeMediaClient for receive only...");
+            LOGGER.debug("Starting NativeMediaClient for receive only...");
             _mediaClient = new NativeMediaClient(localRtpPort); 
             
             //construct the speech client with this session
@@ -215,9 +215,9 @@ public class SpeechSynthClient {
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
                     MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                    _logger.warn("MRCP response received:\n" + response);
+                    LOGGER.warn("MRCP response received:\n" + response);
                 }
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
                 sm.shutdown();
                 endedSession = true;
                 System.exit(1);
@@ -225,7 +225,7 @@ public class SpeechSynthClient {
 
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out or failed.  Is server running?");
+            LOGGER.info("Sip Invitation timed out or failed.  Is server running?");
         }
         sm.shutdown();
         endedSession = true;

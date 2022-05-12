@@ -67,7 +67,7 @@ import org.speechforge.cairo.util.CustomDataSource;
  */
 public class RTPPlayer implements ControllerListener {
 
-    private static Logger _logger = Logger.getLogger(RTPPlayer.class);
+    private static Logger LOGGER = Logger.getLogger(RTPPlayer.class);
 
     private Object _lock = new Object();
     private Processor _processor;
@@ -86,18 +86,18 @@ public class RTPPlayer implements ControllerListener {
  	       //SessionAddress localAddress = new SessionAddress(CairoUtil.getLocalHost(), localPort);
 	       SessionAddress localAddress = new SessionAddress(localIpAddress, localPort);
 	       _targetAddress = new SessionAddress(remoteAddress, remotePort);
-	  	   _logger.debug("Constructing the RtpPlayer, localAddress: "+localAddress.toString() +" and remote address: "+ _targetAddress.toString());	  	   
+	  	   LOGGER.debug("Constructing the RtpPlayer, localAddress: "+localAddress.toString() +" and remote address: "+ _targetAddress.toString());	  	   
 	      _rtpManager = RTPManager.newInstance();
 	      _rtpManager.initialize(localAddress);
 	      _rtpManager.addTarget(_targetAddress);
 	      _af = af;
-    	}catch (InvalidSessionAddressException e) {
+    	} catch (InvalidSessionAddressException e) {
     		
-    		e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
     		throw e;
-    	}catch (IOException e) {
+    	} catch (IOException e) {
     		
-    		e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
     		throw e;
     	}
       //registerDatasource();
@@ -135,7 +135,7 @@ public class RTPPlayer implements ControllerListener {
     }
 
     public void playSource(MediaLocator source) throws InterruptedException, IllegalStateException {
-    	_logger.info("Source: " +source);
+    	LOGGER.info("Source: " +source);
         try {
             synchronized(this) {
                 if (_processor != null) {
@@ -160,7 +160,7 @@ public class RTPPlayer implements ControllerListener {
             try {
                 trackControls[0].setCodecChain(codec);
             } catch (UnsupportedPlugInException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
                         
             realize();
@@ -168,22 +168,21 @@ public class RTPPlayer implements ControllerListener {
             play(); 
 
         } catch (InterruptedException e) {
-            _logger.debug("playSource() interrupted, closing processor...");
+            LOGGER.debug("playSource() interrupted, closing processor...");
             try {
                 close();
             } catch (InterruptedException ie) {
                 // TODO Auto-generated catch block
-                _logger.debug(ie, ie);
+                LOGGER.debug(ie, ie);
             }
             throw e;
         } catch (Exception e) {
-        	e.printStackTrace();
-            _logger.warn("playSource(): encountered unexpected exception: ", e);
+            LOGGER.warn("playSource(): encountered unexpected exception: ", e);
             try {
                 close();
             } catch (InterruptedException ie) {
                 // TODO Auto-generated catch block
-                _logger.debug(ie, ie);
+                LOGGER.debug(ie, ie);
             }
             throw new RuntimeException("playSource() encountered unexpected exception", e);
         }
@@ -219,7 +218,7 @@ public class RTPPlayer implements ControllerListener {
             try {
                 trackControls[0].setCodecChain(codec);
             } catch (UnsupportedPlugInException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
                         
             realize();
@@ -227,21 +226,21 @@ public class RTPPlayer implements ControllerListener {
             play(); 
 
         } catch (InterruptedException e) {
-            _logger.debug("playSource() interrupted, closing processor...");
+            LOGGER.debug("playSource() interrupted, closing processor...");
             try {
                 close();
             } catch (InterruptedException ie) {
                 // TODO Auto-generated catch block
-                _logger.debug(ie, ie);
+                LOGGER.debug(ie, ie);
             }
             throw e;
         } catch (Exception e) {
-            _logger.warn("playSource(): encountered unexpected exception: ", e);
+            LOGGER.warn("playSource(): encountered unexpected exception: ", e);
             try {
                 close();
             } catch (InterruptedException ie) {
                 // TODO Auto-generated catch block
-                _logger.debug(ie, ie);
+                LOGGER.debug(ie, ie);
             }
             throw new RuntimeException("playSource() encountered unexpected exception", e);
         }
@@ -289,12 +288,12 @@ public class RTPPlayer implements ControllerListener {
         }
         
         //ContentDescriptor c = _processor.getContentDescriptor();
-        //System.out.println("Content Descriptor: "+c.toString());
+        //LOGGER.info("Content Descriptor: "+c.toString());
         boolean foundOne = false;
         for (int i=0; i< supported.length; i++) {
 
-            //System.out.println("FORMAT# "+i+" "+supported[i].toString());
-            //System.out.println("FORMAT# "+i+" "+supported[i].getEncoding());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].toString());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].getEncoding());
             if (_af.isSupported(supported[i])) {
                 trackControls[0].setFormat(supported[i]);
                 foundOne = true;
@@ -345,7 +344,7 @@ public class RTPPlayer implements ControllerListener {
                 _sendStream.close();
                 _sendStream = null;
             }     
-            _logger.debug("play(): completed successfully.");
+            LOGGER.debug("play(): completed successfully.");
         }
     }
     
@@ -371,8 +370,8 @@ public class RTPPlayer implements ControllerListener {
      */
     public void controllerUpdate(ControllerEvent event) {
         synchronized (_lock) {
-            if (_logger.isDebugEnabled()) {
-                _logger.debug("ControllerEvent received: " + event);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("ControllerEvent received: " + event);
             }
     
             if (event instanceof EndOfMediaEvent) {
@@ -393,7 +392,7 @@ public class RTPPlayer implements ControllerListener {
         try {
             this.close();
         } catch (InterruptedException e) {
-            _logger.warn("Interrupted while closing rtp processor, exception message: "+e.getLocalizedMessage());
+            LOGGER.warn("Interrupted while closing rtp processor, exception message: "+e.getLocalizedMessage());
         }
         
         /* Some of the possible methods that may be needed for shutting down the rp player

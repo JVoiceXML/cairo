@@ -74,7 +74,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class BargeInClient implements MrcpEventListener {
 
-    private static Logger _logger = Logger.getLogger(BargeInClient.class);
+    private static Logger LOGGER = Logger.getLogger(BargeInClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String LOOP_OPTION = "loop";
@@ -120,8 +120,8 @@ public class BargeInClient implements MrcpEventListener {
      * @see org.mrcp4j.client.MrcpEventListener#eventReceived(org.mrcp4j.message.MrcpEvent)
      */
     public void eventReceived(MrcpEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP event received:\n" + event.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP event received:\n" + event.toString());
         }
 
         try {
@@ -135,11 +135,11 @@ public class BargeInClient implements MrcpEventListener {
                 break;
 
             default:
-                _logger.warn("Unexpected value for event resource type!");
+                LOGGER.warn("Unexpected value for event resource type!");
                 break;
             }
         } catch (IllegalValueException e) {
-            _logger.warn("Illegal value for event resource type!", e);
+            LOGGER.warn("Illegal value for event resource type!", e);
         }
    }
 
@@ -153,7 +153,7 @@ public class BargeInClient implements MrcpEventListener {
                 try {
                     sendStartInputTimersRequest();
                 } catch (Exception e) {
-                    _logger.warn(e, e);
+                    LOGGER.warn(e, e);
                 }
             } else {
                 synchronized (this) {
@@ -177,7 +177,7 @@ public class BargeInClient implements MrcpEventListener {
             try {
                 sendBargeinRequest();
             } catch (Exception e) {
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
             }
         } else if (MrcpEventName.RECOGNITION_COMPLETE.equals(eventName)) {
             synchronized (this) {
@@ -197,8 +197,8 @@ public class BargeInClient implements MrcpEventListener {
         // send request
         MrcpResponse response = _recogChannel.sendRequest(request);
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
 
         return response.getRequestState();
@@ -213,8 +213,8 @@ public class BargeInClient implements MrcpEventListener {
         // send request
         MrcpResponse response = _ttsChannel.sendRequest(request);
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
 
         return response.getRequestState();
@@ -242,8 +242,8 @@ public class BargeInClient implements MrcpEventListener {
         request.setContent("application/jsgf", null, grammarUrl);
         MrcpResponse response = _recogChannel.sendRequest(request);
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
 
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
@@ -259,8 +259,8 @@ public class BargeInClient implements MrcpEventListener {
             _toolkit.beep();
         }
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
         
         while (_mrcpEvent == null) {
@@ -270,7 +270,7 @@ public class BargeInClient implements MrcpEventListener {
         MrcpHeader completionCauseHeader = _mrcpEvent.getHeader(MrcpHeaderName.COMPLETION_CAUSE);
         CompletionCause completionCause = (CompletionCause) completionCauseHeader.getValueObject();
 
-        System.out.println(_mrcpEvent.toString());
+        LOGGER.info(_mrcpEvent.toString());
         
         return (completionCause.getCauseCode() == 0) ? _mrcpEvent.getContent() : null ;
     }
@@ -298,8 +298,8 @@ public class BargeInClient implements MrcpEventListener {
             _toolkit.beep();
         }
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
 
         while (_mrcpEvent == null) {
@@ -361,10 +361,8 @@ public class BargeInClient implements MrcpEventListener {
                         sipAgent.sendBye();
                         sipAgent.dispose();
                     } catch (SipException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
-
                 }
             }
         });
@@ -393,7 +391,7 @@ public class BargeInClient implements MrcpEventListener {
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -423,11 +421,11 @@ public class BargeInClient implements MrcpEventListener {
         SdpMessage message = constructResourceMessage(localRtpPort,format);
 
         // Send the sip invitation (This method on the SipAgent blocks until a response is received or timeout occurs) 
-        _logger.info("Sending a SIP invitation to the cairo server.");
+        LOGGER.info("Sending a SIP invitation to the cairo server.");
         SdpMessage inviteResponse = sipAgent.sendInviteWithoutProxy(_cairoSipAddress, message, peerAddress, _peerPort);
 
         if (inviteResponse != null) {
-            _logger.info("Received the SIP Response.");
+            LOGGER.info("Received the SIP Response.");
         
             // Get the MRCP media channels (need the port number and the channelID that are sent
             // back from the server in the response in order to setup the MRCP channel)
@@ -450,11 +448,11 @@ public class BargeInClient implements MrcpEventListener {
                 remoteRtpPort =  rtpChans.get(0).getMedia().getMediaPort();
                 //rtpmd.get(1).getMedia().setMediaPort(localPort);
             } else {
-                _logger.warn("No Media channel specified in the invite request");
+                LOGGER.warn("No Media channel specified in the invite request");
                 //TODO:  handle no media channel in the response corresponding tp the mrcp channel (sip/sdp error)
             }   
 
-            _logger.debug("Starting NativeMediaClient...");
+            LOGGER.debug("Starting NativeMediaClient...");
             NativeMediaClient mediaClient = new NativeMediaClient(localRtpPort, rserverHost, remoteRtpPort);
             mediaClient.startTransmit();
 
@@ -475,12 +473,12 @@ public class BargeInClient implements MrcpEventListener {
                     String completePrompt = parrotString+ "  " +prompt;
                     result = client.playAndRecognize(completePrompt, grammarUrl);
 
-                    if (_logger.isInfoEnabled()) {
+                    if (LOGGER.isInfoEnabled()) {
                         StringBuilder sb = new StringBuilder();
                         sb.append("\n**************************************************************");
                         sb.append("\nRecognition result: ").append(result);
                         sb.append("\n**************************************************************\n");
-                        _logger.info(sb);
+                        LOGGER.info(sb);
                     }
 
 
@@ -505,11 +503,11 @@ public class BargeInClient implements MrcpEventListener {
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
                     MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("MRCP response received:\n" + response.toString());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("MRCP response received:\n" + response.toString());
                     }
                 }
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
                 sipAgent.sendBye();
                 sipAgent.dispose();
                 sentBye = true;
@@ -518,7 +516,7 @@ public class BargeInClient implements MrcpEventListener {
 
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out.  Is server running?");
+            LOGGER.info("Sip Invitation timed out.  Is server running?");
         }
         
         if (sipAgent != null){

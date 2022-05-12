@@ -27,7 +27,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
  * <li> Compare SNR to a configurable value rather than to compare the 
  * absolute difference between the RMS signal and the estimated background 
  * noise.
- * <li>  Estamates the background noise differently.  First rms value is
+ * <li>  Estimates the background noise differently.  First rms value is
  * the initial estimate.  All rms values that are declared out of speech are used to
  * adjust the background noise estimate thereafter (does not reset like previous
  * algorithm).
@@ -94,7 +94,7 @@ public class SnrSpeechClassifier extends BaseDataProcessor {
     @S4Boolean(defaultValue = false)
     public static final String PROP_SNR_THRESHOLD = "useSnrThreshold";
  
-    protected Logger logger;
+    protected Logger LOGGER;
   
     private double snr;                 //signal to noise ratio
     private boolean snrThresholdFlag;   //if true comapare snr against threshold.  If false compare (signal-noise) against threshold
@@ -132,7 +132,7 @@ public class SnrSpeechClassifier extends BaseDataProcessor {
         threshold = ps.getDouble(PROP_THRESHOLD);
         minSignal = ps.getDouble(PROP_MIN_SIGNAL);
         snrThresholdFlag = ps.getBoolean(PROP_SNR_THRESHOLD);
-        logger = ps.getLogger();
+        LOGGER = ps.getLogger();
 
         initialize();
     }
@@ -149,8 +149,7 @@ public class SnrSpeechClassifier extends BaseDataProcessor {
             try {
                 out = new BufferedWriter(new FileWriter("c:/temp/"+System.currentTimeMillis()));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warning(e.getMessage());
             }
             //        out.close();
         }
@@ -162,7 +161,7 @@ public class SnrSpeechClassifier extends BaseDataProcessor {
      * Resets this LevelTracker to a starting state.
      */
     private void reset() {
-        System.out.println("SpeechClassifierPatch.reset()");
+        LOGGER.info("SpeechClassifierPatch.reset()");
         level = 0;
         background = 10;
         reset = true;          
@@ -252,8 +251,7 @@ public class SnrSpeechClassifier extends BaseDataProcessor {
                 out.newLine();
                 zeroCrossing = 0;
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warning(e.getMessage());
             }
         }
         

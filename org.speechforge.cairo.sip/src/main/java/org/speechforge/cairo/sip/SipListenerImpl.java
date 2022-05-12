@@ -212,9 +212,8 @@ public class SipListenerImpl implements SipListener {
                     Request ackRequest = null;
                     try {
                         ackRequest = dialog.createAck( ((CSeqHeader) response.getHeader(CSeqHeader.NAME)).getSeqNumber() );
-                    } catch (InvalidArgumentException e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
+                    } catch (InvalidArgumentException e) {
+                        LOGGER.warn(e.getMessage(), e);
                     }
                     
                     if (LOGGER.isDebugEnabled()) {
@@ -261,8 +260,7 @@ public class SipListenerImpl implements SipListener {
                         try {
                             sd = sdpFactory.createSessionDescription(contentString);
                         } catch (SdpParseException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            LOGGER.warn(e.getMessage(), e);
                         }
 
                         SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
@@ -284,7 +282,7 @@ public class SipListenerImpl implements SipListener {
                     if (dialog.getState() == DialogState.CONFIRMED) {
                         // oops cancel went in too late. Need to hang up the
                         // dialog.
-                        // System.out.println("Sending BYE -- cancel went in too
+                        // LOGGER.info("Sending BYE -- cancel went in too
                         // late !!");
                         Request byeRequest = dialog.createRequest(Request.BYE);
                         ClientTransaction ct = sipClient.getSipProvider().getNewClientTransaction(byeRequest);
@@ -506,11 +504,9 @@ public class SipListenerImpl implements SipListener {
                 try {
                     stx = sipProvider.getNewServerTransaction(request);
                 } catch (TransactionAlreadyExistsException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn(e.getMessage(), e);
                 } catch (TransactionUnavailableException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
             //_logger.info("the stx: "+stx.toString());
@@ -583,11 +579,9 @@ public class SipListenerImpl implements SipListener {
         } catch (ParseException e) {
             LOGGER.error(e, e);
         } catch (RemoteException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
         
     }
@@ -651,11 +645,9 @@ public class SipListenerImpl implements SipListener {
             } catch (InvalidArgumentException e) {
                 LOGGER.error(e, e);
             } catch (RemoteException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }

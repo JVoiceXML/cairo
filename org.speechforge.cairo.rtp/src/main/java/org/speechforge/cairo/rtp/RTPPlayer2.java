@@ -73,7 +73,7 @@ import org.speechforge.cairo.util.CairoUtil;
 public class RTPPlayer2 implements ControllerListener {
 
  
-    private static Logger _logger = Logger.getLogger(RTPPlayer2.class);
+    private static Logger LOGGER = Logger.getLogger(RTPPlayer2.class);
 
     private Object _lock = new Object();
     private Processor _processor;
@@ -137,21 +137,21 @@ public class RTPPlayer2 implements ControllerListener {
             play(); 
 
         } catch (InterruptedException e) {
-            _logger.debug("playSource() interrupted, closing processor...");
+            LOGGER.debug("playSource() interrupted, closing processor...");
             try {
                 close();
             } catch (InterruptedException ie) {
                 // TODO Auto-generated catch block
-                _logger.debug(ie, ie);
+                LOGGER.debug(ie, ie);
             }
             throw e;
         } catch (Exception e) {
-            _logger.warn("playSource(): encountered unexpected exception: ", e);
+            LOGGER.warn("playSource(): encountered unexpected exception: ", e);
             try {
                 close();
             } catch (InterruptedException ie) {
                 // TODO Auto-generated catch block
-                _logger.debug(ie, ie);
+                LOGGER.debug(ie, ie);
             }
             throw new RuntimeException("playSource() encountered unexpected exception", e);
         }
@@ -196,12 +196,12 @@ public class RTPPlayer2 implements ControllerListener {
         }
         
         ContentDescriptor c = _processor.getContentDescriptor();
-        //System.out.println("Content Descriptor: "+c.toString());
+        //LOGGER.info("Content Descriptor: "+c.toString());
         boolean foundOne = false;
         for (int i=0; i< supported.length; i++) {
 
-            //System.out.println("FORMAT# "+i+" "+supported[i].toString());
-            //System.out.println("FORMAT# "+i+" "+supported[i].getEncoding());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].toString());
+            //LOGGER.info("FORMAT# "+i+" "+supported[i].getEncoding());
             if (_af.isSupported(supported[i])) {
                 trackControls[0].setFormat(supported[i]);
                 foundOne = true;
@@ -222,7 +222,7 @@ public class RTPPlayer2 implements ControllerListener {
             trackControls[0].setCodecChain(codec);
         }
         catch (UnsupportedPlugInException e) {
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } 
           
         
@@ -275,18 +275,18 @@ public class RTPPlayer2 implements ControllerListener {
         //PacketSizeControl pktCtrl = (PacketSizeControl) c.getControl(PacketSizeControl.class.getName());
        
         if (pktCtrl != null) {
-            System.out.println("The track control packet size was: "+pktCtrl.getPacketSize());
+            LOGGER.debug("The track control packet size was: "+pktCtrl.getPacketSize());
             try {
                 pktCtrl.setPacketSize(getPacketSize(trackControls[0].getFormat(), packetRate));
-                System.out.println("   ... but now it is: "+pktCtrl.getPacketSize());
+                LOGGER.debug("   ... but now it is: "+pktCtrl.getPacketSize());
             }
             catch (IllegalArgumentException e) {
                 pktCtrl.setPacketSize(80);
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
 
         } else {
-            System.out.println("Null packet controller!");
+            LOGGER.info("Null packet controller!");
         } 
         
         if (trackControls[0].getFormat().getEncoding().equals(AudioFormat.ULAW_RTP)) {
@@ -302,10 +302,10 @@ public class RTPPlayer2 implements ControllerListener {
                 trackControls[0].setCodecChain(codec);
             }
             catch (UnsupportedPlugInException e) {
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         } else {
-            System.out.println("Not ULAW_RTP.  Format is: "+trackControls[0].getFormat().getEncoding());
+            LOGGER.warn("Not ULAW_RTP.  Format is: "+trackControls[0].getFormat().getEncoding());
         }
     }
 
@@ -318,8 +318,7 @@ public class RTPPlayer2 implements ControllerListener {
                 try {
                     _sendStream = _rtpManager.createSendStream(_pbds, 0);
                  } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                     LOGGER.warn(e.getMessage(), e);
                  }
                 _sendStream.start();
             }
@@ -343,7 +342,7 @@ public class RTPPlayer2 implements ControllerListener {
             //    _sendStream.close();
             //    _sendStream = null;
             //}     
-            _logger.debug("play(): completed successfully.");
+            LOGGER.debug("play(): completed successfully.");
         }
     }
     
@@ -363,9 +362,8 @@ public class RTPPlayer2 implements ControllerListener {
                 } while(_processor != null);
                 try {
                     _pbds.stop();
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                } catch (IOException e) {
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
         }
@@ -376,8 +374,8 @@ public class RTPPlayer2 implements ControllerListener {
      */
     public void controllerUpdate(ControllerEvent event) {
         synchronized (_lock) {
-            if (_logger.isDebugEnabled()) {
-                _logger.debug("ControllerEvent received: " + event);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("ControllerEvent received: " + event);
             }
     
             if (event instanceof EndOfMediaEvent) {
@@ -388,9 +386,8 @@ public class RTPPlayer2 implements ControllerListener {
                 _processor = null;
                 try {
                     _pbds.stop();
-                } catch (IOException e1) {
-                    // TODO Auto-generated catch block
-                    e1.printStackTrace();
+                } catch (IOException e) {
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
 
@@ -405,8 +402,7 @@ public class RTPPlayer2 implements ControllerListener {
         try {
             _pbds.stop();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
 
     }
@@ -426,8 +422,7 @@ public class RTPPlayer2 implements ControllerListener {
                 _ds.connect();
                 streams = ((PushBufferDataSource)_ds).getStreams();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
         }
     
@@ -486,12 +481,12 @@ public class RTPPlayer2 implements ControllerListener {
         @Override
         public void stop() throws IOException {
             if (_readThread == null) {
-                _logger.warn("Trying to stop push buffer data source but the read but thread is null");
+                LOGGER.warn("Trying to stop push buffer data source but the read but thread is null");
             } else {
               _readThread.shutdown();
             }
             if (_ds == null) {
-                _logger.warn("Trying to stop push buffer data source but the input data source is already null");  
+                LOGGER.warn("Trying to stop push buffer data source but the input data source is already null");  
             } else {
               _ds.stop();
               _ds = null;
@@ -510,21 +505,20 @@ public class RTPPlayer2 implements ControllerListener {
                 if (b.isEOM()) {
                     endOfStream = true;
                 }
-                //System.out.println("read a buffer: "+b.getLength()+" "+b.getTimeStamp());
+                //LOGGER.info("read a buffer: "+b.getLength()+" "+b.getTimeStamp());
                 outBuffer.copy(b);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOGGER.warn(e.getMessage(), e);
             }
 
         }
     
         public void setTransferHandler(BufferTransferHandler bufferTransferHandler) {
-            if (_logger.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
                 if (bufferTransferHandler == null) {
-                    _logger.debug("setTransferHandler(): bufferTransferHandler is null!");
+                    LOGGER.debug("setTransferHandler(): bufferTransferHandler is null!");
                 } else {
-                    _logger.debug("setTransferHandler(): bufferTransferHandler.class=" + bufferTransferHandler.getClass());
+                    LOGGER.debug("setTransferHandler(): bufferTransferHandler.class=" + bufferTransferHandler.getClass());
                 }
             }
 
@@ -601,12 +595,12 @@ public class RTPPlayer2 implements ControllerListener {
              //      drainQueue = true;
 
                } catch (Exception e) {
-                   _logger.debug(e, e);
+                   LOGGER.debug(e, e);
                    cause = e;
                }
 
                if (drainQueue) {
-                   _logger.debug("draining prompt queue...");
+                   LOGGER.debug("draining prompt queue...");
                    while (!_bufferQueue.isEmpty()) {
                        try {
                            _bufferQueue.take();
@@ -614,7 +608,7 @@ public class RTPPlayer2 implements ControllerListener {
                            // (e.g. save and put back in queue if not in cancel list)
                        } catch (InterruptedException e1) {
                            // should not happen since this is the only thread consuming from queue
-                           _logger.warn(e1, e1);
+                           LOGGER.warn(e1, e1);
                        }
                    }
                }

@@ -24,6 +24,7 @@ package org.speechforge.cairo.server.resource;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -42,6 +43,8 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
 import org.speechforge.cairo.rtp.AudioFormats;
@@ -234,6 +237,10 @@ public class TransmitterResource extends ResourceImpl {
     }
     
     public static void main(String[] args) throws Exception {
+        PrintStream logger = IoBuilder.forLogger("System.out").setLevel(Level.INFO).buildPrintStream();
+        PrintStream errorLogger = IoBuilder.forLogger("System.err").setLevel(Level.ERROR).buildPrintStream();
+        System.setOut(logger);
+        System.setErr(errorLogger);
 
         CommandLineParser parser = new GnuParser();
         Options options = getOptions();
