@@ -21,7 +21,7 @@ import java.io.InputStream;
  
 public class LiveAudioStream implements PushBufferStream, Runnable {
 	
-    private static Logger _logger = Logger.getLogger(LiveAudioStream.class);
+    private static Logger LOGGER = Logger.getLogger(LiveAudioStream.class);
     
 	
     protected ContentDescriptor cd = new ContentDescriptor(ContentDescriptor.RAW);
@@ -97,7 +97,7 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
 	    		int bytesToRead = MAXSIZE;           
 	            int bytesRead = is.read(buff,offset,bytesToRead);	            
 	            
-				_logger.debug("bytes read from stream: "+bytesRead);
+				LOGGER.debug("bytes read from stream: "+bytesRead);
 	   
 	 
 	    		int totalRead = bytesRead;
@@ -106,13 +106,13 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
     			bytesToRead = MAXSIZE - totalRead;
 	    		while (((totalRead % 2) != 0) && (totalRead < MAXSIZE)) {
 				    int size = is.read(buff,offset,bytesToRead);
-					_logger.debug("   additional bytes read from stream: "+size);
+					LOGGER.debug("   additional bytes read from stream: "+size);
 				    totalRead = totalRead + size;
 				    offset = totalRead-1;
 				    bytesToRead = MAXSIZE - totalRead;
 				    count++;
 				}
-				_logger.debug("-> bytes read from stream: "+totalRead+" "+count);
+				LOGGER.debug("-> bytes read from stream: "+totalRead+" "+count);
 				
 
  
@@ -131,14 +131,14 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
 				                 DataUtil.bytesToValues(b1, 0, b1.length, audioFormat.getSampleSizeInBits()/8, true) :
 				                 DataUtil.littleEndianBytesToValues(b1, 0, b1.length, audioFormat.getSampleSizeInBits()/8, true);
 				        //for (int i =0; i<samples.length;i++) {
-				        //	System.out.println(i+" : "+samples[i]);
+				        //	LOGGER.info(i+" : "+samples[i]);
 				        //}
 				                 
 			            for (double value : samples) {
 			                try {
 			                    dos.writeShort(new Short((short) value));
 			                } catch (IOException e) {
-			                    e.printStackTrace();
+			                    LOGGER.warn(e.getMessage(), e);
 			                }
 			            }     
 				                 
@@ -241,8 +241,8 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
 	        AudioFileFormat.Type outputType = getTargetType("wav");
 	        String wavName = dumpFilePath + getNextFreeIndex(dumpFilePath) + ".wav";
 	        
-	        _logger.debug("created audio Format Object "+wavFormat.toString());
-	        _logger.debug("filename:" + wavName);
+	        LOGGER.debug("created audio Format Object "+wavFormat.toString());
+	        LOGGER.debug("filename:" + wavName);
 
 	        byte[] abAudioData = baos.toByteArray();
 	        ByteArrayInputStream bais = new ByteArrayInputStream(abAudioData);
@@ -254,10 +254,10 @@ public class LiveAudioStream implements PushBufferStream, Runnable {
 	            try {
 	                AudioSystem.write(ais, outputType, outWavFile);
 	            } catch (IOException e) {
-	                e.printStackTrace();
+	                LOGGER.warn(e.getMessage(), e);
 	            }
 	        } else {
-	           System.out.println("output type not supported..."); 
+	           LOGGER.info("output type not supported..."); 
 	        }
 	    }
 	    

@@ -47,7 +47,7 @@ import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 public class SphinxRecorder extends AbstractPoolableObject implements SpeechEventListener {
-    private static Logger _logger = Logger.getLogger(SphinxRecorder.class);
+    private static Logger LOGGER = Logger.getLogger(SphinxRecorder.class);
     
 	private FrontEnd _fe;
 	private int _id;
@@ -59,7 +59,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
     
 	public SphinxRecorder(ConfigurationManager cm, int id) throws InstantiationException {
 
-    	_logger.info("Creating Recorder # "+id);
+    	LOGGER.info("Creating Recorder # "+id);
     	_id = id;
         _fe = (FrontEnd) cm.lookup("frontEnd"+id);
 		_fe.initialize();
@@ -77,7 +77,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 
 	
     public synchronized void stopProcessing() {
-        _logger.debug("SphinxRecordingEngine  #"+_id +"stopping processing...");
+        LOGGER.debug("SphinxRecordingEngine  #"+_id +"stopping processing...");
         if (_rawAudioTransferHandler != null) {
             _rawAudioTransferHandler.stopProcessing();
             _rawAudioTransferHandler = null;
@@ -86,14 +86,14 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
     }
 	
 	public void activate() throws Exception {
-		_logger.debug("SphinxRecordingEngine #"+_id +" activating...");
+		LOGGER.debug("SphinxRecordingEngine #"+_id +" activating...");
 
 	}
 
 
 
 	public void passivate() throws Exception {
-        _logger.debug("SphinxRecorderEngine #"+_id +"passivating...");
+        LOGGER.debug("SphinxRecorderEngine #"+_id +"passivating...");
         stopProcessing();
         _recorderListener = null;
 
@@ -108,7 +108,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
         }
 
         if (recorderListener == null) {
-            _logger.debug("speechStarted(): recorderListener is null!");
+            LOGGER.debug("speechStarted(): recorderListener is null!");
         } else {
         	recorderListener.recordingComplete(_uri);
         }
@@ -122,7 +122,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
         }
 
         if (recorderListener == null) {
-            _logger.debug("speechStarted(): recorderListener is null!");
+            LOGGER.debug("speechStarted(): recorderListener is null!");
         } else {
         	recorderListener.speechStarted();
         }
@@ -133,7 +133,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 		
 		_uri = uri;
 		
-        _logger.info("SphinxRecEngine  #"+_id +"starting  recognition...");
+        LOGGER.info("SphinxRecEngine  #"+_id +"starting  recognition...");
         if (_rawAudioTransferHandler != null) {
             throw new IllegalStateException("Recognition already in progress!");
         }
@@ -143,8 +143,8 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
             throw new IllegalArgumentException(
                 "Rec engine can handle only single stream datasources, # of streams: " + streams);
         }
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("Starting recognition on stream format: " + streams[0].getFormat());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Starting recognition on stream format: " + streams[0].getFormat());
         }
         try {
             _rawAudioTransferHandler = new RawAudioTransferHandler(_rawAudioProcessor);
@@ -161,8 +161,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 		try {
 	        streamer.startRecordingThread();
         } catch (IOException e) {
-	        // TODO Auto-generated catch block
-	        e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
 		
 	}
@@ -210,14 +209,14 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	    
 	    private void showSignals(Data data) {
 	        if (data instanceof SpeechStartSignal) {
-		        _logger.info("SpeechStartSignal encountered!");
+		        LOGGER.info("SpeechStartSignal encountered!");
 	        } else if (data instanceof SpeechEndSignal) {
-		        _logger.info("SpeechEndSignal encountered!");
+		        LOGGER.info("SpeechEndSignal encountered!");
 	        } else if (data instanceof DataStartSignal) {
-	            _logger.info("DataStartSignal encountered!");
+	            LOGGER.info("DataStartSignal encountered!");
 	            infoDataStartSignal((DataStartSignal) data);
 	        } else if (data instanceof DataEndSignal) {
-	            _logger.info("DataEndSignal encountered!");
+	            LOGGER.info("DataEndSignal encountered!");
 	        }
 
 	    }
@@ -225,7 +224,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	    private void infoDataStartSignal(DataStartSignal dataStartSignal) {
 	        Map<String, Object> dataProps = dataStartSignal.getProps();
 	        if (dataProps.containsKey("vadTaggedFeatureStream"))
-	           _logger.debug("SPEECH TAG FEATURE STREAM: "+dataProps.get("vadTaggedFeatureStream"));
+	           LOGGER.debug("SPEECH TAG FEATURE STREAM: "+dataProps.get("vadTaggedFeatureStream"));
 	    }
 	    
    
@@ -236,14 +235,14 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	        	DoubleData dd = (DoubleData) data;
 	        	double[] d = dd.getValues();
 
-	        	_logger.debug(dd.toString());
-	        	_logger.debug("Sending " + d.length + " values.  "+d[0]+ " "+d[d.length-1]);
+	        	LOGGER.debug(dd.toString());
+	        	LOGGER.debug("Sending " + d.length + " values.  "+d[0]+ " "+d[d.length-1]);
 	        } else if (data instanceof FloatData) {
 	        	FloatData fd = (FloatData) data;
-	        	_logger.debug("FloatData: " + fd.getSampleRate() + "Hz, first sample #: " +
+	        	LOGGER.debug("FloatData: " + fd.getSampleRate() + "Hz, first sample #: " +
 	                    fd.getFirstSampleNumber() + ", collect time: " + fd.getCollectTime());
 	        	float[] d = fd.getValues();
-	        	_logger.debug("Sending " + d.length + " values.");
+	        	LOGGER.debug("Sending " + d.length + " values.");
 	        	//for (float val: d) {
 	        	//	_logger.info(val);
 	        	//}
@@ -276,8 +275,8 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 
 
 	        
-	        _logger.debug("created audio Format Object "+wavFormat.toString());
-	        _logger.debug("filename:" + _uri);
+	        LOGGER.debug("created audio Format Object "+wavFormat.toString());
+	        LOGGER.debug("filename:" + _uri);
 
 	        byte[] abAudioData = baos.toByteArray();
 	        ByteArrayInputStream bais = new ByteArrayInputStream(abAudioData);
@@ -286,9 +285,8 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	        URI outuri = null;
             try {
 	            outuri = new URI(_uri);
-            } catch (URISyntaxException e1) {
-	            // TODO Auto-generated catch block
-	            e1.printStackTrace();
+            } catch (URISyntaxException e) {
+                LOGGER.warn(e.getMessage(), e);
             }
 	        File outWavFile = new File(outuri);
 
@@ -296,10 +294,10 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	            try {
 	                AudioSystem.write(ais, outputType, outWavFile);
 	            } catch (IOException e) {
-	                e.printStackTrace();
+	                LOGGER.warn(e.getMessage(), e);
 	            }
 	        } else {
-	           System.out.println("output type not supported..."); 
+	           LOGGER.info("output type not supported..."); 
 	        }
 
 	        /*Player player;
@@ -330,7 +328,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	    
 	    public void run() {
 
-	    	_logger.debug("starting recorder thread");
+	    	LOGGER.debug("starting recorder thread");
 	    	boolean moreData = true;
 	    	while (moreData) {
 
@@ -358,12 +356,12 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 			                try {
 			                    dos.writeShort(new Short((short) value));
 			                } catch (IOException e) {
-			                    e.printStackTrace();
+			                    LOGGER.warn(e.getMessage(), e);
 			                }
 			            }
 			        }
 	    		} else {
-	    			_logger.info("Null data");
+	    			LOGGER.info("Null data");
 	    			moreData=false;
 	    		}
 	            
@@ -375,7 +373,7 @@ public class SphinxRecorder extends AbstractPoolableObject implements SpeechEven
 	    		
 
 	    	}
-	    	_logger.info("dropped out of the get data loop in the recording thread");
+	    	LOGGER.info("dropped out of the get data loop in the recording thread");
 	    }
 	}
 	

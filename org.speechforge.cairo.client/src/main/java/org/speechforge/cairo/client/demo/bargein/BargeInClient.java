@@ -57,7 +57,7 @@ import org.mrcp4j.message.MrcpResponse;
  */
 public class BargeInClient  {
 
-    private static Logger _logger = Logger.getLogger(BargeInClient.class);
+    private static Logger LOGGER = Logger.getLogger(BargeInClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String LOOP_OPTION = "loop";
@@ -121,8 +121,7 @@ public class BargeInClient  {
     				try {
     					sm.shutdown();
     				} catch (SipException e) {
-    					// TODO Auto-generated catch block
-    					e.printStackTrace();
+    					LOGGER.warn(e.getMessage(), e);
     				}
     			}
     		}
@@ -154,7 +153,7 @@ public class BargeInClient  {
     	try {
     		localRtpPort = Integer.parseInt(args[0]);
     	} catch (Exception e) {
-    		_logger.debug(e, e);
+    		LOGGER.debug(e, e);
     	}
 
     	if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -196,7 +195,7 @@ public class BargeInClient  {
 
     			if (session != null) {
     				//construct a media client to stream the audio (both ways) and start streaming
-    				_logger.debug("Starting NativeMediaClient...");
+    				LOGGER.debug("Starting NativeMediaClient...");
     				mediaClient = new NativeMediaClient(localRtpPort, rserverHost, session.getRemoteRtpPort());
     				mediaClient.startTransmit();
 
@@ -216,12 +215,12 @@ public class BargeInClient  {
     						String completePrompt = parrotString+ "  " +prompt;
     						result = _client.playAndRecognizeBlocking(false,completePrompt, grammar,false);
 
-    						if (_logger.isInfoEnabled()) {
+    						if (LOGGER.isInfoEnabled()) {
     							StringBuilder sb = new StringBuilder();
     							sb.append("\n**************************************************************");
     							sb.append("\nRecognition result: ").append(result);
     							sb.append("\n**************************************************************\n");
-    							_logger.info(sb);
+    							LOGGER.info(sb);
     						}
 
 
@@ -248,11 +247,11 @@ public class BargeInClient  {
     				} catch (Exception e){
     					if (e instanceof MrcpInvocationException) {
     						MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-    						if (_logger.isDebugEnabled()) {
-    							_logger.debug("MRCP response received:\n" + response.toString());
+    						if (LOGGER.isDebugEnabled()) {
+    							LOGGER.debug("MRCP response received:\n" + response.toString());
     						}
     					}
-    					_logger.warn(e, e);
+    					LOGGER.warn(e, e);
     					sm.shutdown();
     					sentBye = true;
     					System.exit(1);
@@ -260,7 +259,7 @@ public class BargeInClient  {
 
     			} else {
     				//Invitation Timeout
-    				_logger.info("Sip Invitation timed out.  Is server running?");
+    				LOGGER.info("Sip Invitation timed out.  Is server running?");
     			}
 
     			if (sm != null){
@@ -278,15 +277,15 @@ public class BargeInClient  {
     private class Listener implements SpeechEventListener {
 
 		public void characterEventReceived(String c, DtmfEventType status) {
-			_logger.info("received a unexpected character receieved event. char: "+c+" Status: "+status);
+			LOGGER.info("received a unexpected character receieved event. char: "+c+" Status: "+status);
         }
 
 		public void recognitionEventReceived(SpeechEventType event, RecognitionResult r) {
-			_logger.info("Received a recognition event: "+event);
+			LOGGER.info("Received a recognition event: "+event);
         }
 
 		public void speechSynthEventReceived(SpeechEventType event) {
-			_logger.info("Received a synth event.  Event: "+event);
+			LOGGER.info("Received a synth event.  Event: "+event);
 	        
         }
     }

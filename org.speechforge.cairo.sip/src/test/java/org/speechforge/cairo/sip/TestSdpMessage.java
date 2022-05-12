@@ -100,6 +100,6 @@ public class TestSdpMessage {
 
         Assert.assertEquals(md.getAttribute("sendrecv"), null); // bogus test...
         // assertEquals(md.getAttribute("sendonly"),null);
-        // System.out.println(md.toString());
+        // LOGGER.info(md.toString());
     }
 }

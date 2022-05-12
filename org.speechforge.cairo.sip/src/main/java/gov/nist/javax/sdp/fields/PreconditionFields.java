@@ -421,7 +421,7 @@ public class PreconditionFields implements Serializable
 				(AttributeField) this.preconditionAttributes.elementAt(i);
 			
 			
-			//System.out.println("--> PreconditionField -> (i="+i+") > attribute field: " + af.toString());
+			//LOGGER.info("--> PreconditionField -> (i="+i+") > attribute field: " + af.toString());
 			
 			
 			// go to next attribute if this is not "conf"
@@ -457,7 +457,7 @@ public class PreconditionFields implements Serializable
 			preconditionAttributes.add(newAF);
 			
 			
-			//System.out.println("--> PreconditionField -> new \"conf\" attribute created: " + newAF.toString() );
+			//LOGGER.info("--> PreconditionField -> new \"conf\" attribute created: " + newAF.toString() );
 		}
 	}
 	

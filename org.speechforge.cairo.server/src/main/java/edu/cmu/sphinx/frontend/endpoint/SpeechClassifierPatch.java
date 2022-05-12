@@ -148,7 +148,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
      * Resets this LevelTracker to a starting state.
      */
     private void reset() {
-        System.out.println("SpeechClassifierPatch.reset()");
+        logger.info("SpeechClassifierPatch.reset()");
         level = 0;
         background = 100;
     }
@@ -182,9 +182,9 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
      */
     private void classify(DoubleData audio) {
         double current = logRootMeanSquare(audio.getValues());
-        // System.out.println("current: " + current);
+        // logger.info("current: " + current);
         if (logger.isLoggable(Level.FINEST)) {
-            System.out.println("Before -- Bkg: " + background + ", level: " + level +
+            logger.info("Before -- Bkg: " + background + ", level: " + level +
                                ", current: " + current);
         }
         boolean isSpeech = false;
@@ -207,7 +207,7 @@ public class SpeechClassifierPatch extends BaseDataProcessor {
             if (labeledAudio.isSpeech()) {
                 speech = "*";
             }
-            System.out.println("Bkg: " + background + ", level: " + level +
+            logger.info("Bkg: " + background + ", level: " + level +
                                ", current: " + current + " " + speech);
         }
         outputQueue.add(labeledAudio);

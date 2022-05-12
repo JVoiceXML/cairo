@@ -22,6 +22,21 @@
  */
 package org.speechforge.cairo.client.demo.recog;
 
+import java.awt.Toolkit;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax.sip.SipException;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.log4j.Logger;
+import org.mrcp4j.client.MrcpInvocationException;
+import org.mrcp4j.message.MrcpResponse;
 import org.speechforge.cairo.client.SessionManager;
 import org.speechforge.cairo.client.SpeechClient;
 import org.speechforge.cairo.client.SpeechClientImpl;
@@ -33,21 +48,6 @@ import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.sip.SipSession;
 import org.speechforge.cairo.util.CairoUtil;
 
-import java.awt.Toolkit;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import javax.sip.SipException;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
-import org.mrcp4j.client.MrcpInvocationException;
-import org.mrcp4j.message.MrcpEvent;
-import org.mrcp4j.message.MrcpResponse;
-
 
 /**
  * Demo MRCPv2 client application that utilizes a {@code speechrecog} resource to perform
@@ -57,7 +57,7 @@ import org.mrcp4j.message.MrcpResponse;
  */
 public class RecognitionClient  {
 
-    private static Logger _logger = Logger.getLogger(RecognitionClient.class);
+    private static Logger LOGGER = Logger.getLogger(RecognitionClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String URL_OPTION = "url";
@@ -112,7 +112,7 @@ public class RecognitionClient  {
         // unexpected crash (ie ctrl-c)
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                _logger.debug("Running shutdown hook");
+                LOGGER.debug("Running shutdown hook");
                 if (mediaClient != null)
                    mediaClient.shutdown();
                 if (!sentBye && sipAgent!=null) {
@@ -120,8 +120,7 @@ public class RecognitionClient  {
                         sm.shutdown();
                         sentBye=true;
                     } catch (SipException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        LOGGER.warn(e.getMessage(), e);
                     }
 
                 }
@@ -151,7 +150,7 @@ public class RecognitionClient  {
         try {
             localRtpPort = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
 
         if (localRtpPort < 0 || localRtpPort >= RTPConsumer.TCP_PORT_MAX || localRtpPort % 2 != 0) {
@@ -191,7 +190,7 @@ public class RecognitionClient  {
         SipSession session = sm.newRecogChannel(localRtpPort,_host, "Session Name");
         if (session != null) {
 
-            _logger.debug("Starting NativeMediaClient...");
+            LOGGER.debug("Starting NativeMediaClient...");
             mediaClient = new NativeMediaClient(localRtpPort, rserverHost, session.getRemoteRtpPort());
             mediaClient.startTransmit();
 
@@ -204,18 +203,18 @@ public class RecognitionClient  {
             
             try {
             	
-                if (_logger.isInfoEnabled()) {
+                if (LOGGER.isInfoEnabled()) {
                     if (examplePhrase == null) {
-                        _logger.info("\nStart speaking now...");
+                        LOGGER.info("\nStart speaking now...");
                     } else {
-                        _logger.info("\nStart speaking now... (e.g. \"" + examplePhrase + "\")");
+                        LOGGER.info("\nStart speaking now... (e.g. \"" + examplePhrase + "\")");
                     }
                 }
             	boolean hotword = false;
             	boolean attachGrammar = false;
             	long noInputTimeout = 10000;
             	RecognitionResult result = _client.recognizeBlocking(grammarUrl, hotword, attachGrammar, noInputTimeout);
-                if (_logger.isInfoEnabled()) {
+                if (LOGGER.isInfoEnabled()) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("\n**************************************************************");
                     if (result != null) {
@@ -224,18 +223,18 @@ public class RecognitionClient  {
                     	sb.append("\nThere was no recognition result");
                     }
                     sb.append("\n**************************************************************\n");
-                    _logger.info(sb);
+                    LOGGER.info(sb);
                 }
          
 
             } catch (Exception e){
                 if (e instanceof MrcpInvocationException) {
                     MrcpResponse response = ((MrcpInvocationException) e).getResponse();
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("MRCP response received:\n" + response.toString());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("MRCP response received:\n" + response.toString());
                     }
                 }
-                _logger.warn(e, e);
+                LOGGER.warn(e, e);
                 sm.shutdown();
                 sentBye=true;
                 System.exit(1);
@@ -246,23 +245,23 @@ public class RecognitionClient  {
             
         } else {
             //Invitation Timeout
-            _logger.info("Sip Invitation timed out.  Is server running?");
+            LOGGER.info("Sip Invitation timed out.  Is server running?");
         }
     }
     
     private class Listener implements SpeechEventListener {
 
 		public void characterEventReceived(String c, DtmfEventType status) {
-			_logger.info("received a unexpected character receieved event. char: "+c+" Status: "+status);
+			LOGGER.info("received a unexpected character receieved event. char: "+c+" Status: "+status);
         }
 
 		public void recognitionEventReceived(SpeechEventType event, RecognitionResult r) {
-			_logger.info("Received a recognition event: "+event);
+			LOGGER.info("Received a recognition event: "+event);
        
         }
 
 		public void speechSynthEventReceived(SpeechEventType event) {
-			_logger.info("Received an unexpected synth event.  Event: "+event);
+			LOGGER.info("Received an unexpected synth event.  Event: "+event);
 	        
         }
     }

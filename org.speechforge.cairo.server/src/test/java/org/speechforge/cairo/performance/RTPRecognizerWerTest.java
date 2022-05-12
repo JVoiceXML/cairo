@@ -43,7 +43,7 @@ import edu.cmu.sphinx.util.props.PropertyException;
  */
 public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger _logger = Logger.getLogger(RTPRecognizerWerTest.class);
+    private static Logger LOGGER = Logger.getLogger(RTPRecognizerWerTest.class);
 
     private static final Long LONG_MINUS_ONE = new Long(-1);
     private static final Long FIFTEENSECS = new Long(15000);
@@ -88,14 +88,11 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
               engine = new SphinxRecEngine(cm,1);
 //              scorer = (ConfidenceScorer) cm.lookup("confidenceScorer");
           } catch (IOException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           } catch (PropertyException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           } catch (InstantiationException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           }
 
           
@@ -104,8 +101,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           try {
               address = InetAddress.getByName(RECEIVERADDRESS);
           } catch (UnknownHostException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           } 
 
           //create the audio file player
@@ -116,11 +112,9 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           try {
               audioFilePlayer = new RTPPlayer(null,XMITTERPORT, address, RECEIVERPORT,af);
           } catch (InvalidSessionAddressException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           } catch (IOException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           }
 
           // start up the player thread.  It is waiting for play commands (with test file as the parameter)
@@ -132,10 +126,8 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           try {
               replicator = new RTPStreamReplicator(RECEIVERPORT);
           } catch (IOException e) {
-              // TODO Auto-generated catch block
-              e.printStackTrace();
+              LOGGER.warn(e.getMessage(), e);
           }
-
       }
 
  
@@ -147,12 +139,11 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         try {
             File f = new File(audioFileURL.getFile()); 
             while ( p.playPrompt(f,listener) == -1 ) {
-                _logger.info("Still playing the previous prompt.  Trying again...");
+                LOGGER.info("Still playing the previous prompt.  Trying again...");
                 try {
                     Thread.sleep(1000);
-                } catch (InterruptedException e1) {
-                    //TODO Auto-generated catch block
-                    e1.printStackTrace();
+                } catch (InterruptedException e) {
+                    LOGGER.warn(e.getMessage(), e);
                 }               
             }
             pair  = replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
@@ -163,10 +154,10 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                 throw new IOException("Processor.getDataOutput() returned null!");
             }     
 
-            _logger.debug("Loading grammar...");
+            LOGGER.debug("Loading grammar...");
             engine.loadJSGF(grammarLocation);
 
-            _logger.debug("Starting recognition...");
+            LOGGER.debug("Starting recognition...");
             engine.startRecognition(dataSource, listener);
 
             processor.addControllerListener(new ProcessorStarter());
@@ -175,11 +166,9 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
             engine.startRecogThread();
 
         } catch (GrammarException e) {
-            //closeProcessor();
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         } catch (IOException e) {
-            //closeProcessor();
-            e.printStackTrace();
+            LOGGER.warn(e.getMessage(), e);
         }
 
         //Wait for a result or timeout (AND play completed)  See listener for details
@@ -188,8 +177,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                 try {
                     listener.wait(1000);
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }
         }
@@ -204,14 +192,14 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         // confidence for best path 
         //Path bestPath = confidenceResult.getBestHypothesis(); 
         //double pathConfidence = bestPath.getConfidence();
-        //System.out.println(bestPath.toString()+ " confidence: "+pathConfidence+"/"+bestPath.getScore());
+        //LOGGER.info(bestPath.toString()+ " confidence: "+pathConfidence+"/"+bestPath.getScore());
 
         // confidence for each word in best path 
         //WordResult[] words = bestPath.getWords(); 
         //for (int i = 0; i < words.length; i++) { 
         //    WordResult wordResult = (WordResult) words[i]; 
         //    double wordConfidence = wordResult.getConfidence(); 
-        //    System.out.println(wordResult.toString()+" confidence: "+wordConfidence);
+        //    LOGGER.info(wordResult.toString()+" confidence: "+wordConfidence);
         //} 
 
 
@@ -258,7 +246,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         }
 
         public void noInputTimeout() {
-            _logger.debug("No input timeout ");
+            LOGGER.debug("No input timeout ");
             synchronized (this) {
                 if (_noResultTimeoutTask != null) {
                     _noResultTimeoutTask.cancel();
@@ -270,9 +258,9 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
 
         public void recognitionComplete(RecognitionResult result) {
             if (result == null) {
-               _logger.debug("recog complete with null result");
+               LOGGER.debug("recog complete with null result");
             }else {
-                _logger.debug("recog complete with result: " + result.getText()); 
+                LOGGER.debug("recog complete with result: " + result.getText()); 
             }
             synchronized (this) {
                 if (_noResultTimeoutTask != null) {
@@ -286,11 +274,11 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         }
 
         public void speechStarted() {
-            _logger.debug("speech started... ");   
+            LOGGER.debug("speech started... ");   
         }  
         
         public void noResultTimeout() {
-            _logger.debug("no result timeout ");
+            LOGGER.debug("no result timeout ");
             synchronized (this) {
                 //if (!recogDone) {
                    //recog.closeProcessor();
@@ -304,13 +292,13 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
         }
         
         public void playComplete() {
-            //System.out.println("Play Completed");
+            //LOGGER.info("Play Completed");
 
 
             synchronized (this) {
                 playDone = true;
                 if (!recogDone) {
-                    _logger.debug("play completed before recognition happened. starting timer.");
+                    LOGGER.debug("play completed before recognition happened. starting timer.");
                     
                     //*** This is the magic statement, without which the progrtam fails.  ****
                     engine.stopProcessing();
@@ -321,7 +309,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                    _timer.schedule(_noResultTimeoutTask, FIVESECS);
 
                 } else {
-                    _logger.debug("play completed after recog already happened");
+                    LOGGER.debug("play completed after recog already happened");
                 }
             }
 
@@ -348,8 +336,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                        try {
                            this.wait(500);
                        } catch (InterruptedException e) {
-                           // TODO Auto-generated catch block
-                           e.printStackTrace();
+                           LOGGER.warn(e.getMessage(), e);
                        }
                    }
                }
@@ -359,21 +346,18 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
                //    Thread.sleep(500);
                //} catch (InterruptedException e) {
                    // TODO Auto-generated catch block
-               //    e.printStackTrace();
+               //LOGGER.warn(e.getMessage(), e);
                //}
                
                try {
-                   _logger.info("Playing prompt: "+ file.getName());
+                   LOGGER.info("Playing prompt: "+ file.getName());
                    audioFilePlayer.playPrompt(file);
-               } catch (IllegalStateException e2) {
-                   // TODO Auto-generated catch block
-                   e2.printStackTrace();
-               } catch (IllegalArgumentException e2) {
-                   // TODO Auto-generated catch block
-                   e2.printStackTrace();
-               } catch (InterruptedException e2) {
-                   // TODO Auto-generated catch block
-                   e2.printStackTrace();
+               } catch (IllegalStateException e) {
+                   LOGGER.warn(e.getMessage(), e);
+               } catch (IllegalArgumentException e) {
+                   LOGGER.warn(e.getMessage(), e);
+               } catch (InterruptedException e) {
+                   LOGGER.warn(e.getMessage(), e);
                }
                playDone = true; 
                listener.playComplete();
@@ -452,18 +436,18 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
 
    public void closeProcessor(Processor processor) {
        if (processor != null) {
-         _logger.debug("Closing processor...");
+         LOGGER.debug("Closing processor...");
            processor.close();
            processor = null;
            replicator.removeReplicant( pair.getPbds());
        } else {
-           _logger.debug("Tried to close processor.. but it was null."); 
+           LOGGER.debug("Tried to close processor.. but it was null."); 
        }
    }
     
     
     public static void main(String[] args) {
-        System.out.println("Stating up with config file: "+args[0]);
+        LOGGER.info("Stating up with config file: "+args[0]);
         BaseRecognizerWerTest rp = new RTPRecognizerWerTest();
         rp.runTests(args[0]);       
     }
