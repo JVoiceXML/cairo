@@ -3,6 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'application'
+    id 'distribution'
 }
 
 repositories {
@@ -48,7 +49,7 @@ jar {
     manifest {
         attributes('Implementation-Title': 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.',
                    'Implementation-Vendor': 'switch',
-                   'Implementation-Version': version,
+                   'Implementation-Version': version, 
                    'Built-By'       : System.properties['user.name'],
                    'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
                    'Created-By'     : "Gradle ${gradle.gradleVersion}",
@@ -57,6 +58,86 @@ jar {
     }
     baseName 'org.speechforge.cairo.server'
 }
+
+task createConfiguration(type: Copy) {
+    into "${buildDir}/config"
+    from("${projectDir}/src/main/config")
+}
+
+task createTransmitterApp(type: CreateStartScripts) {
+    dependsOn createConfiguration
+    
+    mainClassName = "org.speechforge.cairo.server.resource.TransmitterResource"
+    classpath = startScripts.classpath + files('../config')
+    outputDir = startScripts.outputDir
+    applicationName = "transmitter"
+    defaultJvmOpts = ["-Xms1024m", "-Xmx2048m", "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Djava.security.manager",
+               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
+
+               "-DCAIRO_CONFIG=../config/cairo-config.xml"]
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\config', '%APP_HOME%\\config')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/config', '$APP_HOME/config')
+    }
+}
+
+task createReceiverApp(type: CreateStartScripts) {
+    dependsOn createConfiguration
+    
+    mainClassName = "org.speechforge.cairo.server.resource.ReceiverResource"
+    classpath = startScripts.classpath + files('../config')
+    outputDir = startScripts.outputDir
+    applicationName = "receiver"
+    defaultJvmOpts = ["-Xms1024m", "-Xmx2048m", "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Djava.security.manager",
+               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
+               "-DCAIRO_CONFIG=../config/cairo-config.xml",
+               "-DCAIRO_RECORD_DIR=%%RECORD_DIR%%"]
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\config', '%APP_HOME%\\config')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/config', '$APP_HOME/config')
+    }
+}
+
+
+startScripts {
+    dependsOn createTransmitterApp
+    dependsOn createReceiverApp
+    
+    mainClassName = "org.speechforge.cairo.server.resource.ResourceServerImpl"
+    classpath += files('../config')
+    applicationName = "rserver"
+    //javaOpts = [ "-sipPort", "5050", "-sipTransport", "udp" ]
+    defaultJvmOpts = ["-Xms1024m", "-Xmx2048m", "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Djava.security.manager",
+               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"]
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\config', '%APP_HOME%\\config')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/config', '$APP_HOME/config')
+    }
+}
+
+applicationDistribution.from("${buildDir}/config") {
+    include "*"
+    into 'config'
+}
+
 
 publishing {
     publications {
