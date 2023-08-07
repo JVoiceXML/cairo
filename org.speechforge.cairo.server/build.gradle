@@ -1,5 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
 plugins {
     id 'java'
+    id 'com.github.eerohele.saxon-gradle' version '0.8.0'
     id 'maven-publish'
     id 'signing'
     id 'application'
@@ -7,7 +14,9 @@ plugins {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
+    jcenter()    
     maven { 
         url "https://oss.sonatype.org/content/repositories/snapshots" 
     }
@@ -59,9 +68,46 @@ jar {
     baseName 'org.speechforge.cairo.server'
 }
 
+task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
+    stylesheet "${projectDir}/src/main/config/patch-configuration.xsl"
+    input "${projectDir}/src/main/config/cairo-config.xml"
+    output "${buildDir}/config/cairo-config.xml"
+    parameters(
+        recordDir: '/tmp/cairo-record',
+        grammarDir: '/tmp/cairo-grammar',
+        voice: 'dfki-spike',
+        promptDir: '/tmp/cairo-prompt',
+        ipAddress: getIP()
+    )
+}
+
 task createConfiguration(type: Copy) {
+    dependsOn xsltCairoConfig
+
     into "${buildDir}/config"
-    from("${projectDir}/src/main/config")
+    from("${projectDir}/src/main/config") {
+        exclude '*.xsl',
+            'cairo-config.xml'
+    }
+}
+
+def getIP() {
+    InetAddress result = null;
+    Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+    while (interfaces.hasMoreElements()) {
+        Enumeration<InetAddress> addresses = interfaces.nextElement().getInetAddresses();
+        while (addresses.hasMoreElements()) {
+            InetAddress address = addresses.nextElement();
+            if (!address.isLoopbackAddress()) {
+                if (address.isSiteLocalAddress()) {
+                    return address.getHostAddress();
+                } else if (result == null) {
+                    result = address;
+                }
+            }
+        }
+    }
+    return (result != null ? result : InetAddress.getLocalHost()).getHostAddress();
 }
 
 task createTransmitterApp(type: CreateStartScripts) {
