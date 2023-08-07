@@ -47,7 +47,8 @@ import javax.media.rtp.event.SessionEvent;
 import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.util.CairoUtil;
 
 /**
@@ -57,7 +58,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public abstract class RTPConsumer implements SessionListener, ReceiveStreamListener {
 
-    private static Logger _logger = Logger.getLogger(RTPConsumer.class);
+    private static Logger _logger = LogManager.getLogger(RTPConsumer.class);
     
     public static final int TCP_PORT_MAX = 65536;
 

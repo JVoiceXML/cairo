@@ -14,7 +14,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.server.recog.GrammarLocation;
 
 /**
@@ -25,7 +26,7 @@ import org.speechforge.cairo.server.recog.GrammarLocation;
  */
 public class BareRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger LOGGER = Logger.getLogger(BareRecognizerWerTest.class);
+    private static Logger LOGGER = LogManager.getLogger(BareRecognizerWerTest.class);
   
     public void  shutdown() {
         

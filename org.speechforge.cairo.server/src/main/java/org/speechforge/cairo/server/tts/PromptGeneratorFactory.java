@@ -29,7 +29,8 @@ import org.speechforge.cairo.util.pool.PoolableObject;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Serves to create a pool of {@link org.speechforge.cairo.server.tts.PromptGenerator} instances.
@@ -38,7 +39,7 @@ import org.apache.log4j.Logger;
  */
 public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
 
-    private static Logger _logger = Logger.getLogger(PromptGeneratorFactory.class);
+    private static Logger _logger = LogManager.getLogger(PromptGeneratorFactory.class);
 
     private String _voiceName;
 

@@ -28,7 +28,8 @@ import java.net.URL;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +45,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 public class TestSphinxWavFile {
 
     private static final Logger LOGGER =
-            Logger.getLogger(TestSphinxWavFile.class);
+            LogManager.getLogger(TestSphinxWavFile.class);
 
     /**
      * Create the test case

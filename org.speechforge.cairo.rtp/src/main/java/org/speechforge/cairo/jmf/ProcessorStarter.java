@@ -31,7 +31,8 @@ import javax.media.Processor;
 import javax.media.StartEvent;
 import javax.media.protocol.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Provides a standard implementation of a {@code javax.media.ControllerListener} that can be used
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class ProcessorStarter implements ControllerListener {
 
-    private static Logger _logger = Logger.getLogger(ProcessorStarter.class);
+    private static Logger _logger = LogManager.getLogger(ProcessorStarter.class);
     
     private boolean _handleEOM;
 

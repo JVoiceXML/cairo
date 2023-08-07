@@ -45,7 +45,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpMethodName;
 import org.mrcp4j.MrcpRequestState;
@@ -71,7 +72,7 @@ import org.mrcp4j.message.request.MrcpRequest;
 public class SpeechClientImpl implements MrcpEventListener, SpeechClient, SpeechClientProvider {
 
     /** The _logger. */
-    private static Logger _logger = Logger.getLogger(SpeechClientImpl.class);
+    private static Logger _logger = LogManager.getLogger(SpeechClientImpl.class);
  
     //InetAddress _cairoSipInetAddress = null;
     //private  String _cairoSipHostName;

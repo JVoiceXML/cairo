@@ -110,7 +110,6 @@ task createReceiverApp(type: CreateStartScripts) {
     }
 }
 
-
 startScripts {
     dependsOn createTransmitterApp
     dependsOn createReceiverApp

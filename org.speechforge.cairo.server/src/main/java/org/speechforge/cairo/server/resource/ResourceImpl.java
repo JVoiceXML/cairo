@@ -28,7 +28,8 @@ import java.rmi.server.UnicastRemoteObject;
 
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Base class for resource implementations.
@@ -37,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class ResourceImpl extends UnicastRemoteObject implements Resource {
 
-    private static Logger _logger = Logger.getLogger(ResourceImpl.class);
+    private static Logger _logger = LogManager.getLogger(ResourceImpl.class);
 
     public static final String HELP_OPTION = "help";
     public static final String RSERVERHOST_OPTION = "rserverhost";

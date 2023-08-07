@@ -19,7 +19,8 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 import org.speechforge.cairo.rtp.server.SpeechEventListener;
 import org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor;
@@ -47,7 +48,7 @@ import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 public class SphinxRecorder extends AbstractPoolableObject implements SpeechEventListener {
-    private static Logger LOGGER = Logger.getLogger(SphinxRecorder.class);
+    private static Logger LOGGER = LogManager.getLogger(SphinxRecorder.class);
     
 	private FrontEnd _fe;
 	private int _id;

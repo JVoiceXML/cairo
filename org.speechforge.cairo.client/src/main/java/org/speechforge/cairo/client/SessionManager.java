@@ -35,7 +35,8 @@ import javax.sdp.SdpParseException;
 import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.client.MrcpChannel;
 import org.mrcp4j.client.MrcpFactory;
@@ -66,7 +67,7 @@ import org.speechforge.cairo.sip.SipSession;
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
  */
 public class SessionManager  {
-        private static Logger LOGGER = Logger.getLogger(SessionManager.class);
+        private static Logger LOGGER = LogManager.getLogger(SessionManager.class);
         
         // properties need to be set either
         //   - call setters and then the no arg constructor then startup()(perhaps with SPring) OR

@@ -24,12 +24,10 @@ package org.speechforge.cairo.server.resource;
 
 import java.util.Hashtable;
 import java.util.Map;
-import org.apache.log4j.Logger;
-import org.speechforge.cairo.server.recog.RTPRecogChannel;
-import org.speechforge.cairo.server.recorder.RTPRecorderChannel;
+
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.server.resource.session.ChannelResources;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
-import org.speechforge.cairo.server.tts.RTPSpeechSynthChannel;
 import org.speechforge.cairo.sip.SdpMessage;
 
 /**
@@ -39,7 +37,7 @@ import org.speechforge.cairo.sip.SdpMessage;
  */
 public class ResourceSession {
 
-    private static Logger _logger = Logger.getLogger(ResourceSession.class);
+    private static Logger _logger = LogManager.getLogger(ResourceSession.class);
 
     private String Id;
     private  Map<String, ChannelResources> channels;

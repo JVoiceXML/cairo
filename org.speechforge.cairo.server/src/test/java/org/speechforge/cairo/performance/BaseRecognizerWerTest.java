@@ -10,7 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
@@ -23,7 +24,7 @@ import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
  */
 public abstract class BaseRecognizerWerTest {
     
-    private static Logger LOGGER = Logger.getLogger(BaseRecognizerWerTest.class);
+    private static Logger LOGGER = LogManager.getLogger(BaseRecognizerWerTest.class);
 
    ConfigurationManager cm;
    Recognizer recognizer;

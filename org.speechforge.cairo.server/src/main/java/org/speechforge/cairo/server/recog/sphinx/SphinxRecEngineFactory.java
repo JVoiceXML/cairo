@@ -27,7 +27,8 @@ import java.net.URL;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.util.pool.AbstractPoolableObjectFactory;
 import org.speechforge.cairo.util.pool.ObjectPoolUtil;
 import org.speechforge.cairo.util.pool.PoolableObject;
@@ -41,7 +42,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  */
 public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
 
-    private static Logger _logger = Logger.getLogger(SphinxRecEngineFactory.class);
+    private static Logger _logger = LogManager.getLogger(SphinxRecEngineFactory.class);
 
     URL _sphinxConfigURL = null;
     ConfigurationManager _cm;

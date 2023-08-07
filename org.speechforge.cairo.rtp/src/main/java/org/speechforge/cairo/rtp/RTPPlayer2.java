@@ -61,7 +61,8 @@ import javax.media.rtp.RTPManager;
 import javax.media.rtp.SendStream;
 import javax.media.rtp.SessionAddress;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.util.CairoUtil;
 
 
@@ -73,7 +74,7 @@ import org.speechforge.cairo.util.CairoUtil;
 public class RTPPlayer2 implements ControllerListener {
 
  
-    private static Logger LOGGER = Logger.getLogger(RTPPlayer2.class);
+    private static Logger LOGGER = LogManager.getLogger(RTPPlayer2.class);
 
     private Object _lock = new Object();
     private Processor _processor;

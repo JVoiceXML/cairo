@@ -36,7 +36,8 @@ import javax.media.format.AudioFormat;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 /**
@@ -47,7 +48,7 @@ import org.apache.log4j.Logger;
  */
 public class JMFUtil {
 
-    private static Logger _logger = Logger.getLogger(JMFUtil.class);
+    private static Logger _logger = LogManager.getLogger(JMFUtil.class);
 
     /**
      * RAW content type. This signifies content that's contained in individual

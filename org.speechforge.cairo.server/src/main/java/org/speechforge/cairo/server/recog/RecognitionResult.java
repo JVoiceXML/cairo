@@ -34,7 +34,8 @@ import javax.speech.recognition.RuleParse;
 
 import edu.cmu.sphinx.result.Result;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Represents the result of a completed recognition request.
@@ -43,7 +44,7 @@ import org.apache.log4j.Logger;
  */
 public class RecognitionResult {
 
-    private static Logger _logger = Logger.getLogger(RecognitionResult.class);
+    private static Logger _logger = LogManager.getLogger(RecognitionResult.class);
     
     private final static String tagRuleDelimiter = ":";
     private final static String OUTOFGRAMMAR = "<unk>";

@@ -1,18 +1,5 @@
 package org.speechforge.cairo.performance;
 
-import edu.cmu.sphinx.frontend.util.StreamDataSource;
-import edu.cmu.sphinx.jsgf.JSGFGrammar;
-import edu.cmu.sphinx.jsgf.JSGFGrammarException;
-import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
-import edu.cmu.sphinx.recognizer.Recognizer;
-
-import edu.cmu.sphinx.result.Result;
-
-import edu.cmu.sphinx.util.props.ConfigurationManager;
-import edu.cmu.sphinx.util.props.PropertyException;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -28,19 +15,25 @@ import javax.media.format.AudioFormat;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import org.apache.log4j.Logger;
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
-import org.speechforge.cairo.rtp.server.PBDSReplicator;
 import org.speechforge.cairo.test.sphinx.util.RecogNotifier;
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
+
+import edu.cmu.sphinx.jsgf.JSGFGrammar;
+import edu.cmu.sphinx.jsgf.JSGFGrammarException;
+import edu.cmu.sphinx.jsgf.JSGFGrammarParseException;
+import edu.cmu.sphinx.recognizer.Recognizer;
+import edu.cmu.sphinx.util.props.ConfigurationManager;
+import edu.cmu.sphinx.util.props.PropertyException;
 
 
 /**
@@ -51,7 +44,7 @@ import org.speechforge.cairo.jmf.ProcessorStarter;
  */
 public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger LOGGER = Logger.getLogger(ReplicatorRecognizerWerTest.class);
+    private static Logger LOGGER = LogManager.getLogger(ReplicatorRecognizerWerTest.class);
     ConfigurationManager cm;
     Recognizer recognizer;
     SphinxRecEngine engine;
