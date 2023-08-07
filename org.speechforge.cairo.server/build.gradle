@@ -73,10 +73,10 @@ task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
     input "${projectDir}/src/main/config/cairo-config.xml"
     output "${buildDir}/config/cairo-config.xml"
     parameters(
-        recordDir: '/tmp/cairo-record',
-        grammarDir: '/tmp/cairo-grammar',
-        voice: 'dfki-spike',
-        promptDir: '/tmp/cairo-prompt',
+        recordDir: CAIRO_RECORD_DIR,
+        grammarDir: CAIRO_GRAMMAR_DIR,
+        voice: CAIRO_GRAMMAR_DIR,
+        promptDir: CAIRO_PROMPT_DIR,
         ipAddress: getIP()
     )
 }
