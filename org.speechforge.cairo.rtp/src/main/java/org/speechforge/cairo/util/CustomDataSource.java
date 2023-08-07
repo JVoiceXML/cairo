@@ -4,7 +4,8 @@ import javax.media.Time;
 import javax.media.format.AudioFormat;
 import javax.media.protocol.*;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +13,7 @@ import java.io.InputStream;
  
 public class CustomDataSource extends PushBufferDataSource {
 	
-    	private static Logger LOGGER = Logger.getLogger(CustomDataSource.class);
+    	private static Logger LOGGER = LogManager.getLogger(CustomDataSource.class);
 
 	    protected Object [] controls = new Object[0];
 	    protected boolean started = false;

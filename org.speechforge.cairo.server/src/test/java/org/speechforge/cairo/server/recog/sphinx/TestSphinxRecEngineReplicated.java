@@ -32,7 +32,8 @@ import javax.media.format.AudioFormat;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.speechforge.cairo.jmf.JMFUtil;
@@ -50,7 +51,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 public class TestSphinxRecEngineReplicated {
 
     private static final Logger LOGGER =
-            Logger.getLogger(TestSphinxRecEngineReplicated.class);
+            LogManager.getLogger(TestSphinxRecEngineReplicated.class);
 
     /**
      * Create the test case

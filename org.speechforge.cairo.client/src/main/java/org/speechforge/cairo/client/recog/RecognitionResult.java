@@ -25,7 +25,8 @@ package org.speechforge.cairo.client.recog;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -36,7 +37,7 @@ import org.apache.log4j.Logger;
 public class RecognitionResult {
 
     /** The _logger. */
-    private static Logger _logger = Logger.getLogger(RecognitionResult.class);
+    private static Logger _logger = LogManager.getLogger(RecognitionResult.class);
     
     /** The Constant tagRuleDelimiter. */
     private final static String tagRuleDelimiter = ":";

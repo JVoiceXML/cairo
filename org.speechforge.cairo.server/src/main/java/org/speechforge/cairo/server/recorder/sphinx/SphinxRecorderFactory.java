@@ -33,7 +33,8 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Serves to create a pool of {@link org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine} instances.
@@ -42,7 +43,7 @@ import org.apache.log4j.Logger;
  */
 public class SphinxRecorderFactory extends AbstractPoolableObjectFactory {
 
-    private static Logger _logger = Logger.getLogger(SphinxRecorderFactory.class);
+    private static Logger _logger = LogManager.getLogger(SphinxRecorderFactory.class);
 
     URL _sphinxConfigURL = null;
     ConfigurationManager _cm;

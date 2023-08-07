@@ -40,7 +40,8 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.Participant;
 import javax.media.rtp.ReceiveStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Reusable media client that plays audio received from an RTP media stream through the system speakers
@@ -50,7 +51,7 @@ import org.apache.log4j.Logger;
  */
 public class NativeMediaClient extends RTPConsumer {
 
-    private static Logger _logger = Logger.getLogger(NativeMediaClient.class);
+    private static Logger _logger = LogManager.getLogger(NativeMediaClient.class);
 
     private Player _player;
     private RTPPlayer _rtpPlayer;

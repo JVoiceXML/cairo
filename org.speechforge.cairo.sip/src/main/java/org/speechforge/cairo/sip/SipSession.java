@@ -33,7 +33,8 @@ import javax.sip.RequestEvent;
 import javax.sip.ServerTransaction;
 import javax.sip.SipException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.client.MrcpChannel;
 
 /**
@@ -43,7 +44,7 @@ import org.mrcp4j.client.MrcpChannel;
  */
 public class SipSession {
 
-    private static Logger _logger = Logger.getLogger(SipSession.class);
+    private static Logger _logger = LogManager.getLogger(SipSession.class);
 
     
     // Note.  Considered adding additional states (active and inactive).  decided against it

@@ -4,7 +4,8 @@ import java.util.Vector;
 import javax.media.Format;
 import javax.sound.sampled.AudioFormat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class AudioFormats {
     
@@ -52,7 +53,7 @@ public class AudioFormats {
     Table 2: Payload types (PT) for standard audio and video encodings
     ********************************************************************/
 
-    //private static Logger LOGGER = Logger.getLogger(AudioFormats.class);
+    //private static Logger LOGGER = LogManager.getLogger(AudioFormats.class);
 
     private Vector requestedFormatsSDP;
     private Format[] supportedFormatsJMF;

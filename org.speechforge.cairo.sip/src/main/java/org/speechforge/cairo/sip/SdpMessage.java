@@ -39,7 +39,8 @@ import javax.sdp.SessionDescription;
 import javax.sdp.SessionName;
 import javax.sdp.Version;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpResourceType;
 
 import gov.nist.javax.sdp.MediaDescriptionImpl;
@@ -60,7 +61,7 @@ import gov.nist.javax.sdp.fields.SessionNameField;
 @SuppressWarnings("serial")
 public class SdpMessage implements Serializable {
 
-    private static Logger LOGGER = Logger.getLogger(SdpMessage.class);
+    private static Logger LOGGER = LogManager.getLogger(SdpMessage.class);
 
     public static final String SDP_AUDIO_MEDIA = "audio";
 

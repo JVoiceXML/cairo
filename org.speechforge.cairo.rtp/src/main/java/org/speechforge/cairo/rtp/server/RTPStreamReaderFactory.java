@@ -30,7 +30,8 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Serves to create a pool of {@link org.speechforge.cairo.rtp.server.RTPStreamReplicator} instances.
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  */
 public class RTPStreamReaderFactory implements PoolableObjectFactory {
 
-    private static Logger _logger = Logger.getLogger(RTPStreamReaderFactory.class);
+    private static Logger _logger = LogManager.getLogger(RTPStreamReaderFactory.class);
 
     private PortPairPool _portPairPool;
 

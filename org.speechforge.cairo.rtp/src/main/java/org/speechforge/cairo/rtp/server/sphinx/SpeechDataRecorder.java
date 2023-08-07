@@ -45,7 +45,8 @@ import edu.cmu.sphinx.frontend.FloatData;
 import edu.cmu.sphinx.frontend.endpoint.SpeechEndSignal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechStartSignal;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
 
@@ -55,7 +56,7 @@ import org.apache.log4j.Logger;
  */
 public class SpeechDataRecorder extends BaseDataProcessor {
 
-    private static Logger LOGGER = Logger.getLogger(SpeechDataRecorder.class);
+    private static Logger LOGGER = LogManager.getLogger(SpeechDataRecorder.class);
 
     private SpeechEventListener _speechEventListener = null;
 

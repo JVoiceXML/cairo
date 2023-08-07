@@ -37,7 +37,8 @@ import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Serves to replicate a {@code javax.media.protocol.PushBufferDataSource} so that it may be
@@ -48,7 +49,7 @@ import org.apache.log4j.Logger;
  */
 public class PBDSReplicator implements BufferTransferHandler {
 
-    static Logger _logger = Logger.getLogger(PBDSReplicator.class);
+    static Logger _logger = LogManager.getLogger(PBDSReplicator.class);
 
     static final Object[] EMPTY_CONTROLS_ARRAY = new Object[0];
 

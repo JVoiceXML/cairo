@@ -25,7 +25,8 @@ package org.speechforge.cairo.rtp.server.sphinx;
 import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.frontend.util.DataUtil;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Transforms audio data of a specified format to {@code edu.cmu.sphinx.frontend.DoubleData}.
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public class AudioDataTransformer {
 
-    private static Logger _logger = Logger.getLogger(AudioDataTransformer.class);
+    private static Logger _logger = LogManager.getLogger(AudioDataTransformer.class);
 
     public final static String STEREO_TO_MONO_AVERAGE = "average";
     public final static String STEREO_TO_MONO_SELECT_CHANNEL = "selectChannel";

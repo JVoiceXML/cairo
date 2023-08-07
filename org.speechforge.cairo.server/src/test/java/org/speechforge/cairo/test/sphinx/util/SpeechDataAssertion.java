@@ -29,7 +29,8 @@ import java.io.Reader;
 import java.io.StreamTokenizer;
 import java.net.URL;
 
-import junit.framework.Assert;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
@@ -38,8 +39,7 @@ import edu.cmu.sphinx.frontend.DoubleData;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.S4String;
-
-import org.apache.log4j.Logger;
+import junit.framework.Assert;
 
 /**
  * Sphinx data processor used for asserting values for speech data as it passes through the pipeline.
@@ -49,7 +49,7 @@ import org.apache.log4j.Logger;
  */
 public class SpeechDataAssertion extends BaseDataProcessor {
 
-    private static Logger _logger = Logger.getLogger(SpeechDataAssertion.class);
+    private static Logger _logger = LogManager.getLogger(SpeechDataAssertion.class);
 
     @S4String(defaultValue = "speechDataFileName")
 	public static final String PROP_SPEECH_DATA_FILE = "speechDataFile";

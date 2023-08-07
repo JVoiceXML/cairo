@@ -8,7 +8,8 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import edu.cmu.sphinx.frontend.util.DataUtil;
 
@@ -21,7 +22,7 @@ import java.io.InputStream;
  
 public class LiveAudioStream implements PushBufferStream, Runnable {
 	
-    private static Logger LOGGER = Logger.getLogger(LiveAudioStream.class);
+    private static Logger LOGGER = LogManager.getLogger(LiveAudioStream.class);
     
 	
     protected ContentDescriptor cd = new ContentDescriptor(ContentDescriptor.RAW);

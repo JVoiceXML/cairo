@@ -19,7 +19,8 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.server.recog.GrammarLocation;
 import org.speechforge.cairo.server.recog.RecognitionResult;
 import org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine;
@@ -36,7 +37,7 @@ import org.speechforge.cairo.jmf.ProcessorStarter;
  */
 public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger LOGGER = Logger.getLogger(JMFRecognizerWerTest.class);
+    private static Logger LOGGER = LogManager.getLogger(JMFRecognizerWerTest.class);
 
     ConfigurationManager cm;
     Recognizer recognizer;

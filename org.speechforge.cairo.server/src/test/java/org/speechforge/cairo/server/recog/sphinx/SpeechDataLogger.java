@@ -27,6 +27,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
 import edu.cmu.sphinx.frontend.Data;
 import edu.cmu.sphinx.frontend.DataProcessingException;
@@ -36,10 +39,7 @@ import edu.cmu.sphinx.frontend.Signal;
 import edu.cmu.sphinx.frontend.endpoint.SpeechClassifiedDataAccessor;
 import edu.cmu.sphinx.util.props.PropertyException;
 import edu.cmu.sphinx.util.props.PropertySheet;
-import edu.cmu.sphinx.util.props.S4Double;
 import edu.cmu.sphinx.util.props.S4String;
-
-import org.apache.log4j.Logger;
 
 /**
  * Sphinx data processor for logging speech data as it passes through the pipeline.
@@ -49,7 +49,7 @@ import org.apache.log4j.Logger;
  */
 public class SpeechDataLogger extends BaseDataProcessor {
 
-    private static Logger _logger = Logger.getLogger(SpeechDataLogger.class);
+    private static Logger _logger = LogManager.getLogger(SpeechDataLogger.class);
 
     /**
      * Property specifying the location of the log file to log speech data to.

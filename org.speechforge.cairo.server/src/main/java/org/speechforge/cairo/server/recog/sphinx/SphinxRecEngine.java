@@ -65,7 +65,8 @@ import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 import edu.cmu.sphinx.util.props.PropertyException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Provides a poolable recognition engine that takes raw audio data as input.
@@ -74,7 +75,7 @@ import org.apache.log4j.Logger;
  */
 public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEventListener {
 
-    private static Logger _logger = Logger.getLogger(SphinxRecEngine.class);
+    private static Logger _logger = LogManager.getLogger(SphinxRecEngine.class);
     private static Toolkit _toolkit = _logger.isTraceEnabled()? Toolkit.getDefaultToolkit() : null;
 
     private int _id;

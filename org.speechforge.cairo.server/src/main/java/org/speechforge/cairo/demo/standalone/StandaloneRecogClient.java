@@ -43,7 +43,8 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.speechforge.cairo.jmf.JMFUtil;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 import org.speechforge.cairo.rtp.server.PBDSReplicator;
@@ -63,7 +64,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  */
 public class StandaloneRecogClient extends RecogListenerDecorator {
 
-    private static Logger _logger = Logger.getLogger(StandaloneRecogClient.class);
+    private static Logger _logger = LogManager.getLogger(StandaloneRecogClient.class);
 
     private static final String BEEP_OPTION = "beep";
 

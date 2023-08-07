@@ -36,7 +36,8 @@ import java.util.concurrent.TimeoutException;
 import javax.media.rtp.InvalidSessionAddressException;
 
 import org.apache.commons.pool.ObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpEvent;
@@ -60,7 +61,7 @@ import org.speechforge.cairo.server.MrcpGenericChannel;
  */
 public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements SpeechSynthRequestHandler {
 
-    private static Logger _logger = Logger.getLogger(MrcpSpeechSynthChannel.class);
+    private static Logger _logger = LogManager.getLogger(MrcpSpeechSynthChannel.class);
 
 //    private static short IDLE = 0;
 //    private static short SPEAKING = 1;
