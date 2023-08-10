@@ -75,7 +75,7 @@ task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
     parameters(
         recordDir: CAIRO_RECORD_DIR,
         grammarDir: CAIRO_GRAMMAR_DIR,
-        voice: CAIRO_GRAMMAR_DIR,
+        voice: CAIRO_VOICE,
         promptDir: CAIRO_PROMPT_DIR,
         ipAddress: getIP()
     )
@@ -123,7 +123,6 @@ task createTransmitterApp(type: CreateStartScripts) {
                "-Djava.security.manager",
                "-Djava.security.policy=config/jvoicexml.policy",
                "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
-
                "-DCAIRO_CONFIG=../config/cairo-config.xml"]
     doLast {
         def windowsScriptFile = file getWindowsScript()

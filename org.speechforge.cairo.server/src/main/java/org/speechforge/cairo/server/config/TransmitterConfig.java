@@ -36,6 +36,7 @@ import org.apache.commons.configuration.XMLConfiguration;
 public class TransmitterConfig extends ResourceConfig {
 
     private File _basePromptDir;
+    private String _speechSynthesizer;
     private String _voiceName;
 
     /**
@@ -47,6 +48,7 @@ public class TransmitterConfig extends ResourceConfig {
     public TransmitterConfig(int index, XMLConfiguration config) throws ConfigurationException {
         super(index, config);
         _basePromptDir = getConfigDir(config, "resources.resource(" + index + ").basePromptDir");
+        _speechSynthesizer = config.getString("resources.resource(" + index + ").speechSynthesizer");
         _voiceName = config.getString("resources.resource(" + index + ").voiceName");
     }
 
@@ -55,6 +57,13 @@ public class TransmitterConfig extends ResourceConfig {
      */
     public File getBasePromptDir() {
         return _basePromptDir;
+    }
+
+    /**
+     * @return the TTS system to be used 
+     */
+    public String getSpeechSynthesizer(){
+        return _speechSynthesizer;
     }
 
     /**

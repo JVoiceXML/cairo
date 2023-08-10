@@ -90,7 +90,8 @@ public class TransmitterResource extends ResourceImpl {
         super(RESOURCE_TYPE);
         _basePromptDir = config.getBasePromptDir();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
-        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(config.getVoiceName(), config.getEngines());
+        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(
+                config.getSpeechSynthesizer(), config.getVoiceName(), config.getEngines());
         _portPairPool = new PortPairPool(config.getRtpBasePort(), config.getMaxConnects());
         
         //if in config file, use as specified else get the local host programatically
