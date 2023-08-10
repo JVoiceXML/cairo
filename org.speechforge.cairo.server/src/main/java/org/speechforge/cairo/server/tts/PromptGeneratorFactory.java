@@ -42,12 +42,15 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
     private static Logger _logger = LogManager.getLogger(PromptGeneratorFactory.class);
 
     private String _voiceName;
+    private String _speechSynthesizer;
 
     /**
      * Constructs a new object.
+     * @param speechSynthesizer the speech synthesizer
      * @param voiceName name of the voice to use to play prompts
      */
-    public PromptGeneratorFactory(String voiceName) {
+    public PromptGeneratorFactory(String speechSynthesizer, String voiceName) {
+        _speechSynthesizer = speechSynthesizer;
         _voiceName = voiceName;
     }
 
@@ -56,24 +59,31 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
      */
     @Override
     public PoolableObject makeObject() throws Exception {
-        return new PromptGenerator(_voiceName);
+        if(_speechSynthesizer.equals("Festival")) {
+            return new FestivalPromptGenerator(_voiceName);
+        } else if (_speechSynthesizer.equals("Mary")) {
+            return new MaryPromptGenerator(_voiceName);
+        } else {
+            return new PromptGenerator(_voiceName);
+        }
     }
 
     /**
      * TODOC
+     * @param speechSynthesizer the synthesizer to use
      * @param voiceName name of the voice to use to play prompts
      * @param instances number of instances to create
      * @return created pool
      * @throws InstantiationException error creating the pool
      */
-    public static ObjectPool createObjectPool(String voiceName, int instances)
+    public static ObjectPool createObjectPool(String speechSynthesizer, String voiceName, int instances)
       throws InstantiationException {
 
         if (_logger.isDebugEnabled()) {
             _logger.debug("creating new prompt generator pool... instances: " + instances);
         }
 
-        PoolableObjectFactory factory = new PromptGeneratorFactory(voiceName);
+        PoolableObjectFactory factory = new PromptGeneratorFactory(speechSynthesizer, voiceName);
 
         // TODO: adapt config to prompt generator constraints
         GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);

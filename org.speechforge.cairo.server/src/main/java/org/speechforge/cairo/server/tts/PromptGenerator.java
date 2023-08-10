@@ -22,6 +22,7 @@
  */
 package org.speechforge.cairo.server.tts;
 
+import org.apache.log4j.Logger;
 import org.speechforge.cairo.util.pool.AbstractPoolableObject;
 
 import java.io.File;
@@ -41,10 +42,12 @@ import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class PromptGenerator extends AbstractPoolableObject {
+    private static final Logger LOGGER = Logger.getLogger(PromptGenerator.class);
 
     private Voice _voice;
 
     public PromptGenerator(String voiceName) {
+        LOGGER.info("Creating FreeTTS prompt generator for voice '" + voiceName + "'");
 
         VoiceManager voiceManager = VoiceManager.getInstance();
         _voice = voiceManager.getVoice(voiceName);
