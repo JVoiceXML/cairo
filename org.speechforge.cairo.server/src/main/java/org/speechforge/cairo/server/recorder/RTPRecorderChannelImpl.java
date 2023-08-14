@@ -40,7 +40,8 @@ import javax.media.protocol.DataSource;
 import javax.media.protocol.FileTypeDescriptor;
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.exception.ResourceUnavailableException;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
 import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
@@ -53,7 +54,7 @@ import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
  */
 public class RTPRecorderChannelImpl implements DataSinkListener, RTPRecorderChannel {
 
-    private static Logger _logger = Logger.getLogger(RTPRecorderChannelImpl.class);
+    private static Logger _logger = LogManager.getLogger(RTPRecorderChannelImpl.class);
 
     private static final ContentDescriptor CONTENT_DESCRIPTOR_WAVE =
         new FileTypeDescriptor(FileTypeDescriptor.WAVE);

@@ -44,8 +44,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
@@ -77,7 +78,7 @@ import org.speechforge.cairo.util.CairoUtil;
 @SuppressWarnings("serial")
 public class ReceiverResource extends ResourceImpl {
 
-    private static final Logger LOGGER = Logger.getLogger(ReceiverResource.class);
+    private static final Logger LOGGER = LogManager.getLogger(ReceiverResource.class);
 
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.RECEIVER;
 

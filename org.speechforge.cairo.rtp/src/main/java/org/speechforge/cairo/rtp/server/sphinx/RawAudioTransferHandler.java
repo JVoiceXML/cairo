@@ -31,7 +31,8 @@ import javax.media.format.AudioFormat;
 import javax.media.protocol.BufferTransferHandler;
 import javax.media.protocol.PushBufferStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Transfers raw audio data from a {@code javax.media.protocol.PushBufferStream} to a
@@ -41,7 +42,7 @@ import org.apache.log4j.Logger;
  */
 public class RawAudioTransferHandler implements BufferTransferHandler {
 
-    private static Logger LOGGER = Logger.getLogger(RawAudioTransferHandler.class);
+    private static Logger LOGGER = LogManager.getLogger(RawAudioTransferHandler.class);
 
     private RawAudioProcessor _rawAudioProcessor;
 

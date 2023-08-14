@@ -37,7 +37,8 @@ import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.speechforge.cairo.jmf.JMFUtil;
@@ -57,7 +58,7 @@ import edu.cmu.sphinx.frontend.DoubleData;
 public class TestPBDSReplicator {
 
     private static final  Logger LOGGER =
-            Logger.getLogger(TestPBDSReplicator.class);
+            LogManager.getLogger(TestPBDSReplicator.class);
 
     /**
      * Create the test case

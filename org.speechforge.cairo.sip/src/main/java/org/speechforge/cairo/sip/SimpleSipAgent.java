@@ -27,10 +27,11 @@ import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
 import javax.sip.TimeoutEvent;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class SimpleSipAgent implements SessionListener {
-        private static Logger LOGGER = Logger.getLogger(SimpleSipAgent.class);
+        private static Logger LOGGER = LogManager.getLogger(SimpleSipAgent.class);
         private String _mySipAddress;
         private String _stackName;
         private int _port;

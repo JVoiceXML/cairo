@@ -26,7 +26,8 @@ import java.net.URL;
 
 import javax.media.MediaLocator;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
 public class TestRunSphinxRecEngine {
 
     private static final Logger LOGGER =
-            Logger.getLogger(TestSphinxRecEngineReplicated.class);
+            LogManager.getLogger(TestSphinxRecEngineReplicated.class);
 
     private RunSphinxRecEngine _runner = null;
 

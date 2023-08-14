@@ -30,7 +30,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.rtp.InvalidSessionAddressException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.rtp.AudioFormats;
 import org.speechforge.cairo.rtp.RTPPlayer;
 import org.speechforge.cairo.util.CairoUtil;
@@ -42,7 +43,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class RTPSpeechSynthChannel {
 
-    private static Logger _logger = Logger.getLogger(RTPSpeechSynthChannel.class);
+    private static Logger _logger = LogManager.getLogger(RTPSpeechSynthChannel.class);
 
     // TODO: move to config file
     private static final File FEEDER_PROMPT_FILE = new File("../prompts/feeder.wav");

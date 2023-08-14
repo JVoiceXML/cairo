@@ -19,7 +19,8 @@ import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.Participant;
 import javax.media.rtp.ReceiveStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Serves to replicate an incoming RTP audio stream so that it may be consumed by multiple
@@ -30,7 +31,7 @@ import org.apache.log4j.Logger;
  */
 public class RTPStreamReader extends RTPConsumer {
 
-    private static Logger _logger = Logger.getLogger(RTPStreamReader.class);
+    private static Logger _logger = LogManager.getLogger(RTPStreamReader.class);
 
   
     private Processor _processor;

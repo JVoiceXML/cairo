@@ -42,7 +42,8 @@ import java.util.concurrent.TimeoutException;
 
 import javax.speech.recognition.GrammarException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.MrcpResourceType;
@@ -67,7 +68,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
 
     private static final Long LONG_MINUS_ONE = new Long(-1);
 
-    static Logger _logger = Logger.getLogger(MrcpRecogChannel.class);
+    static Logger _logger = LogManager.getLogger(MrcpRecogChannel.class);
 
     public static Long DEFAULT_NO_INPUT_TIMEOUT = new Long(10000);
     public static Boolean DEFAULT_START_INPUT_TIMERS = Boolean.TRUE;

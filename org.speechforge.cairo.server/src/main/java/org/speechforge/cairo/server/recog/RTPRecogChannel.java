@@ -45,7 +45,8 @@ import javax.speech.recognition.GrammarException;
 
 import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Handles recognition requests against an incoming RTP audio stream.
@@ -58,7 +59,7 @@ public class RTPRecogChannel {
     public static final short SPEECH_IN_PROGRESS = 1;
     public static final short COMPLETE = 2;
 
-    static Logger LOGGER = Logger.getLogger(RTPRecogChannel.class);
+    static Logger LOGGER = LogManager.getLogger(RTPRecogChannel.class);
 
     private /*static*/ Timer _timer = new Timer();
 

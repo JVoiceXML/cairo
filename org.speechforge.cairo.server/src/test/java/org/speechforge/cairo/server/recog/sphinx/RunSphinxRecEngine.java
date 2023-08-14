@@ -22,32 +22,29 @@
  */
 package org.speechforge.cairo.server.recog.sphinx;
 
-import static org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
 import static org.speechforge.cairo.jmf.JMFUtil.MICROPHONE;
-
-import org.speechforge.cairo.server.recog.RecogListenerDecorator;
-import org.speechforge.cairo.server.recog.RecognitionResult;
-import org.speechforge.cairo.rtp.server.PBDSReplicator;
-import org.speechforge.cairo.jmf.JMFUtil;
-import org.speechforge.cairo.jmf.ProcessorStarter;
+import static org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat.PREFERRED_MEDIA_FORMATS;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
 import javax.media.CannotRealizeException;
-import javax.media.Manager;
 import javax.media.MediaLocator;
 import javax.media.NoDataSourceException;
 import javax.media.NoProcessorException;
 import javax.media.Processor;
-import javax.media.ProcessorModel;
-import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 
-import edu.cmu.sphinx.util.props.ConfigurationManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.speechforge.cairo.jmf.JMFUtil;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.PBDSReplicator;
+import org.speechforge.cairo.server.recog.RecogListenerDecorator;
+import org.speechforge.cairo.server.recog.RecognitionResult;
 
-import org.apache.log4j.Logger;
+import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 /**
  * Provides main method for running SphinxRecEngine in standalone mode using the microphone or prompt file for input.
@@ -57,7 +54,7 @@ import org.apache.log4j.Logger;
  */
 public class RunSphinxRecEngine extends RecogListenerDecorator {
 
-    private static Logger _logger = Logger.getLogger(RunSphinxRecEngine.class);
+    private static Logger _logger = LogManager.getLogger(RunSphinxRecEngine.class);
 
     private SphinxRecEngine _engine;
     private RecognitionResult _result;
