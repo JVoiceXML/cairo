@@ -34,7 +34,8 @@ import javax.sdp.SdpException;
 import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpResourceType;
 
 /**
@@ -45,7 +46,7 @@ import org.mrcp4j.MrcpResourceType;
  */
 public class SdpMessageValidator {
     private final static Logger LOGGER =
-        Logger.getLogger(SdpMessageValidator.class);
+        LogManager.getLogger(SdpMessageValidator.class);
 
     /**
      * Validates the provided SDP message.

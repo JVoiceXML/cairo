@@ -41,8 +41,9 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
 import org.speechforge.cairo.sip.ResourceUnavailableException;
@@ -64,7 +65,7 @@ public class ResourceServerImpl implements SessionListener {
 
     public static final String NAME = "ResourceServer";
 
-    private static Logger LOGGER = Logger.getLogger(ResourceServerImpl.class);
+    private static Logger LOGGER = LogManager.getLogger(ResourceServerImpl.class);
 
 
     private static final String SIPPORT_OPTION = "sipPort";

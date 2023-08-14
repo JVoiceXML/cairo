@@ -35,7 +35,8 @@ import java.io.InputStreamReader;
 import java.util.EnumSet;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.MrcpResourceType;
@@ -62,7 +63,7 @@ public class MrcpRecorderChannel extends MrcpGenericChannel implements RecorderR
 	private static final Long LONG_MINUS_ONE = new Long(-1);
 
 
-    private static Logger LOGGER = Logger.getLogger(MrcpRecorderChannel.class);
+    private static Logger LOGGER = LogManager.getLogger(MrcpRecorderChannel.class);
 
     private RTPRecorderChannel _recorderChannel;
 

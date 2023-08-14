@@ -22,14 +22,13 @@
  */
 package org.speechforge.cairo.server;
 
-import org.speechforge.cairo.exception.UnsupportedHeaderException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpResponse;
 import org.mrcp4j.message.header.IllegalValueException;
@@ -39,6 +38,7 @@ import org.mrcp4j.message.request.MrcpRequest;
 import org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest;
 import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.GenericRequestHandler;
+import org.speechforge.cairo.exception.UnsupportedHeaderException;
 
 /**
  * Abstract base class for specific MRCPv2 channel implementations.
@@ -47,7 +47,7 @@ import org.mrcp4j.server.provider.GenericRequestHandler;
  */
 public abstract class MrcpGenericChannel implements GenericRequestHandler {
 
-    private static Logger _logger = Logger.getLogger(MrcpGenericChannel.class);
+    private static Logger _logger = LogManager.getLogger(MrcpGenericChannel.class);
 
     private Map<String, Object> _params = new HashMap<String, Object>();
 

@@ -22,7 +22,8 @@
  */
 package org.speechforge.cairo.server.recog;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.speechforge.cairo.rtp.server.sphinx.SpeechDataRecorder;
@@ -34,7 +35,7 @@ import org.speechforge.cairo.util.rule.RuleMatch;
  */
 public class TestRecognitionResult {
 
-    private static Logger LOGGER = Logger.getLogger(TestRecognitionResult.class);
+    private static Logger LOGGER = LogManager.getLogger(TestRecognitionResult.class);
 
     /**
      * Create the test case

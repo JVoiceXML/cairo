@@ -28,7 +28,8 @@ import javax.media.MediaLocator;
 import javax.media.Processor;
 import javax.media.protocol.PushBufferDataSource;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
 import org.speechforge.cairo.jmf.JMFUtil;
@@ -44,7 +45,7 @@ import edu.cmu.sphinx.util.props.ConfigurationManager;
  */
 public class TestSphinxRecEngineRaw {
 
-    private static Logger _logger = Logger.getLogger(TestSphinxRecEngineRaw.class);
+    private static Logger _logger = LogManager.getLogger(TestSphinxRecEngineRaw.class);
     
     private static final String PROP_FRONTEND =     "frontend";
     private static final String EP_FRONTEND =       "epFrontEnd";

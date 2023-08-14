@@ -22,7 +22,8 @@
  */
 package org.speechforge.cairo.server.recorder;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Delegates method calls to an underlying {@link RecorderListener} implementation.
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 public class RecorderListenerDecorator implements RecorderListener {
 
-    private static Logger _logger = Logger.getLogger(RecorderListenerDecorator.class);
+    private static Logger _logger = LogManager.getLogger(RecorderListenerDecorator.class);
 
     private RecorderListener _recorderListener;
 

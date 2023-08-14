@@ -37,7 +37,8 @@ import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Implements a {@link org.speechforge.cairo.server.resource.ResourceRegistry} that can be
@@ -49,7 +50,7 @@ import org.apache.log4j.Logger;
 @SuppressWarnings("serial")
 public class ResourceRegistryImpl extends UnicastRemoteObject implements ResourceRegistry {
 
-    private static final Logger LOGGER = Logger.getLogger(ResourceRegistryImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger(ResourceRegistryImpl.class);
 
     private ResourceList receivers = new ResourceList();
     private ResourceList transmitters = new ResourceList();

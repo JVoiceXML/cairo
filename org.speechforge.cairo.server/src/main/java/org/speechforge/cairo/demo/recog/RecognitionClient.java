@@ -41,7 +41,8 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpMethodName;
 import org.mrcp4j.MrcpRequestState;
@@ -73,7 +74,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class RecognitionClient implements MrcpEventListener {
 
-    private static Logger LOGGER = Logger.getLogger(RecognitionClient.class);
+    private static Logger LOGGER = LogManager.getLogger(RecognitionClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String URL_OPTION = "url";

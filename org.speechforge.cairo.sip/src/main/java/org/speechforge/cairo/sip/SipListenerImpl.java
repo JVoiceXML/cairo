@@ -53,7 +53,8 @@ import javax.sip.header.ToHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 /**
@@ -64,7 +65,7 @@ import org.apache.log4j.Logger;
  */
 public class SipListenerImpl implements SipListener {
 
-    static Logger LOGGER = Logger.getLogger(SipListenerImpl.class);
+    static Logger LOGGER = LogManager.getLogger(SipListenerImpl.class);
 
     private SipAgent sipClient;
 

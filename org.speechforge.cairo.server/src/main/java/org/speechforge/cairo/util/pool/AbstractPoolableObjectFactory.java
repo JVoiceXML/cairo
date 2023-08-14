@@ -28,7 +28,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.commons.pool.ObjectPool;
 import org.apache.commons.pool.PoolableObjectFactory;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Generic implementation of {@code org.apache.commons.pool.PoolableObjectFactory} which constructs
@@ -40,7 +41,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractPoolableObjectFactory implements PoolableObjectFactory {
 
-    private static Logger _logger = Logger.getLogger(AbstractPoolableObjectFactory.class);
+    private static Logger _logger = LogManager.getLogger(AbstractPoolableObjectFactory.class);
 
 
     /* (non-Javadoc)

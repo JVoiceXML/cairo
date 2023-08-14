@@ -43,7 +43,8 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.MrcpEvent;
 import org.mrcp4j.message.MrcpResponse;
@@ -57,7 +58,7 @@ import org.mrcp4j.message.MrcpResponse;
  */
 public class BargeInClient  {
 
-    private static Logger LOGGER = Logger.getLogger(BargeInClient.class);
+    private static Logger LOGGER = LogManager.getLogger(BargeInClient.class);
 
     private static final String BEEP_OPTION = "beep";
     private static final String LOOP_OPTION = "loop";

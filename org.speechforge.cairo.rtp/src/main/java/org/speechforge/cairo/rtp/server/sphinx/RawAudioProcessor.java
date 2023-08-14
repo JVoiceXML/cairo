@@ -32,7 +32,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.media.format.AudioFormat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.util.ByteHexConverter;
 
 import edu.cmu.sphinx.frontend.BaseDataProcessor;
@@ -52,7 +53,7 @@ import edu.cmu.sphinx.util.props.S4Integer;
  */
 public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
-    private static Logger _logger = Logger.getLogger(RawAudioProcessor.class);
+    private static Logger _logger = LogManager.getLogger(RawAudioProcessor.class);
 
     
 

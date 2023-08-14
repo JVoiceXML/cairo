@@ -42,8 +42,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
@@ -70,7 +71,7 @@ import org.speechforge.cairo.util.CairoUtil;
 @SuppressWarnings("serial")
 public class TransmitterResource extends ResourceImpl {
 
-    private static final Logger LOGGER = Logger.getLogger(TransmitterResource.class);
+    private static final Logger LOGGER = LogManager.getLogger(TransmitterResource.class);
 
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.TRANSMITTER;
 
@@ -89,7 +90,8 @@ public class TransmitterResource extends ResourceImpl {
         super(RESOURCE_TYPE);
         _basePromptDir = config.getBasePromptDir();
         _mrcpServer = new MrcpServerSocket(config.getMrcpPort());
-        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(config.getVoiceName(), config.getEngines());
+        _promptGeneratorPool = PromptGeneratorFactory.createObjectPool(
+                config.getSpeechSynthesizer(), config.getVoiceName(), config.getEngines());
         _portPairPool = new PortPairPool(config.getRtpBasePort(), config.getMaxConnects());
         
         //if in config file, use as specified else get the local host programatically

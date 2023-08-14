@@ -57,7 +57,8 @@ import javax.media.rtp.event.SessionEvent;
 import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.util.CairoUtil;
 
 /**
@@ -68,7 +69,7 @@ import org.speechforge.cairo.util.CairoUtil;
  */
 public class RecorderMediaClient implements SessionListener, ReceiveStreamListener { 
 
-    private static Logger LOGGER = Logger.getLogger(RecorderMediaClient.class);
+    private static Logger LOGGER = LogManager.getLogger(RecorderMediaClient.class);
 
     private PushBufferDataSource _pbds;
     

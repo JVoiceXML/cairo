@@ -25,7 +25,8 @@ package org.speechforge.cairo.util;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Provides utility methods for conversion between byte arrays and hex strings.
@@ -34,7 +35,7 @@ import org.apache.log4j.Logger;
  */
 public final class ByteHexConverter {
 
-    private static Logger _logger = Logger.getLogger(ByteHexConverter.class);
+    private static Logger _logger = LogManager.getLogger(ByteHexConverter.class);
 
     /**
      * TODOC.

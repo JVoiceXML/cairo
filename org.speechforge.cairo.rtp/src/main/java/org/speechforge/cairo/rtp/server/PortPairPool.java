@@ -28,7 +28,8 @@ import org.speechforge.cairo.rtp.ResourceUnavailableException;
 
 
 import org.apache.commons.lang.Validate;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Manages pooling of TCP port pairs that are required for each RTP channel.
@@ -37,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public class PortPairPool {
 
-    private static Logger _logger = Logger.getLogger(PortPairPool.class);
+    private static Logger _logger = LogManager.getLogger(PortPairPool.class);
 
     private int[] _ports;
     private boolean[] _availables;

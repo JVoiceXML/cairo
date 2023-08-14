@@ -24,23 +24,26 @@ package org.speechforge.cairo.server.recorder;
 
 import static org.speechforge.cairo.jmf.JMFUtil.CONTENT_DESCRIPTOR_RAW;
 
-import org.speechforge.cairo.exception.ResourceUnavailableException;
-import org.speechforge.cairo.jmf.ProcessorStarter;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
-import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
-import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
-import org.speechforge.cairo.server.recorder.sphinx.SphinxRecorder;
 import java.io.File;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javax.media.Processor;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.FileTypeDescriptor;
 import javax.media.protocol.PushBufferDataSource;
+
 import org.apache.commons.lang.Validate;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.speechforge.cairo.exception.ResourceUnavailableException;
+import org.speechforge.cairo.jmf.ProcessorStarter;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator;
+import org.speechforge.cairo.rtp.server.RTPStreamReplicator.ProcessorReplicatorPair;
+import org.speechforge.cairo.rtp.server.sphinx.SourceAudioFormat;
+import org.speechforge.cairo.server.recorder.sphinx.SphinxRecorder;
 
 /**
  * Manages recording requests against an RTP audio stream being received.
@@ -49,7 +52,7 @@ import org.apache.log4j.Logger;
  */
 public class RTPRecorderChannelS4Impl implements RTPRecorderChannel  {
 
-    private static Logger _logger = Logger.getLogger(RTPRecorderChannelS4Impl.class);
+    private static Logger _logger = LogManager.getLogger(RTPRecorderChannelS4Impl.class);
 
     private static final ContentDescriptor CONTENT_DESCRIPTOR_WAVE =
         new FileTypeDescriptor(FileTypeDescriptor.WAVE);

@@ -7,9 +7,9 @@
             <maxConnects>50</maxConnects>
             <engines>1</engines>
             <recorderEngines>1</recorderEngines>
-            <baseRecordingDir>%%RECORD_DIR%%</baseRecordingDir>
-            <baseGrammarDir>%%GRAMMAR_DIR%%</baseGrammarDir>
-            <ipAddress>%%IP%%</ipAddress>
+            <baseRecordingDir>@@RECORD_DIR@@</baseRecordingDir>
+            <baseGrammarDir>@@GRAMMAR_DIR@@</baseGrammarDir>
+            <ipAddress>@@IP@@</ipAddress>
             <!-- You can overwrite the location like this but we already load
                 the sphinx-config.xml from this directory.
             <sphinxConfigUrl>file:///your-config-dir/sphinx-config.xml</sphinxConfigUrl>
@@ -22,10 +22,10 @@
             <rtpBasePort>42150</rtpBasePort>
             <maxConnects>50</maxConnects>
             <engines>1</engines>
-            <voiceName>%%VOICE%%</voiceName>
-            <basePromptDir>%%PROMPT_DIR%%</basePromptDir>
+            <voiceName>@@VOICE@@</voiceName>
+            <basePromptDir>@@PROMPT_DIR@@</basePromptDir>
             <speechSynthesizer>Mary</speechSynthesizer>
-            <ipAddress>%%IP%%</ipAddress>
+            <ipAddress>@@IP@@</ipAddress>
         </resource>
     </resources>
 </cairo>

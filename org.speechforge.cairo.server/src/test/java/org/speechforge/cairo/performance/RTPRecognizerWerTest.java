@@ -17,7 +17,8 @@ import javax.media.rtp.InvalidSessionAddressException;
 import javax.sdp.SdpConstants;
 import javax.speech.recognition.GrammarException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.speechforge.cairo.jmf.ProcessorStarter;
 import org.speechforge.cairo.rtp.AudioFormats;
 import org.speechforge.cairo.rtp.RTPPlayer;
@@ -43,7 +44,7 @@ import edu.cmu.sphinx.util.props.PropertyException;
  */
 public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
     
-    private static Logger LOGGER = Logger.getLogger(RTPRecognizerWerTest.class);
+    private static Logger LOGGER = LogManager.getLogger(RTPRecognizerWerTest.class);
 
     private static final Long LONG_MINUS_ONE = new Long(-1);
     private static final Long FIFTEENSECS = new Long(15000);

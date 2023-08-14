@@ -22,7 +22,8 @@
  */
 package org.speechforge.cairo.server.recog;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Delegates method calls to an underlying {@link org.speechforge.cairo.server.recog.RecogListener} implementation.
@@ -32,7 +33,7 @@ import org.apache.log4j.Logger;
  */
 public class RecogListenerDecorator implements RecogListener {
 
-    private static Logger _logger = Logger.getLogger(RecogListenerDecorator.class);
+    private static Logger _logger = LogManager.getLogger(RecogListenerDecorator.class);
 
     private RecogListener _recogListener;
 

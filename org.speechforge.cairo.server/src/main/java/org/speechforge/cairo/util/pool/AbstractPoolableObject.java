@@ -22,7 +22,8 @@
  */
 package org.speechforge.cairo.util.pool;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Provides default implementations for methods defined by {@link org.speechforge.cairo.util.pool.PoolableObject}.
@@ -31,7 +32,7 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractPoolableObject implements PoolableObject {
 
-    private static Logger _logger = Logger.getLogger(AbstractPoolableObject.class);
+    private static Logger _logger = LogManager.getLogger(AbstractPoolableObject.class);
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.util.pool.PoolableObject#activate()

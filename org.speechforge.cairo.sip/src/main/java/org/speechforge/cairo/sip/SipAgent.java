@@ -73,7 +73,8 @@ import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 
 
@@ -84,7 +85,7 @@ import org.apache.log4j.Logger;
  */
 public class SipAgent {
 
-    private static final Logger LOGGER = Logger.getLogger(SipAgent.class);
+    private static final Logger LOGGER = LogManager.getLogger(SipAgent.class);
 
     // SIP protocol objects
     static AddressFactory addressFactory;
