@@ -40,6 +40,12 @@ jar {
     baseName 'org.speechforge.cairo.sip'
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
