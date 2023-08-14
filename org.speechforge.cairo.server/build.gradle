@@ -1,0 +1,249 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'java'
+    id 'com.github.eerohele.saxon-gradle' version '0.8.0'
+    id 'maven-publish'
+    id 'signing'
+    id 'application'
+    id 'distribution'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()    
+    maven { 
+        url "https://oss.sonatype.org/content/repositories/snapshots" 
+    }
+    maven { 
+        url "https://repo.spring.io/plugins-release/"
+    }
+}
+
+dependencies {
+    implementation group: 'org.jvoicexml', name: 'org.mrcp4j', version: '0.3-SNAPSHOT'
+    implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
+    implementation group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '1.13.1'
+    implementation group: 'de.dfki.mary', name: 'marytts-client', version: '5.2'
+    implementation group: 'javax.media', name: 'jmf', version: '2.1.1e'
+    implementation group: 'edu.cmu.sphinx', name: 'sphinx4-core', version: '5prealpha-SNAPSHOT'
+    implementation group: 'edu.cmu.sphinx', name: 'sphinx4-data', version: '5prealpha-SNAPSHOT'
+    implementation fileTree(dir: "./lib", include: ['*.jar'])
+    implementation group: 'org.mobicents.external.freetts', name: 'freetts', version: '1.0'
+    implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+    implementation group: 'commons-configuration', name: 'commons-configuration', version: '1.6'
+    implementation group: 'commons-pool', name: 'commons-pool', version: '1.3'
+    implementation group: 'javax.sip', name: 'jain-sip-api', version: '1.2.1.4'
+    implementation group: 'javax.sip', name: 'jain-sip-ri', version: '1.3.0-91'
+    implementation group: 'javax.sdp', name: 'nist-sdp', version: '1.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-jul', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-iostreams', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.17.1'
+    implementation project(':org.speechforge.cairo.rtp')
+    implementation project(':org.speechforge.cairo.sip')
+
+    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+    testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+}
+
+
+jar {
+    manifest {
+        attributes('Implementation-Title': 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.',
+                   'Implementation-Vendor': 'switch',
+                   'Implementation-Version': version, 
+                   'Built-By'       : System.properties['user.name'],
+                   'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                   'Created-By'     : "Gradle ${gradle.gradleVersion}",
+                   'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                   'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}")
+    }
+    baseName 'org.speechforge.cairo.server'
+}
+
+task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
+    stylesheet "${projectDir}/src/main/config/patch-configuration.xsl"
+    input "${projectDir}/src/main/config/cairo-config.xml"
+    output "${buildDir}/config/cairo-config.xml"
+    parameters(
+        recordDir: CAIRO_RECORD_DIR,
+        grammarDir: CAIRO_GRAMMAR_DIR,
+        voice: CAIRO_VOICE,
+        promptDir: CAIRO_PROMPT_DIR,
+        ipAddress: getIP()
+    )
+}
+
+task createConfiguration(type: Copy) {
+    dependsOn xsltCairoConfig
+
+    into "${buildDir}/config"
+    from("${projectDir}/src/main/config") {
+        exclude '*.xsl',
+            'cairo-config.xml'
+    }
+}
+
+def getIP() {
+    InetAddress result = null;
+    Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+    while (interfaces.hasMoreElements()) {
+        Enumeration<InetAddress> addresses = interfaces.nextElement().getInetAddresses();
+        while (addresses.hasMoreElements()) {
+            InetAddress address = addresses.nextElement();
+            if (!address.isLoopbackAddress()) {
+                if (address.isSiteLocalAddress()) {
+                    return address.getHostAddress();
+                } else if (result == null) {
+                    result = address;
+                }
+            }
+        }
+    }
+    return (result != null ? result : InetAddress.getLocalHost()).getHostAddress();
+}
+
+task createTransmitterApp(type: CreateStartScripts) {
+    dependsOn createConfiguration
+    
+    mainClassName = "org.speechforge.cairo.server.resource.TransmitterResource"
+    classpath = startScripts.classpath + files('../config')
+    outputDir = startScripts.outputDir
+    applicationName = "transmitter"
+    defaultJvmOpts = ["-Xms1024m", "-Xmx2048m", "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Djava.security.manager",
+               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
+               "-DCAIRO_CONFIG=../config/cairo-config.xml"]
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\config', '%APP_HOME%\\config')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/config', '$APP_HOME/config')
+    }
+}
+
+task createReceiverApp(type: CreateStartScripts) {
+    dependsOn createConfiguration
+    
+    mainClassName = "org.speechforge.cairo.server.resource.ReceiverResource"
+    classpath = startScripts.classpath + files('../config')
+    outputDir = startScripts.outputDir
+    applicationName = "receiver"
+    defaultJvmOpts = ["-Xms1024m", "-Xmx2048m", "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Djava.security.manager",
+               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
+               "-DCAIRO_CONFIG=../config/cairo-config.xml",
+               "-DCAIRO_RECORD_DIR=%%RECORD_DIR%%"]
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\config', '%APP_HOME%\\config')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/config', '$APP_HOME/config')
+    }
+}
+
+startScripts {
+    dependsOn createTransmitterApp
+    dependsOn createReceiverApp
+    
+    mainClassName = "org.speechforge.cairo.server.resource.ResourceServerImpl"
+    classpath += files('../config')
+    applicationName = "rserver"
+    //javaOpts = [ "-sipPort", "5050", "-sipTransport", "udp" ]
+    defaultJvmOpts = ["-Xms1024m", "-Xmx2048m", "-XX:+UseConcMarkSweepGC",
+               "-Dsun.rmi.dgc.client.gcInterval=3600000",
+               "-Dsun.rmi.dgc.server.gcInterval=3600000",
+               "-Djava.security.manager",
+               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"]
+    doLast {
+        def windowsScriptFile = file getWindowsScript()
+        def unixScriptFile = file getUnixScript()
+        windowsScriptFile.text = windowsScriptFile.text.replace('%APP_HOME%\\lib\\config', '%APP_HOME%\\config')
+        unixScriptFile.text = unixScriptFile.text.replace('$APP_HOME/lib/config', '$APP_HOME/config')
+    }
+}
+
+applicationDistribution.from("${buildDir}/config") {
+    include "*"
+    into 'config'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = tasks.jar.baseName
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'Cairo Server'
+                description = 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.'
+                url = 'https://github.com/JVoiceXML/JVoiceXML'
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License, Version 2.1'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'schnelle'
+                        name = 'Dirk Schnelle-Walka'
+                        email = 'dirk.schnelle@jvoicexml.org'
+                    }
+                }
+                scm {
+                    connection = 'git@github.com:JVoiceXML/cairo.git'
+                    developerConnection = 'git@github.com:JVoiceXML/cairo.git'
+                    url = 'https://github.com/JVoiceXML/cairo'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/" 
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+            credentials {
+                username = JVOICEXML_OSSRH_USERNAME
+                password = JVOICEXML_OSSRH_PASSWORD
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}

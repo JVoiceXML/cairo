@@ -1,0 +1,19 @@
+Release Notes for cairo-sip v0.1:
+=================================
+The cairo-sip library provides a simple Java API for supporting SIP/SDP message
+communication between MRCPv2 clients and servers.
+
+The Session Initiation Protocol (SIP) and the Session Description Protocol
+(SDP) are critical elements of the Media Resource Control Protocol Version 2
+(MRCPv2) standard as described in the MRCPv2 specification:
+
+   "MRCPv2 is not a "stand-alone" protocol - it relies on a session management
+   protocol such as the Session Initiation Protocol (SIP) to establish the
+   MRCPv2 control session between the client and the server, and for rendezvous
+   and capability discovery. It also depends on SIP and SDP to establish the
+   media sessions and associated parameters between the media source or sink
+   and the media server."
+
+This is the first release for the cairo-sip project.  This release provides the
+necessary SIP and SDP capabilities required for implementing MRCPv2 clients and
+servers.
