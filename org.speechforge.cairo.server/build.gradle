@@ -182,6 +182,10 @@ applicationDistribution.from("${buildDir}/config") {
     into 'config'
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
 
 publishing {
     publications {
