@@ -29,3 +29,11 @@ In order to start them cd to the cairo installation directory and start them via
 1. bin\rserver -sipPort 5060 -sipTransport udp
 2. bin\receiver config\cairo-config.xml receiver1
 3. bin\transmitter config\cairo-config.xml transmitter1
+
+## Usage in Gradle
+
+    compile group: 'org.jvoicexml', name: 'org.speechforge.cairo.client', version: '0.3.1'
+    compile group: 'org.jvoicexml', name: 'org.speechforge.cairo.sip', version: '0.3.1'
+    compile group: 'org.jvoicexml', name: 'org.speechforge.cairo.rtp', version: '0.3.1'
+    compile group: 'org.jvoicexml', name: 'org.speechforge.cairo.server', version: '0.3.1'
+
