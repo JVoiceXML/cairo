@@ -43,6 +43,7 @@ public class SdpMessageFilter {
         /**
          * Validates the provided SDP message.
          * @param message the message to validate
+         * @return filtered descriptions
          * @throws SdpException error validating the message
          */
         public static Vector<MediaDescription> filter(final SdpMessage message) 
