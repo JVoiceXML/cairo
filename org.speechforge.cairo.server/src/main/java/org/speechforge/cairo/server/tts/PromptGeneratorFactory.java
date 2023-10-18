@@ -39,7 +39,7 @@ import org.apache.logging.log4j.LogManager;
  */
 public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
 
-    private static Logger _logger = LogManager.getLogger(PromptGeneratorFactory.class);
+    private static final Logger LOGGER = LogManager.getLogger(PromptGeneratorFactory.class);
 
     private String _voiceName;
     private String _speechSynthesizer;
@@ -59,6 +59,9 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
      */
     @Override
     public PoolableObject makeObject() throws Exception {
+        if (_speechSynthesizer == null) {
+            return new PromptGenerator(_voiceName);
+        }
         if(_speechSynthesizer.equals("Festival")) {
             return new FestivalPromptGenerator(_voiceName);
         } else if (_speechSynthesizer.equals("Mary")) {
@@ -79,8 +82,8 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
     public static ObjectPool createObjectPool(String speechSynthesizer, String voiceName, int instances)
       throws InstantiationException {
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("creating new prompt generator pool... instances: " + instances);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("creating new prompt generator pool... instances: " + instances);
         }
 
         PoolableObjectFactory factory = new PromptGeneratorFactory(speechSynthesizer, voiceName);

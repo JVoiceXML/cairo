@@ -25,6 +25,8 @@
       <rtpBasePort>42150</rtpBasePort>
       <maxConnects>50</maxConnects>
       <engines>1</engines>
+      <!-- Synthesizer could Festival, Mary or FreeTTs -->
+      <speechSynthesizer>FreeTTS</speechSynthesizer>
       <voiceName>kevin</voiceName>
       <basePromptDir>/temp/cairo/basePromptDir</basePromptDir>
       <!-- can specify ip address, if not specified it tries to get it progamatically -->
