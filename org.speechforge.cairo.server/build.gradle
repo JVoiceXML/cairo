@@ -41,11 +41,11 @@ dependencies {
     implementation group: 'javax.sip', name: 'jain-sip-api', version: '1.2.1.4'
     implementation group: 'javax.sip', name: 'jain-sip-ri', version: '1.3.0-91'
     implementation group: 'javax.sdp', name: 'nist-sdp', version: '1.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.17.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-jul', version: '2.17.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.17.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-iostreams', version: '2.17.1'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.17.1'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.21.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-jul', version: '2.21.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.21.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-iostreams', version: '2.21.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.21.0'
     implementation project(':org.speechforge.cairo.rtp')
     implementation project(':org.speechforge.cairo.sip')
 
