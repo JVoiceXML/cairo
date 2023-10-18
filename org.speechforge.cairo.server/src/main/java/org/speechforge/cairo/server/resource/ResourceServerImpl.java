@@ -265,7 +265,7 @@ public class ResourceServerImpl implements SessionListener {
 
     public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException,
             ResourceUnavailableException, RemoteException {
-        SdpMessage m = invite(request, session);
+        final SdpMessage m = invite(request, session);
         try {
             _ua.sendResponse(session, m);
         } catch (SipException e) {
