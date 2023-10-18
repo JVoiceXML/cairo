@@ -121,7 +121,7 @@ task createTransmitterApp(type: CreateStartScripts) {
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000",
                "-Djava.security.manager",
-               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.security.policy=config/cairo.policy",
                "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
                "-DCAIRO_CONFIG=../config/cairo-config.xml"]
     doLast {
@@ -143,7 +143,7 @@ task createReceiverApp(type: CreateStartScripts) {
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000",
                "-Djava.security.manager",
-               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.security.policy=config/cairo.policy",
                "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager",
                "-DCAIRO_CONFIG=../config/cairo-config.xml",
                "-DCAIRO_RECORD_DIR=%%RECORD_DIR%%"]
@@ -167,7 +167,7 @@ startScripts {
                "-Dsun.rmi.dgc.client.gcInterval=3600000",
                "-Dsun.rmi.dgc.server.gcInterval=3600000",
                "-Djava.security.manager",
-               "-Djava.security.policy=config/jvoicexml.policy",
+               "-Djava.security.policy=config/cairo.policy",
                "-Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"]
     doLast {
         def windowsScriptFile = file getWindowsScript()
