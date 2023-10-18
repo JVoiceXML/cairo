@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
  */
 public abstract class ResourceImpl extends UnicastRemoteObject implements Resource {
 
-    private static Logger _logger = LogManager.getLogger(ResourceImpl.class);
+    private static final Logger LOGGER = LogManager.getLogger(ResourceImpl.class);
 
     public static final String HELP_OPTION = "help";
     public static final String RSERVERHOST_OPTION = "rserverhost";
@@ -59,7 +59,7 @@ public abstract class ResourceImpl extends UnicastRemoteObject implements Resour
      * @see org.speechforge.cairo.server.manager.Resource#hello(java.lang.String)
      */
     public void ping() {
-        _logger.debug("Resource received ping() request.");
+        LOGGER.debug("Resource received ping() request.");
     }
 
     /*protected boolean supports(MrcpResourceType resourceType) throws ResourceUnavailableException {

@@ -22,7 +22,8 @@
  */
 package org.speechforge.cairo.sip;
 
-import java.util.Vector;
+import java.util.Collection;
+import java.util.List;
 
 import javax.sdp.Attribute;
 import javax.sdp.Connection;
@@ -34,8 +35,8 @@ import javax.sdp.SdpException;
 import javax.sdp.SdpParseException;
 import javax.sdp.SessionDescription;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mrcp4j.MrcpResourceType;
 
 /**
@@ -67,7 +68,7 @@ public class SdpMessageValidator {
         } 
         if (problemCount > 0) {
             LOGGER.warn("The following " + problemCount +
-                " validation problems were found in the SDP message");
+                " validation problem(s) were found in the SDP message");
             LOGGER.warn(errors);
             LOGGER.warn(sd.toString());
             throw new SdpException(errors.toString());
@@ -90,13 +91,13 @@ public class SdpMessageValidator {
             throws SdpException, SdpParseException {
         int problemCount = 0;
         @SuppressWarnings("unchecked")
-        final Vector<MediaDescription> descriptions = sd.getMediaDescriptions(true);
+        final Collection<MediaDescription> descriptions = sd.getMediaDescriptions(true);
         for (MediaDescription md : descriptions) {
             final Media media = md.getMedia();
             final String mediaType = media.getMediaType();
             final String protocol = media.getProtocol();
             if (mediaType.equals("audio") && ((protocol.equals(SdpConstants.RTP_AVP) || protocol.equals("RTP/AVPF")))) {
-                LOGGER.warn("protocol '" + protocol + "' not implemented, yet");
+                LOGGER.warn("protocol '" + protocol + "' not implemented, yet. Trying to continue.");
                    // TODO: Check if the RTP Encoding in the request is supported by cairos codecs and streaming reosurces. 
                    //       Should offers be rejected if encoding not supported -- or counter-offered?  Maybe this is not a validation task
                    //       but a session negotiation task.
@@ -128,7 +129,7 @@ public class SdpMessageValidator {
             final StringBuilder errors) throws SdpParseException {
         int problemCount = 0;
         @SuppressWarnings("unchecked")
-        Vector<Attribute> attributes = media.getAttributes(true);
+        List<Attribute> attributes = media.getAttributes(true);
         for (Attribute attribute : attributes) {
             if (attribute.getName().equals("setup")) {
                 // value should be "active" in request and "passive"
@@ -261,7 +262,7 @@ public class SdpMessageValidator {
         // If no general connection is provided, each media descriptor should own one
         int errorCount = 0;
         @SuppressWarnings("unchecked")
-        final Vector<MediaDescription> descriptions = 
+        final List<MediaDescription> descriptions = 
             description.getMediaDescriptions(true);
         for (MediaDescription md : descriptions) {
             final Connection connection = md.getConnection();

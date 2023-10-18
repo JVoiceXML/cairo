@@ -42,9 +42,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
@@ -83,7 +83,7 @@ public class TransmitterResource extends ResourceImpl {
 
     private PortPairPool _portPairPool;
 
-	private InetAddress _myIpAddress;
+    private InetAddress _myIpAddress;
 
     public TransmitterResource(TransmitterConfig config) 
       throws IOException, RemoteException, InstantiationException {

@@ -25,7 +25,9 @@ package org.speechforge.cairo.sip;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.util.Iterator;
+import java.util.Vector;
 
+import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
 import javax.sdp.SdpFactory;
 import javax.sdp.SdpParseException;
@@ -450,11 +452,19 @@ public class SipListenerImpl implements SipListener {
                 SessionDescription sd = sdpFactory.createSessionDescription(contentString);
                 SdpMessage sdpMessage = SdpMessage.createSdpSessionMessage(sd);
 
+                // Filter all unsupported media types
+                final Vector<MediaDescription> filteredDescriptions =
+                        SdpMessageFilter.filter(sdpMessage);
+                final SessionDescription sessionDescription =
+                        sdpMessage.getSessionDescription();
+                sessionDescription.setMediaDescriptions(filteredDescriptions);
+                
                 //validate the sdp message (throw sdpException if the message is invalid)
                 SdpMessageValidator.validate(sdpMessage);
                 
                 //process the invitation (the resource manager processInviteRequest method)
-                sipClient.getSessionListener().processInviteRequest(sdpMessage, session);
+                final SessionListener listener = sipClient.getSessionListener();
+                listener.processInviteRequest(sdpMessage, session);
                 
                 //----- Removed the response sending
                 //------Must send yourself. 
