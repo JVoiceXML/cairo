@@ -33,12 +33,11 @@ import javax.media.Time;
 import javax.media.format.AudioFormat;
 import javax.media.protocol.BufferTransferHandler;
 import javax.media.protocol.ContentDescriptor;
-import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.protocol.PushBufferStream;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Serves to replicate a {@code javax.media.protocol.PushBufferDataSource} so that it may be
@@ -48,8 +47,9 @@ import org.apache.logging.log4j.LogManager;
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
 public class PBDSReplicator implements BufferTransferHandler {
-
-    static Logger _logger = LogManager.getLogger(PBDSReplicator.class);
+    /** LOgger instance. */
+    private static final Logger LOGGER = 
+            LogManager.getLogger(PBDSReplicator.class);
 
     static final Object[] EMPTY_CONTROLS_ARRAY = new Object[0];
 
@@ -72,15 +72,15 @@ public class PBDSReplicator implements BufferTransferHandler {
             throw new IllegalArgumentException("No streams found in provided data source!");
         }
 
-        if (_logger.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             if (pbStreams.length == 1) {
                 ContentDescriptor cd = pbStreams[0].getContentDescriptor();
-                _logger.debug("stream details: contentType=" + cd.getContentType() + ", format=" + pbStreams[0].getFormat());
+                LOGGER.debug("stream details: contentType=" + cd.getContentType() + ", format=" + pbStreams[0].getFormat());
             } else {
-                _logger.debug("Only first audio stream handled, total streams received: " + pbStreams.length);
+                LOGGER.debug("Only first audio stream handled, total streams received: " + pbStreams.length);
                 for (int i = 0; i < pbStreams.length; i++) {
                     ContentDescriptor cd = pbStreams[i].getContentDescriptor();
-                    _logger.debug("stream " + i + " details: contentType=" + cd.getContentType() + ", format=" + pbStreams[i].getFormat());
+                    LOGGER.debug("stream " + i + " details: contentType=" + cd.getContentType() + ", format=" + pbStreams[i].getFormat());
                 }
             }
         }
@@ -123,7 +123,7 @@ public class PBDSReplicator implements BufferTransferHandler {
         synchronized (_destinations) {
             _destinations.add(pbds);
         }
-        _logger.debug("destination count now: "+_destinations.size());
+        LOGGER.debug("destination count now: "+_destinations.size());
         return pbds;
     }
 
@@ -131,26 +131,29 @@ public class PBDSReplicator implements BufferTransferHandler {
      * @see javax.media.protocol.BufferTransferHandler#transferData(javax.media.protocol.PushBufferStream)
      */
     public void transferData(PushBufferStream pbs) {
-        _logger.trace("transferData()");
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("transferData()");
+        }
         
-        Buffer buffer = new Buffer();
+        final Buffer buffer = new Buffer();
         IOException ioe = null;
-
         try {
             pbs.read(buffer);
         } catch (IOException e) {
             ioe = e;
-            _logger.debug(e, e);
+            LOGGER.debug(e, e);
         }
         
         synchronized (_destinations) {
-        	_logger.trace("num destinations: "+_destinations.size());
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("num destinations: "+_destinations.size());
+            }
             if (_destinations.size() > 0) {
                 for (PBDS pbds : _destinations) {
                     pbds.newData(buffer, ioe);
                 }
-            } else if (_logger.isDebugEnabled()) {
-                _logger.debug("transferData called with no destinations registered!");
+            } else if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("transferData called with no destinations registered!");
             }
         }
     }
@@ -172,7 +175,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         public void newData(Buffer buffer, IOException ioe) {
             if (_started) {
-                _logger.trace("newData()");
+                LOGGER.trace("newData()");
                 synchronized (this) {
                     _buffer = buffer;
                     _ioe = ioe;
@@ -188,7 +191,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public PushBufferStream[] getStreams() {
-            _logger.debug("getStreams()");
+            LOGGER.debug("getStreams()");
             return new PushBufferStream[] {this};
         }
 
@@ -197,7 +200,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public String getContentType() {
-            _logger.debug("getContentType()");
+            LOGGER.debug("getContentType()");
             return _pbds.getContentType();
         }
 
@@ -206,7 +209,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void connect() {
-            _logger.debug("connect()");
+            LOGGER.debug("connect()");
             // do nothing, base source is already connected
         }
 
@@ -215,7 +218,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void disconnect() {
-            _logger.debug("disconnect()");
+            LOGGER.debug("disconnect()");
             _started = false;
         }
 
@@ -224,7 +227,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void start() {
-            _logger.debug("start()");
+            LOGGER.debug("start()");
             _started = true;
         }
 
@@ -233,7 +236,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public void stop() {
-            _logger.debug("stop()");
+            LOGGER.debug("stop()");
             _started = false;
         }
 
@@ -242,8 +245,8 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public Object getControl(String controlType) {
-            if (_logger.isDebugEnabled()) {
-                _logger.debug("getControl() request received: controlType=" + controlType);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("getControl() request received: controlType=" + controlType);
             }
             return _pbds.getControl(controlType);
         }
@@ -253,7 +256,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public Object[] getControls() {
-            _logger.debug("getControls()");
+            LOGGER.debug("getControls()");
             //return EMPTY_CONTROLS_ARRAY;
             return _pbds.getControls();
         }
@@ -263,7 +266,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          */
         @Override
         public Time getDuration() {
-            _logger.debug("getDuration()");
+            LOGGER.debug("getDuration()");
             return Duration.DURATION_UNKNOWN;
         }
 
@@ -271,7 +274,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.PushBufferStream#getFormat()
          */
         public Format getFormat() {
-            _logger.debug("getFormat()");
+            LOGGER.debug("getFormat()");
             return _format;
         }
 
@@ -279,12 +282,12 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.PushBufferStream#read(javax.media.Buffer)
          */
         public void read(Buffer buffer) throws IOException {
-            _logger.trace("read()");
+            LOGGER.trace("read()");
             synchronized (this) {
                 if (_ioe != null) {
                     throw _ioe;
                 }
-                _logger.trace("readig buffer of length: "+_buffer.getLength());
+                LOGGER.trace("readig buffer of length: "+_buffer.getLength());
                 buffer.copy(_buffer);
             }
         }
@@ -293,11 +296,11 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.PushBufferStream#setTransferHandler(javax.media.protocol.BufferTransferHandler)
          */
         public void setTransferHandler(BufferTransferHandler bufferTransferHandler) {
-            if (_logger.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
                 if (bufferTransferHandler == null) {
-                    _logger.debug("setTransferHandler(): bufferTransferHandler is null!");
+                    LOGGER.debug("setTransferHandler(): bufferTransferHandler is null!");
                 } else {
-                    _logger.debug("setTransferHandler(): bufferTransferHandler.class=" + bufferTransferHandler.getClass());
+                    LOGGER.debug("setTransferHandler(): bufferTransferHandler.class=" + bufferTransferHandler.getClass());
                 }
             }
 
@@ -306,14 +309,14 @@ public class PBDSReplicator implements BufferTransferHandler {
                     _bufferTransferHandler = bufferTransferHandler;
                 //}
             }
-            _logger.debug("DONE set settransferhandler()...");
+            LOGGER.debug("DONE set settransferhandler()...");
         }
 
         /* (non-Javadoc)
          * @see javax.media.protocol.SourceStream#getContentDescriptor()
          */
         public ContentDescriptor getContentDescriptor() {
-            _logger.debug("getContentDescriptor()");
+            LOGGER.debug("getContentDescriptor()");
             return new ContentDescriptor(_pbds.getContentType());
         }
 
@@ -321,7 +324,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.SourceStream#getContentLength()
          */
         public long getContentLength() {
-            _logger.debug("getContentLength()");
+            LOGGER.debug("getContentLength()");
             return LENGTH_UNKNOWN;
         }
 
@@ -329,7 +332,7 @@ public class PBDSReplicator implements BufferTransferHandler {
          * @see javax.media.protocol.SourceStream#endOfStream()
          */
         public boolean endOfStream() {
-            _logger.debug("endOfStream()");
+            LOGGER.debug("endOfStream()");
             synchronized (this) {
                 return (_buffer != null && _buffer.isEOM());
             }

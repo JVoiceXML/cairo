@@ -24,7 +24,8 @@
             <engines>1</engines>
             <voiceName>@@VOICE@@</voiceName>
             <basePromptDir>@@PROMPT_DIR@@</basePromptDir>
-            <speechSynthesizer>Mary</speechSynthesizer>
+            <!-- Synthesizer could Festival, Mary or FreeTTs -->
+            <speechSynthesizer>FreeTTS</speechSynthesizer>
             <ipAddress>@@IP@@</ipAddress>
         </resource>
     </resources>

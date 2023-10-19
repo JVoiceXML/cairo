@@ -271,7 +271,7 @@ public class SipListenerImpl implements SipListener {
                         SdpMessage sdpResponse = sipClient.getSessionListener().processInviteResponse(true, sdpMessage, session);
                         session.setState(SipSession.SessionState.inviteResponseReceived);
                         synchronized(session){
-                        	session.notifyAll();
+                            session.notifyAll();
                         }
                     } else {
                         // TODO: handle error condition where the session was
