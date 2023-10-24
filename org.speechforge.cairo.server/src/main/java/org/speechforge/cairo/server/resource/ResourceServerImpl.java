@@ -23,9 +23,12 @@
 package org.speechforge.cairo.server.resource;
 
 
+import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -41,8 +44,8 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
@@ -318,8 +321,41 @@ public class ResourceServerImpl implements SessionListener {
         return options;
     }
 
+
     /**
-     * TODOC
+     * Provides logging information about the used environment like host system.
+     * and used Java version
+     */
+    private static void reportEnvironmentInformation() {
+        // Get JRE info
+        final Package pkg = Runtime.class.getPackage();
+        final String version = pkg.getImplementationVersion();
+        final String vendor = pkg.getImplementationVendor();
+        final String title = pkg.getImplementationTitle();
+        LOGGER.info("Java:\t\t\t" + title + " " + version);
+        LOGGER.info("Java vendor:\t\t" + vendor);
+        
+        // Get OS info
+        final String os = System.getProperty("os.name", "generic");
+        LOGGER.info("Operating system:\t" + os);
+        
+        // Check the security policy
+        final String policy = System.getProperty("java.security.policy");
+        if (policy == null) {
+            LOGGER.info("java.security.policy:\t(undefined)");
+        } else {
+            final File policyFile = new File(policy);
+            if (policyFile.exists()) {
+                LOGGER.info("java.security.policy:\t" + policy);
+            } else {
+                LOGGER.info("java.security.policy:\t" + policy
+                        + " (not found)");
+            }
+        } 
+    }
+
+    /**
+     * Main method of the resource server
      * 
      * @param args program arguments
      * @throws Exception error running the program
@@ -368,6 +404,9 @@ public class ResourceServerImpl implements SessionListener {
                 LOGGER.debug("- '" + option + "'");
             }
         }
+        LOGGER.info("----------------------------------------------------");
+        LOGGER.info("starting cairo...");
+        reportEnvironmentInformation();
         ResourceRegistryImpl rr = new ResourceRegistryImpl();
         ResourceServerImpl rs = new ResourceServerImpl(rr, sipPort,
                 sipTransport, hostName, publicAddress);
