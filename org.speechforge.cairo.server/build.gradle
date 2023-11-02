@@ -53,26 +53,12 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
 }
 
-
-jar {
-    manifest {
-        attributes('Implementation-Title': 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.',
-                   'Implementation-Vendor': 'switch',
-                   'Implementation-Version': version, 
-                   'Built-By'       : System.properties['user.name'],
-                   'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-                   'Created-By'     : "Gradle ${gradle.gradleVersion}",
-                   'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-                   'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}")
-    }
-    baseName 'org.speechforge.cairo.server'
-}
-
 task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
     stylesheet "${projectDir}/src/main/config/patch-configuration.xsl"
     input "${projectDir}/src/main/config/cairo-config.xml"
     output "${buildDir}/config/cairo-config.xml"
     parameters(
+        synthesizer: CAIRO_SYNTHESIZER,
         recordDir: CAIRO_RECORD_DIR,
         grammarDir: CAIRO_GRAMMAR_DIR,
         voice: CAIRO_VOICE,
@@ -89,6 +75,26 @@ task createConfiguration(type: Copy) {
         exclude '*.xsl',
             'cairo-config.xml'
     }
+}
+
+jar {
+    dependsOn createConfiguration
+
+    manifest {
+        attributes('Implementation-Title': 'Cairo sets out to provide an enterprise grade, MRCPv2 compliant speech solution utilizing existing open source speech resources.',
+                   'Implementation-Vendor': 'switch',
+                   'Implementation-Version': version, 
+                   'Built-By'       : System.properties['user.name'],
+                   'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+                   'Created-By'     : "Gradle ${gradle.gradleVersion}",
+                   'Build-Jdk'      : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+                   'Build-OS'       : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}")
+    }
+    baseName 'org.speechforge.cairo.server'
+}
+
+clean {
+    delete file("${buildDir}/config/cairo-config.xml")
 }
 
 def getIP() {

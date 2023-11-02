@@ -19,7 +19,7 @@
     <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.speechforge.cairo.server.resource.TransmitterResource"/>
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="org.speechforge.cairo.server"/>
-    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="src/main/resources/config/cairo-config.xml transmitter1"/>
+    <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="build/config/cairo-config.xml transmitter1"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="org.speechforge.cairo.server"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms1024m -Xmx2048m -XX:+UseConcMarkSweepGC -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Djava.security.manager -Djava.security.policy=${workspace_loc:/cairo/org.speechforge.cairo.server}/src/main/resources/config/cairo.policy -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -DCAIRO_CONFIG=${workspace_loc:/cairo/org.speechforge.cairo.server}/src/main/resources/config/cairo-config.xml"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms1024m -Xmx2048m -XX:+UseConcMarkSweepGC -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Djava.security.manager -Djava.security.policy=${workspace_loc:/cairo/org.speechforge.cairo.server}/build/config/cairo.policy -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -DCAIRO_CONFIG=${workspace_loc:/cairo/org.speechforge.cairo.server}/build/config/cairo-config.xml"/>
 </launchConfiguration>

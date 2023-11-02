@@ -2,7 +2,7 @@
 <launchConfiguration type="org.eclipse.buildship.core.launch.runconfiguration">
     <listAttribute key="arguments"/>
     <booleanAttribute key="build_scans_enabled" value="false"/>
-    <stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(VERSION(7.3.1))"/>
+    <stringAttribute key="gradle_distribution" value="GRADLE_DISTRIBUTION(VERSION(6.9.1))"/>
     <stringAttribute key="gradle_user_home" value=""/>
     <stringAttribute key="java_home" value="C:\Program Files\Java\jdk1.8.0_291"/>
     <listAttribute key="jvm_arguments"/>

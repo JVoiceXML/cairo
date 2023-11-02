@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * Serves to create a pool of {@link org.speechforge.cairo.server.tts.PromptGenerator} instances.
+ * Serves to create a pool of {@link org.speechforge.cairo.server.tts.FreeTTSPromptGenerator} instances.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  */
@@ -60,14 +60,14 @@ public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
     @Override
     public PoolableObject makeObject() throws Exception {
         if (_speechSynthesizer == null) {
-            return new PromptGenerator(_voiceName);
+            return new FreeTTSPromptGenerator(_voiceName);
         }
         if(_speechSynthesizer.equals("Festival")) {
             return new FestivalPromptGenerator(_voiceName);
         } else if (_speechSynthesizer.equals("Mary")) {
             return new MaryPromptGenerator(_voiceName);
         } else {
-            return new PromptGenerator(_voiceName);
+            return new FreeTTSPromptGenerator(_voiceName);
         }
     }
 

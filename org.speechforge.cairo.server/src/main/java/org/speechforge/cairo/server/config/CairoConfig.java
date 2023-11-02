@@ -27,48 +27,55 @@ import java.util.List;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class encapsulating configuration information for a Cairo deployment.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
- *
+ * @author Dirk Schnelle-Walka
  */
 public class CairoConfig {
+    /** Logger instance. */
+    private static final Logger LOGGER =
+            LogManager.getLogger(CairoConfig.class);
 
-    XMLConfiguration _config;
+    /** The configuration to use. */
+    private XMLConfiguration config;
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @param cairoConfigURL  URL of the cairo configuration
      * @throws ConfigurationException error in the configuration
      */
     public CairoConfig(URL cairoConfigURL) throws ConfigurationException {
-        _config = new XMLConfiguration(cairoConfigURL);
+        LOGGER.info("using configuration at '" + cairoConfigURL + "''");
+        config = new XMLConfiguration(cairoConfigURL);
     }
 
     /**
-     * TODOC
+     * Retrieves the receiver configuration.
      * @param name name of the receiver
      * @return created receiver
      * @throws ConfigurationException error in the configuration
      */
     public ReceiverConfig getReceiverConfig(String name) throws ConfigurationException {
-        return new ReceiverConfig(this.getConfigIndex(name), _config);
+        return new ReceiverConfig(this.getConfigIndex(name), config);
     }
 
     /**
-     * TODOC
+     * Retreives the transmitter configuration.
      * @param name name of the transmitter
      * @return created transmitter
      * @throws ConfigurationException error in the configuration
      */
     public TransmitterConfig getTransmitterConfig(String name) throws ConfigurationException {
-        return new TransmitterConfig(this.getConfigIndex(name), _config);
+        return new TransmitterConfig(this.getConfigIndex(name), config);
     }
 
     private int getConfigIndex(String name) throws ConfigurationException {
-        List<String> resourceNames = _config.getList("resources.resource.name");
+        List<String> resourceNames = config.getList("resources.resource.name");
         for (int i = 0; i < resourceNames.size(); i++) {
             String resourceName = resourceNames.get(i);
             if (resourceName.equalsIgnoreCase(name)) {

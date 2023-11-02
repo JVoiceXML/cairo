@@ -50,10 +50,12 @@ import org.apache.logging.log4j.LogManager;
  * source.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class RTPStreamReplicator extends RTPConsumer {
-
-    private static Logger LOGGER = LogManager.getLogger(RTPStreamReplicator.class);
+    /** Logger instance. */
+    private static final Logger LOGGER =
+            LogManager.getLogger(RTPStreamReplicator.class);
 
     private PBDSReplicator _replicator;
     private Processor _processor;
@@ -157,8 +159,11 @@ public class RTPStreamReplicator extends RTPConsumer {
                 }
                 _processor.close();
                 _processor = null;
-                if (LOGGER.isDebugEnabled()) 
-                   recorder.streamInactive(null,false);
+                if (LOGGER.isDebugEnabled()) {
+                    if (recorder != null) {
+                        recorder.streamInactive(null, false);
+                    }
+                }
             }
         //}
     }

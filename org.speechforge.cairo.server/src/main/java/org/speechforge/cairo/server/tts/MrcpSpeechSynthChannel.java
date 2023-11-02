@@ -28,7 +28,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.concurrent.TimeoutException;
@@ -36,8 +35,8 @@ import java.util.concurrent.TimeoutException;
 import javax.media.rtp.InvalidSessionAddressException;
 
 import org.apache.commons.pool.ObjectPool;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.message.MrcpEvent;
@@ -52,16 +51,18 @@ import org.mrcp4j.server.MrcpSession;
 import org.mrcp4j.server.provider.SpeechSynthRequestHandler;
 import org.speechforge.cairo.exception.UnsupportedHeaderException;
 import org.speechforge.cairo.server.MrcpGenericChannel;
+import org.speechforge.cairo.util.pool.PoolableObject;
 
 
 /**
  * Handles MRCPv2 speech synthesis requests by delegating to a dedicated {@link org.speechforge.cairo.server.tts.RTPSpeechSynthChannel}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements SpeechSynthRequestHandler {
-
-    private static Logger _logger = LogManager.getLogger(MrcpSpeechSynthChannel.class);
+    /** Logger instance. */
+    private static final Logger LOGGER = LogManager.getLogger(MrcpSpeechSynthChannel.class);
 
 //    private static short IDLE = 0;
 //    private static short SPEAKING = 1;
@@ -104,7 +105,9 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         short statusCode = -1;
 
-        _logger.debug(request.getContent());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(request.getContent());
+        }
         if (request.hasContent()) {
             String contentType = request.getContentType();
             if (contentType.equalsIgnoreCase("text/plain")) {
@@ -115,33 +118,31 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                     requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
                     statusCode = MrcpResponse.STATUS_SUCCESS;
                 } catch (RuntimeException e) {
-                    _logger.debug(e, e);
+                    LOGGER.warn(e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
-                } catch (InvalidSessionAddressException e) {
-                    _logger.debug(e, e);
-                    statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                } catch (IOException e) {
-                    _logger.debug(e, e);
+                } catch (InvalidSessionAddressException | IOException e) {
+                    LOGGER.warn(e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                 }
             } else if (contentType.equalsIgnoreCase("text/uri-list")) {
                 String text = request.getContent();
                 String[] uris = text.split("\\r");
-                _logger.debug(text);
+                LOGGER.debug(text);
                 //TODO: Handle multiple URI's in a URI list
                 //should there be just one listener for the last prompt?  for now limiting to one.
                 if (uris.length > 1) {
-                   _logger.warn("Multiple URIs not supported yet.  Just playing the first URI.");
+                   LOGGER.warn("Multiple URIs not supported yet.  Just playing the first URI.");
                 }
                 //for (int i=0; i<uris.length;i++) {
-                for (int i=0; i<1;i++) {
+                for (int i = 0; i < 1; i++) {
                     try {
-
                         URL url = new URL(uris[i]);
                         URLConnection uc = url.openConnection();
-                        _logger.debug(uris[i]+"  "+uc.getContentType());
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug(uris[i] + "  " + uc.getContentType());
+                        }
                         
-                        if (uc.getContentType().equals("text/plain")) {                        
+                        if (uc.getContentType().equals("text/plain")) {
                            BufferedReader in = new BufferedReader(
                                                 new InputStreamReader(
                                                 uc.getInputStream()));
@@ -160,15 +161,11 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                               requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
                               statusCode = MrcpResponse.STATUS_SUCCESS;
                            } catch (RuntimeException e) {
-                               _logger.debug(e, e);
+                               LOGGER.warn(e, e);
                                statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                                break;
-                           } catch (InvalidSessionAddressException e) {
-                               _logger.debug(e, e);
-                               statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                               break;
-                           } catch (IOException e) {
-                               _logger.debug(e, e);
+                           } catch (InvalidSessionAddressException | IOException e) {
+                               LOGGER.warn(e, e);
                                statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                                break;
                            }
@@ -187,28 +184,21 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                                 requestState = (state == RTPSpeechSynthChannel.IDLE) ? MrcpRequestState.IN_PROGRESS : MrcpRequestState.PENDING;
                                 statusCode = MrcpResponse.STATUS_SUCCESS;
                              } catch (RuntimeException e) {
-                                 _logger.debug(e, e);
+                                 LOGGER.warn(e, e);
                                  statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                                  break;
-                             } catch (InvalidSessionAddressException e) {
-                                 _logger.debug(e, e);
-                                 statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                                 break;
-                             } catch (IOException e) {
-                                 _logger.debug(e, e);
+                             } catch (InvalidSessionAddressException | IOException e) {
+                                 LOGGER.warn(e, e);
                                  statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                                  break;
                              }
                         } else {
-                            _logger.warn("Unsupported content type for in the speak request: "+ uc.getContentType());
+                            LOGGER.warn("Unsupported content type for in the speak request: "+ uc.getContentType());
                         }
                   
                         
-                    } catch (MalformedURLException e) {
-                        _logger.debug(e, e);
-                        statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                     } catch (IOException e) {
-                        _logger.debug(e, e);
+                        LOGGER.warn(e, e);
                         statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                     }
                 }
@@ -314,6 +304,16 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         return promptFile;
     }
     
+    /**
+     * Generates a prompt from the configured {@link PromptGenerator}.
+     * @param text text to be spoken
+     * @return Generated file
+     * @throws IllegalArgumentException
+     *          error generating the prompt
+     * @throws IOException
+     *          error generating the prompt
+     */
+    @SuppressWarnings("unchecked")
     private File generatePrompt(String text) throws IllegalArgumentException, IOException {
         PromptGenerator promptGenerator = null;
 
@@ -321,7 +321,6 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         try {
             promptGenerator = (PromptGenerator) _promptGeneratorPool.borrowObject();
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             throw new RuntimeException(e);
         }
 
@@ -332,8 +331,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         try {
             _promptGeneratorPool.returnObject(promptGenerator);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            _logger.debug(e, e);
+            LOGGER.warn(e, e);
         }
 
         return promptFile;
@@ -367,10 +365,10 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                 _session.postEvent(event);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block
-                _logger.debug(e, e);
+                LOGGER.debug(e, e);
             } catch (TimeoutException e) {
                 // TODO Auto-generated catch block
-                _logger.debug(e, e);
+                LOGGER.debug(e, e);
             }
         }
 
@@ -399,10 +397,10 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                 _session.postEvent(event);
             } catch (IllegalStateException e) {
                 // TODO Auto-generated catch block
-                _logger.debug(e, e);
+                LOGGER.debug(e, e);
             } catch (TimeoutException e) {
                 // TODO Auto-generated catch block
-                _logger.debug(e, e);
+                LOGGER.debug(e, e);
             }
         }
         

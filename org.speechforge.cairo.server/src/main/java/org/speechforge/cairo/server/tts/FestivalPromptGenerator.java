@@ -33,8 +33,10 @@ import org.speechforge.cairo.util.pool.AbstractPoolableObject;
  * Generates speech prompt files using the Festival text-to-speech engine.
  *
  * @author Martin Mory {@literal <}<a href="mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
-public class FestivalPromptGenerator extends AbstractPoolableObject {
+public class FestivalPromptGenerator extends AbstractPoolableObject
+    implements PromptGenerator {
     private static final Logger LOGGER = Logger.getLogger(FestivalPromptGenerator.class);
 
     // private Voice _voice;
@@ -46,13 +48,11 @@ public class FestivalPromptGenerator extends AbstractPoolableObject {
     }
 
     /**
-     * Generates a prompt file containing the specified speech text.
-     * @param text textual content of prompt file.
-     * @param dir directory in which to save the generated prompt file.
-     * @return the generated prompt file.
-     * @throws IllegalArgumentException if the directory specified is not a directory.
+     * {@inheritDoc}
      */
-    public synchronized File generatePrompt(String text, File dir) throws IllegalArgumentException {
+    @Override
+    public synchronized File generatePrompt(String text, File dir)
+            throws IllegalArgumentException {
 	if(dir == null || !dir.isDirectory()) {  
             throw new IllegalArgumentException("Directory file specified does not exist or is not a directory: " + dir);
         }
