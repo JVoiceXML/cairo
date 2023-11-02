@@ -37,8 +37,7 @@ import marytts.util.http.Address;
 /**
  * Generates speech prompt files using the Mary text-to-speech engine.
  *
- * @author Martin Mory {@literal <}<a href=
- *         "mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
+ * @author Martin Mory {@literal <}<a href="mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
  * @author Dirk Schnelle-Walka
  */
 public class MaryPromptGenerator extends AbstractPoolableObject
