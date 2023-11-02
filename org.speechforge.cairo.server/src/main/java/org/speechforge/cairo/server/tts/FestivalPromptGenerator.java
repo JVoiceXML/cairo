@@ -33,8 +33,10 @@ import org.speechforge.cairo.util.pool.AbstractPoolableObject;
  * Generates speech prompt files using the Festival text-to-speech engine.
  *
  * @author Martin Mory {@literal <}<a href="mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
-public class FestivalPromptGenerator extends AbstractPoolableObject {
+public class FestivalPromptGenerator extends AbstractPoolableObject
+    implements PromptGenerator {
     private static final Logger LOGGER = Logger.getLogger(FestivalPromptGenerator.class);
 
     // private Voice _voice;

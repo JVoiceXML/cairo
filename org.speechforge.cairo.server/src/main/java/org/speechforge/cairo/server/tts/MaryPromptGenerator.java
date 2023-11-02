@@ -26,7 +26,8 @@ package org.speechforge.cairo.server.tts;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.speechforge.cairo.util.pool.AbstractPoolableObject;
 
 import marytts.client.MaryClient;
@@ -36,12 +37,16 @@ import marytts.util.http.Address;
  * Generates speech prompt files using the Mary text-to-speech engine.
  *
  * @author Martin Mory {@literal <}<a href="mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
-public class MaryPromptGenerator extends AbstractPoolableObject {
+public class MaryPromptGenerator extends AbstractPoolableObject
+    implements PromptGenerator {
+    /** Logger instance. */
+    private static final Logger LOGGER = 
+            LogManager.getLogger(MaryPromptGenerator.class);
 
     // private Voice _voice;
     private String _voiceName;
-    private static final Logger LOGGER = Logger.getLogger(MaryPromptGenerator.class);
     private MaryClient _mary;
 
     public MaryPromptGenerator(String voiceName) {
