@@ -25,6 +25,7 @@ package org.speechforge.cairo.server.tts;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,42 +37,48 @@ import marytts.util.http.Address;
 /**
  * Generates speech prompt files using the Mary text-to-speech engine.
  *
- * @author Martin Mory {@literal <}<a href="mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
+ * @author Martin Mory {@literal <}<a href=
+ *         "mailto:linuxfan91@users.sourceforge.net">linuxfan91@users.sourceforge.net</a>{@literal >}
  * @author Dirk Schnelle-Walka
  */
 public class MaryPromptGenerator extends AbstractPoolableObject
-    implements PromptGenerator {
+        implements PromptGenerator {
     /** Logger instance. */
-    private static final Logger LOGGER = 
-            LogManager.getLogger(MaryPromptGenerator.class);
+    private static final Logger LOGGER = LogManager
+            .getLogger(MaryPromptGenerator.class);
 
     // private Voice _voice;
     private String _voiceName;
     private MaryClient _mary;
 
     public MaryPromptGenerator(String voiceName) {
-	_voiceName = voiceName;
-	LOGGER.info("Creating MARY prompt generator for voice '" + _voiceName + "'");
-	try{
-	    String serverHost = System.getProperty("server.host", "localhost");
-	    int serverPort = Integer.getInteger("server.port", 59125).intValue();
-	    _mary = MaryClient.getMaryClient(new Address(serverHost, serverPort));
-	}
-	catch(Exception e){
-	    LOGGER.info("FATAL: Cannot connect to Mary server");
-	}
+        _voiceName = voiceName;
+        LOGGER.info("Creating MARY prompt generator for voice '" + _voiceName
+                + "'");
+        try {
+            String serverHost = System.getProperty("server.host", "localhost");
+            int serverPort = Integer.getInteger("server.port", 59125)
+                    .intValue();
+            _mary = MaryClient
+                    .getMaryClient(new Address(serverHost, serverPort));
+        } catch (Exception e) {
+            LOGGER.info("FATAL: Cannot connect to Mary server");
+        }
     }
 
     /**
-     * Generates a prompt file containing the specified speech text.
-     * @param text textual content of prompt file.
-     * @param dir directory in which to save the generated prompt file.
-     * @return the generated prompt file.
-     * @throws IllegalArgumentException if the directory specified is not a directory.
+     * {@inheritDoc}
      */
-    public synchronized File generatePrompt(String text, File dir) throws IllegalArgumentException {
-	if(dir == null || !dir.isDirectory()) {  
-            throw new IllegalArgumentException("Directory file specified does not exist or is not a directory: " + dir);
+    @Override
+    public synchronized File generatePrompt(String text, File dir)
+            throws IllegalArgumentException, IOException {
+        if (_mary == null) {
+            throw new IOException("No connection to Mary. Cannot synthesize!");
+        }
+        if (dir == null || !dir.isDirectory()) {
+            throw new IllegalArgumentException(
+                    "Directory file specified does not exist or is not a directory: "
+                            + dir);
         }
 
         if (text == null) {
@@ -82,33 +89,40 @@ public class MaryPromptGenerator extends AbstractPoolableObject
 
         // File promptFile = new File(dir, promptName);
 
-        // AudioPlayer ap = new SingleFileAudioPlayer(promptFile.getAbsolutePath(), AudioFileFormat.Type.AU);
-        // AudioFormat af = new AudioFormat(AudioFormat.Encoding.ULAW, 8000, 8, 1, 8, 8000, false);
+        // AudioPlayer ap = new
+        // SingleFileAudioPlayer(promptFile.getAbsolutePath(),
+        // AudioFileFormat.Type.AU);
+        // AudioFormat af = new AudioFormat(AudioFormat.Encoding.ULAW, 8000, 8,
+        // 1, 8, 8000, false);
         // ap.setAudioFormat(af);
         // _voice.setAudioPlayer(ap);
         // _voice.speak(text);
         // ap.close();
         // _voice.setAudioPlayer(null);
-	try{
-	    LOGGER.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-	    String locale = "en-US"; // or US English (en-US), Telugu (te), Turkish (tr), ... 
-	    String inputType = "TEXT";
-	    String outputType = "AUDIO";
-	    String audioType = "AU";
-	    
-	    LOGGER.info("MARY in action: " + dir + "/" + promptName + ".au");
-	    FileOutputStream baos = new FileOutputStream(dir + "/" + promptName + ".au");
-	    _mary.process(text, inputType, outputType, locale, audioType, _voiceName, baos);
-	    baos.close();
-	}
-	catch(Exception e){
-        LOGGER.error(e);
-	    throw new RuntimeException("Cannot synthesize with Mary!");
-	}
+        try {
+            LOGGER.info(
+                    "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            String locale = "en-US"; // or US English (en-US), Telugu (te),
+                                     // Turkish (tr), ...
+            String inputType = "TEXT";
+            String outputType = "AUDIO";
+            String audioType = "AU";
+
+            LOGGER.info("MARY in action: " + dir + "/" + promptName + ".au");
+            FileOutputStream baos = new FileOutputStream(
+                    dir + "/" + promptName + ".au");
+            _mary.process(text, inputType, outputType, locale, audioType,
+                    _voiceName, baos);
+            baos.close();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new RuntimeException("Cannot synthesize with Mary!");
+        }
         File promptFile = new File(dir, promptName + ".au");
-	/*	        if (!promptFile.exists()) {
-            throw new RuntimeException("Expected generated prompt file does not exist!");
-		}*/
+        /*
+         * if (!promptFile.exists()) { throw new
+         * RuntimeException("Expected generated prompt file does not exist!"); }
+         */
         return promptFile;
     }
 
