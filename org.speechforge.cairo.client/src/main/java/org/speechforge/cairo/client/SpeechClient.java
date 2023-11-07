@@ -24,12 +24,16 @@ package org.speechforge.cairo.client;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
+import java.util.List;
 
 import javax.media.rtp.InvalidSessionAddressException;
 
+import org.mrcp4j.MrcpMethodName;
 import org.mrcp4j.MrcpRequestState;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.header.IllegalValueException;
+import org.mrcp4j.message.request.MrcpRequest;
 import org.speechforge.cairo.client.recog.RecognitionResult;
 
 
@@ -40,24 +44,91 @@ import org.speechforge.cairo.client.recog.RecognitionResult;
  */
 public interface SpeechClient {
     
-    //TODO:  Re-Implement the non blocking calls.  Commented them out for the time being to get something working.
     //TODO:  Redesign the SpeechRequest object. reduce to essential components.  remove MRCP references...
     
     void setContentType(String contentType);
-       
+
     /**
-     * Play the prompt using a speech sythesizer or play the audio file.
+     * Plays the provided prompt
      * 
-     * @param urlPrompt if this flag is set the prompt string is an url
-     * @param prompt the prompt to play either a text string or a url
+     * @param prompt the prompt
+     * 
+     * @return sent request
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
-     * @throws NoMediaControlChannelException error accessing the  media control channel
-     * @throws InvalidSessionAddressException SIP address could npot be determined
+     * @throws NoMediaControlChannelException error accessing the media control channel 
      */
-    public void playBlocking(boolean urlPrompt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException, InvalidSessionAddressException;
+    SpeechRequest queuePrompt(String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
+
+    /**
+     * Plays the provided prompt
+     * 
+     * @param prompt URL of the prompt. Ensure to set the content via
+     *          {@link #setContentType(String)} before calling this method
+     * 
+     * @return sent request
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException error accessing the media control channel 
+     */
+    SpeechRequest queuePrompt(URL prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
+    
+    /**
+     * Plays the provided list of prompts as URLs.
+     * 
+     * @param prompts URLs of the prompt. Content type will be set to
+     *          {@code text/uri-list}.
+     * 
+     * @return sent request
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException error accessing the media control channel 
+     */
+    SpeechRequest queuePrompt(List<URL> prompts) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
+
+    /**
+     * Plays the provided prompt and waits for the return value.
+     * 
+     * @param prompt the prompt
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException error accessing the media control channel 
+     */
+    void playBlocking(String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
+
+    /**
+     * Plays the provided prompt and waits for the return value.
+     * 
+     * @param prompt URL of the prompt. Ensure to set the content via
+     *          {@link #setContentType(String)} before calling this method
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException error accessing the media control channel 
+     */
+    void playBlocking(URL prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
+    
+    /**
+     * Plays the provided list of prompts as URLs and waits for the return value.
+     * 
+     * @param prompts URLs of the prompt. Content type will be set to
+     *          {@code text/uri-list}.
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws NoMediaControlChannelException error accessing the media control channel 
+     */
+    void playBlocking(List<URL> prompts) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
 
     
     /**
@@ -191,25 +262,7 @@ public interface SpeechClient {
      * @deprecated
      */
     public void setDefaultListener(SpeechEventListener listener);
-    
- 
-    /**
-     * Queue prompt for the audio stream  This is a non-blocking call.
-     * Note that if url prompt is tue, and the content type of the url is an audio file, the audio file is played on the asudio stream.
-     * 
-     * @param urlPormpt if true, then the prompt is a url else it is text to synthesize
-     * @param prompt the prompt
-     * 
-     * @return the speech request
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws MrcpInvocationException the mrcp invocation exception
-     * @throws InterruptedException the interrupted exception
-     * @throws NoMediaControlChannelException error accessing the media channel
-     */
-    public SpeechRequest queuePrompt(boolean urlPormpt, String prompt)  throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;    
 
-   
     /**
      * Enable dtmf.
      * If dtmf is already enabled,(replace old pattern and listener or throw exception?)

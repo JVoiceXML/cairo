@@ -272,7 +272,7 @@ public class AsynchBargeInClient  {
                        }
                     }
                     if (_parrot) {
-                        _client.playBlocking(false,parrotString);
+                        _client.playBlocking(parrotString);
                     }
 
                     //TODO: check the natural language elements in recognition result for tag:value == main:quit
