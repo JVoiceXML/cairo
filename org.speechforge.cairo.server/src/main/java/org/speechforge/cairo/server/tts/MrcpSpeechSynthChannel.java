@@ -106,7 +106,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         short statusCode = -1;
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(request.getContent());
+            LOGGER.debug("content of play request: " + request.getContent());
         }
         if (request.hasContent()) {
             String contentType = request.getContentType();

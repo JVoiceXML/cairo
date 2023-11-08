@@ -90,7 +90,6 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     private boolean bargeIn;
 
     //used to construct mrcp channels (in the static metods below)
-    private static String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
     private static MrcpFactory factory = MrcpFactory.newInstance();
     private static MrcpProvider provider = factory.createProvider();
 
@@ -419,7 +418,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
  
         // speak request
         MrcpRequest request = ttsChannel.createRequest(MrcpMethodName.SPEAK);
-       request.setContent("text/plain", null, prompt);
+        request.setContent(_contentType, null, prompt);
         return sendPlayRequest(request);
     }
 
@@ -472,10 +471,6 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             throws IOException, MrcpInvocationException, InterruptedException {
         MrcpResponse response = ttsChannel.sendRequest(request);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MRCP response received:\n" + response.toString());
-        }
-        
         //_activeRequestType = RequestType.play;
         SpeechRequest queuedTts = new SpeechRequest(response.getRequestID(), RequestType.play, false);
         queuedTts.setBlockingCall(false);
@@ -484,46 +479,67 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     }
     
     /**
-     * Recognize.
-     * 
-     * @param grammarUrl the grammar url
-     * @param hotword hotword detection enabled
-     * @param attachGrammar grammar should be attached
-     * @param noInputTimeout no-speech timeout in msec 
-     * 
-     * @return the speech request
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws MrcpInvocationException the mrcp invocation exception
-     * @throws InterruptedException the interrupted exception
-     * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException error accessing the media control
-     * 		channel 
+     * {@inheritDoc} 
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-  	
-    	if (recogChannel == null)
-    		throw new  NoMediaControlChannelException();
-  
-        MrcpRequest request = constructRecogRequest(grammarUrl,hotword, attachGrammar,  noInputTimeout);
-      
-        LOGGER.debug("REQUEST: "+request.toString());
-        MrcpResponse response = recogChannel.sendRequest(request);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MRCP response received:\n" + response.toString());
+    @Override
+    public SpeechRequest recognize(String grammar, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        if (recogChannel == null) {
+            throw new  NoMediaControlChannelException();
         }
-
+        MrcpRequest request = constructRecogRequest(hotword, noInputTimeout);
+        request.setContent(_contentType, null, grammar);
+        MrcpResponse response = recogChannel.sendRequest(request);
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
-            throw new RuntimeException("Recognition failed to start!");           
+            throw new RuntimeException("Recognition failed to start!");
         }
         //_activeRequestType = RequestType.recognize;
         SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
         queuedRecognition.setBlockingCall(false);
-               
         return queuedRecognition;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpeechRequest recognize(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        BufferedReader in  = new BufferedReader(reader);
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = in.readLine()) != null) {
+            sb.append(line);
+            sb.append(System.lineSeparator());
+        }
+        return recognize(sb.toString(), hotword, noInputTimeout);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpeechRequest recognize(List<URL> grammars, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        if (ttsChannel == null) {
+            throw new  NoMediaControlChannelException();
+        }
+ 
+        MrcpRequest request = constructRecogRequest(hotword, noInputTimeout);
+        final StringBuilder str = new StringBuilder();
+        for (URL url : grammars) {
+            if (str.length() > 0) {
+                str.append(System.lineSeparator());
+                str.append(url.toString());
+            }
+        }
+        request.setContent("text/uri-list", null, str.toString());
+        MrcpResponse response = recogChannel.sendRequest(request);
+        if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
+            throw new RuntimeException("Recognition failed to start!");
+        }
+        //_activeRequestType = RequestType.recognize;
+        SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
+        queuedRecognition.setBlockingCall(false);
+        return queuedRecognition;
+    }
     
     /**
      * Play and recognize.
@@ -542,21 +558,22 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws NoMediaControlChannelException error accessing the media control channel
      */
     public  SpeechRequest playAndRecognize(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword)
-    throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	if ((ttsChannel == null) ||  (recogChannel == null))
-    		throw new  NoMediaControlChannelException();
+            throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        if ((ttsChannel == null) ||  (recogChannel == null)) {
+            throw new  NoMediaControlChannelException();
+        }
     
         long noInputTimeout=0;
-        MrcpRequest request = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
+        MrcpRequest request = constructRecogRequest(hotword, noInputTimeout);
+        request.setContent(prompt);
         SpeechRequest speechRequest = internalPlayAndRecogize(urlPrompt, prompt, request);
 
         return speechRequest;  
-
     }
 
 
     /**
-     * Internal play and recogize.
+     * Internal play and recognize.
      * 
      * @param urlPrompt the url prompt
      * @param prompt the prompt
@@ -573,11 +590,6 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         // TODO delay start of recognition if barge-in is disabled!
     	LOGGER.debug("Sending the mrcp request");
     	MrcpResponse response = recogChannel.sendRequest(request);
-
-          if (LOGGER.isDebugEnabled()) {
-              LOGGER.debug("MRCP response received:\n" + response.toString());
-          }
-
           if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
               throw new RuntimeException("Recognition failed to start!");
           }
@@ -620,7 +632,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /**
-     * Construct recog request.
+     * Construct recog request but does not set the content.
      * 
      * @param grammarUrl the grammar url
      * 
@@ -629,70 +641,21 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MalformedURLException the malformed URL exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private MrcpRequest constructRecogRequest(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws MalformedURLException, IOException {
-
-          // recog request
-          MrcpRequest request = recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-          
-          if (hotword) {
-              request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-           }
-           if (noInputTimeout != 0) {
-              request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
-              request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
-           } else {
-              request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
-           }
-          
-           if (hotword) {
-              request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-           }
-
-           if (attachGrammar) {
-              URL gUrl = new URL(grammarUrl);
-              request.setContent(_contentType, null, gUrl);
-          } else {
-              request.setContent("text/uri-list", null, grammarUrl);
-          }
-        return request;
-    } 
-
-    
-    /**
-     * Construct recog request.
-     * 
-     * @param reader the reader
-     * 
-     * @return the mrcp request
-     * 
-     * @throws MalformedURLException the malformed URL exception
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    private MrcpRequest constructRecogRequest(Reader reader, boolean hotword, long noInputTimeout) throws MalformedURLException, IOException {
-
-        BufferedReader in  = new BufferedReader(reader);
-        StringBuilder sb = new StringBuilder();
-
-        String line = null;
-        while ((line = in.readLine()) != null) {
-            sb.append(line);
-            sb.append("\n");
-        }
-        
-       LOGGER.debug("The grammar text: " +sb.toString());
-        
-        // recog request
+    private MrcpRequest constructRecogRequest(boolean hotword, long noInputTimeout) throws MalformedURLException, IOException {
         MrcpRequest request = recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-        if (noInputTimeout != 0) {
-            request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
-            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
-         } else {
-            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
-         }
+        
         if (hotword) {
             request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-         }
-        request.setContent("application/jsgf", null, sb.toString());
+        }
+        if (noInputTimeout > 0) {
+            request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
+            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
+        } else {
+            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
+        }
+        if (hotword) {
+            request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
+        }
         return request;
     } 
 
@@ -749,12 +712,13 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             }
         }
     }
-    
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.lang.String, boolean, boolean)
+
+    /**
+     * {@inheritDoc}
      */
+    @Override
     public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-        _activeRecognition = this.recognize(grammarUrl, hotword, attachGrammar, noInputTimeout);
+        _activeRecognition = this.recognize(grammarUrl, hotword, noInputTimeout);
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
         
@@ -772,16 +736,17 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         return _activeRecognition.getResult();
     }
     
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.lang.String, boolean)
+    /**
+     * {@inheritDoc}
      */
+    @Override
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	if ((ttsChannel == null) ||  (recogChannel == null))
-    		throw new  NoMediaControlChannelException();
-    
+        if ((ttsChannel == null) ||  (recogChannel == null)) {
+            throw new  NoMediaControlChannelException();
+        }
         long noInputTimeout=0;
-        MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
-        LOGGER.debug("The requestis: "+mrcpRequest.toString());
+        MrcpRequest mrcpRequest = constructRecogRequest(hotword, noInputTimeout);
+        mrcpRequest.setContent(_contentType, null, grammarUrl);
         _activeRecognition = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
         
         //Block...
@@ -841,8 +806,16 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     
     	
         long noInputTimeout=0;
-        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
-        SpeechRequest request = internalPlayAndRecogize(urlPrompt,prompt, mrcpRequest);
+        MrcpRequest mrcpRequest = constructRecogRequest(hotword, noInputTimeout);
+        BufferedReader in  = new BufferedReader(reader);
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = in.readLine()) != null) {
+            sb.append(line);
+            sb.append(System.lineSeparator());
+        }
+        mrcpRequest.setContent(_contentType, null, sb.toString());
+        SpeechRequest request = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
         
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
@@ -1145,13 +1118,13 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     
     public static MrcpChannel createTtsChannel(String xmitterChannelId, InetAddress remoteHostAdress, int xmitterPort) throws IllegalArgumentException, IllegalValueException, IOException {
         //Construct the MRCP Channels    
-        MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, protocol);
+        MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, MrcpProvider.PROTOCOL_TCP_MRCPv2);
         return ttsChannel;
     }
     
     public static MrcpChannel createRecogChannel(String receiverChannelId, InetAddress remoteHostAdress, int receiverPort) throws IllegalArgumentException, IllegalValueException, IOException {
         //Construct the MRCP Channels
-        MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, protocol);
+        MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, MrcpProvider.PROTOCOL_TCP_MRCPv2);
         return recogChannel;
     }
     
@@ -1230,60 +1203,17 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         }
     }
 
-
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#recognize(java.io.Reader, boolean, boolean)
-     */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	
-    	if (recogChannel == null)
-    		throw new  NoMediaControlChannelException();
-    
-    	
-        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
-        
-        if (hotword) {
-            mrcpRequest.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-        }
-        if (noInputTimeout != 0) {
-            mrcpRequest.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
-        }
-        
-        MrcpResponse response = recogChannel.sendRequest(mrcpRequest);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MRCP response received:\n" + response.toString());
-        }
-
-        if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
-            throw new RuntimeException("Recognition failed to start!");
-        }
-   
-        //_activeRequestType = RequestType.recognize;
-        SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
-        queuedRecognition.setBlockingCall(false);
-        
-           
-        return queuedRecognition;
-        
-    }
-
-
-  
-	public void addListener(SpeechEventListener listener) {
+    public void addListener(SpeechEventListener listener) {
         synchronized (listenerList) {
-        	listenerList.add(listener);
+            listenerList.add(listener);
         }
-	    
     }
 
-
-	public void removeListener(SpeechEventListener listener) {
+    public void removeListener(SpeechEventListener listener) {
         synchronized (listenerList) {
-        	listenerList.remove(listener);
+            listenerList.remove(listener);
         }
     }
-
 
     private void fireSynthEvent(final SpeechEventType event) {
         synchronized (listenerList) {

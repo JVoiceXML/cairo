@@ -23,36 +23,35 @@
 package org.speechforge.cairo.client.demo.bargein;
 
 
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.client.SpeechClient;
-import org.speechforge.cairo.client.SpeechClientImpl;
-import org.speechforge.cairo.client.recog.RecognitionResult;
-import org.speechforge.cairo.rtp.RTPConsumer;
-import org.speechforge.cairo.sip.SdpMessage;
-import org.speechforge.cairo.sip.SimpleSipAgent;
-import org.speechforge.cairo.sip.SipSession;
 import java.awt.Toolkit;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Vector;
+
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpConstants;
-import javax.sdp.SdpException;
 import javax.sip.SipException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.mrcp4j.MrcpResourceType;
+import org.apache.logging.log4j.Logger;
 import org.mrcp4j.client.MrcpChannel;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.MrcpResponse;
+import org.speechforge.cairo.client.SpeechClient;
+import org.speechforge.cairo.client.SpeechClientImpl;
+import org.speechforge.cairo.client.recog.RecognitionResult;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.rtp.RTPConsumer;
+import org.speechforge.cairo.sip.SdpMessage;
+import org.speechforge.cairo.sip.SimpleSipAgent;
 import org.speechforge.cairo.util.CairoUtil;
 
 /**
@@ -194,7 +193,7 @@ public class AsynchBargeInClient  {
         sipAgent = new SimpleSipAgent(_mySipAddress, "Synth Client Sip Stack", _myPort, "UDP");
 
         // Construct the SDP message that will be sent in the SIP invitation
-        Vector format = new Vector();
+        Vector<Integer> format = new Vector<Integer>();
         format.add(SdpConstants.PCMU);
         SdpMessage message = SpeechClientImpl.constructResourceMessage(localRtpPort,format, _mySipAddress, _host, "Session Name");
 

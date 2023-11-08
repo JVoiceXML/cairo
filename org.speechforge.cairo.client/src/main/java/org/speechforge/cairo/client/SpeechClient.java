@@ -49,7 +49,8 @@ public interface SpeechClient {
     void setContentType(String contentType);
 
     /**
-     * Plays the provided prompt
+     * Plays the provided prompt. Ensure to set the content via
+     *          {@link #setContentType(String)} before calling this method
      * 
      * @param prompt the prompt
      * 
@@ -63,10 +64,10 @@ public interface SpeechClient {
     SpeechRequest queuePrompt(String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
 
     /**
-     * Plays the provided prompt
-     * 
-     * @param prompt URL of the prompt. Ensure to set the content via
+     * Plays the provided prompt. Ensure to set the content via
      *          {@link #setContentType(String)} before calling this method
+     * 
+     * @param prompt URL of the prompt.
      * 
      * @return sent request
      * 
@@ -78,10 +79,10 @@ public interface SpeechClient {
     SpeechRequest queuePrompt(URL prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException;
     
     /**
-     * Plays the provided list of prompts as URLs.
+     * Plays the provided list of prompts as URLs. Content type will be set to
+     * {@code text/uri-list}.
      * 
-     * @param prompts URLs of the prompt. Content type will be set to
-     *          {@code text/uri-list}.
+     * @param prompts URLs of the prompt. 
      * 
      * @return sent request
      * 
@@ -283,9 +284,8 @@ public interface SpeechClient {
      * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
      * Hotword and normal bargein mode is supported.  You can also pass the grammar along in the mrcp command or send the uri of the gramamr.
      * 
-     * @param grammarUrl A url to the grammar file
+     * @param grammar A grammar as a string
      * @param hotword a flag indicating that the recognition mode is hotword mode
-     * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
      * @param noInputTimeout no-input timeout in msec
      * 
      * @return the speech request
@@ -296,7 +296,7 @@ public interface SpeechClient {
      * @throws IllegalValueException the illegal value exception
      * @throws NoMediaControlChannelException error accessing the media channel
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
+    public SpeechRequest recognize(String grammar, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
 
     /**
      * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
@@ -304,7 +304,6 @@ public interface SpeechClient {
      * 
      * @param reader the reader for the grammar
      * @param hotword a flag indicating that the recognition mode is hotword mode
-     * @param attachGrammar A flag indicating that the grammar should be attached to the mrcp command (else a uri is passed)
      * @param noInputTimeout no-input timeout in msec
      * 
      * @return the speech request
@@ -315,7 +314,25 @@ public interface SpeechClient {
      * @throws IllegalValueException the illegal value exception
      * @throws NoMediaControlChannelException error accessing the media channel
      */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
+    public SpeechRequest recognize(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
+
+    /**
+     * Start speech recognition with the given grammar.  This method does not block.  The listener is called with the results.
+     * Hotword and normal bargein mode is supported.  You can also pass the grammar along in the mrcp command or send the uri of the gramamr.
+     * 
+     * @param grammars A list of url to the grammar file
+     * @param hotword a flag indicating that the recognition mode is hotword mode
+     * @param noInputTimeout no-input timeout in msec
+     * 
+     * @return the speech request
+     * 
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws MrcpInvocationException the mrcp invocation exception
+     * @throws InterruptedException the interrupted exception
+     * @throws IllegalValueException the illegal value exception
+     * @throws NoMediaControlChannelException error accessing the media channel
+     */
+    public SpeechRequest recognize(List<URL> grammars, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException ;
     
     /**
      * Cancel request.

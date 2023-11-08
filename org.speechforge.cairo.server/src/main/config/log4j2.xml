@@ -23,10 +23,10 @@
 
     <Loggers>
         <Logger name="org.speechforge.cairo" level="debug"/>
+        <Logger name="org.mrcp4j" level="debug"/>
         <Logger name="gov.nist" level="info"/>
-		<Logger
-			name="org.speechforge.cairo.server.rtp.PBDSReplicator"
-			level="trace" />
+        <Logger name="org.speechforge.cairo.server.rtp.PBDSReplicator" 
+            level="trace" />
 
         <Root level="warn">
              <AppenderRef ref="stdout" />

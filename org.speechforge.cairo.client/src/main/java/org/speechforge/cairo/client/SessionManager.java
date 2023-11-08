@@ -67,7 +67,8 @@ import org.speechforge.cairo.sip.SipSession;
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
  */
 public class SessionManager  {
-        private static Logger LOGGER = LogManager.getLogger(SessionManager.class);
+        /** Logger instance. */
+        private static final Logger LOGGER = LogManager.getLogger(SessionManager.class);
         
         // properties need to be set either
         //   - call setters and then the no arg constructor then startup()(perhaps with SPring) OR
@@ -175,13 +176,13 @@ public class SessionManager  {
         	// the server come back with the rtp media line with the port it is listeneing on.  Essesently this is a workaround due to a deficciency in
         	// the cairo server.
         	
-            Vector formats = new Vector();
+            Vector<Integer> formats = new Vector<Integer>();
             formats.add(SdpConstants.PCMU);
         	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
             MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,formats,clientHost);
             //MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
             MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
-            Vector v = new Vector();
+            Vector<MediaDescription> v = new Vector<MediaDescription>();
             //v.add(synthControlChannel);
             v.add(recogControlChannel);
             v.add(rtpChannel);
@@ -203,13 +204,13 @@ public class SessionManager  {
          * @throws SipException the sip exception
          */
         public SipSession newSynthChannel(int clientRtpPort, String clientHost, String sessionName) throws SdpException, SipException {
-            Vector format = new Vector();
+            Vector<Integer> format = new Vector<Integer>();
             format.add(SdpConstants.PCMU);
-        	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
+            SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
             MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,format,clientHost);
             MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
             //MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
-            Vector v = new Vector();
+            Vector<MediaDescription> v = new Vector<MediaDescription>();
             v.add(synthControlChannel);
             //v.add(recogControlChannel);
             v.add(rtpChannel);
@@ -231,28 +232,27 @@ public class SessionManager  {
          * @throws SipException the sip exception
          */
         public SipSession newRecogAndSynthChannels(int clientRtpPort, String clientHost, String sessionName) throws SdpException, SipException {
-        	final long startTime = System.nanoTime();
-
-            Vector format = new Vector();
+            final long startTime = System.nanoTime();
+            Vector<Integer> format = new Vector<Integer>();
             format.add(SdpConstants.PCMU);
         	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
             MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,format,clientHost);
             //rtpChannel.getMedia().setMediaFormats(formats);
             MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
             MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
-            Vector v = new Vector();
+            Vector<MediaDescription> v = new Vector<MediaDescription>();
             v.add(synthControlChannel);
             v.add(recogControlChannel);
             v.add(rtpChannel);
             sdpMessage.getSessionDescription().setMediaDescriptions(v);  
-        	LOGGER.info("before snd invite  " +System.currentTimeMillis());
-        	SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
-        	
-        	long endTime = System.nanoTime();
-        	long duration = (endTime - startTime)/1000000;
-        	LOGGER.info("sipInvite time: "+duration+" ms  (" +System.currentTimeMillis()+")");
+            LOGGER.info("before snd invite  " +System.currentTimeMillis());
+            SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
+        
+            long endTime = System.nanoTime();
+            long duration = (endTime - startTime)/1000000;
+            LOGGER.info("sipInvite time: "+duration+" ms  (" +System.currentTimeMillis()+")");
 
-        	return s;
+            return s;
         }
         
         
@@ -262,24 +262,24 @@ public class SessionManager  {
         	// the server come back with the rtp media line with the port it is listeneing on.  Essesently this is a workaround due to a deficciency in
         	// the cairo server.
         	
-            Vector formats = new Vector();
+            Vector<Integer> formats = new Vector<Integer>();
             formats.add(SdpConstants.PCMU);
         	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
             MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,formats,clientHost);
             //MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
             MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.RECORDER);
-            Vector v = new Vector();
+            Vector<MediaDescription> v = new Vector<MediaDescription>();
             //v.add(synthControlChannel);
             v.add(recogControlChannel);
             v.add(rtpChannel);
             sdpMessage.getSessionDescription().setMediaDescriptions(v);    	
-        	SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
-        	return s;
+            SipSession s = sendInviteWithoutProxy(cairoSipAddress, sdpMessage, cairoSipHostName, cairoSipPort);
+            return s;
         }
     
         
         public SipSession newRecogAndSynthAndRecorderChannels(int clientRtpPort, String clientHost, String sessionName) throws SdpException, SipException {
-            Vector format = new Vector();
+            Vector<Integer> format = new Vector<Integer>();
             format.add(SdpConstants.PCMU);
         	SdpMessage sdpMessage = SdpMessage.createNewSdpSessionMessage(mySipAddress, clientHost, sessionName);
             MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(clientRtpPort,format,clientHost);
@@ -287,7 +287,7 @@ public class SessionManager  {
             MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
             MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
             MediaDescription recorderControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.RECORDER);
-            Vector v = new Vector();
+            Vector<MediaDescription> v = new Vector<MediaDescription>();
             v.add(synthControlChannel);
             v.add(recogControlChannel);
             v.add(rtpChannel);
@@ -485,6 +485,7 @@ public class SessionManager  {
             /* (non-Javadoc)
              * @see org.speechforge.cairo.sip.SessionListener#processInviteResponse(boolean, org.speechforge.cairo.sip.SdpMessage, org.speechforge.cairo.sip.SipSession)
              */
+            @SuppressWarnings("unchecked")
             public synchronized SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
                 LOGGER.debug("Got an invite response, ok is: "+ok + " "+System.currentTimeMillis());
                 
@@ -533,7 +534,7 @@ public class SessionManager  {
 	                            // that will go to the recognizer.
 	                            List <MediaDescription> rtpChans = response.getAudioChansForThisControlChan(controlChan);
 	                            int remoteRtpPort = -1;	                            
-	                            Vector supportedFormats = null;
+	                            Vector<String> supportedFormats = null;
 	                            if (rtpChans.size() > 0) {
 	                                //TODO: What if there is more than 1 media channels?
 	                                //TODO: check if there is an override for the host attribute in the m block
