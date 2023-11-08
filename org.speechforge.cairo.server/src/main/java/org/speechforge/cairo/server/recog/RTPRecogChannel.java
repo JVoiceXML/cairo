@@ -52,14 +52,16 @@ import org.apache.logging.log4j.LogManager;
  * Handles recognition requests against an incoming RTP audio stream.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class RTPRecogChannel {
+    /** Logger instance. */
+    private static Logger LOGGER = LogManager.getLogger(RTPRecogChannel.class);
 
     public static final short WAITING_FOR_SPEECH = 0;
     public static final short SPEECH_IN_PROGRESS = 1;
     public static final short COMPLETE = 2;
 
-    static Logger LOGGER = LogManager.getLogger(RTPRecogChannel.class);
 
     private /*static*/ Timer _timer = new Timer();
 
@@ -109,7 +111,9 @@ public class RTPRecogChannel {
             throw new IllegalStateException("Recognition already in progress!");
             // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
         }
-        LOGGER.debug("OK, processor was null");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("OK, processor was null");
+        }
 
 
         _pair  = _replicator.createRealizedProcessor(CONTENT_DESCRIPTOR_RAW, 10000,SourceAudioFormat.PREFERRED_MEDIA_FORMATS); // TODO: specify audio format
@@ -140,7 +144,7 @@ public class RTPRecogChannel {
             LOGGER.debug("Loading grammar...");
             _recEngine.loadJSGF(grammarLocation);
             _recEngine.setHotword(hotword);
-            LOGGER.debug("Starting recognition...");
+            LOGGER.info("Starting recognition...");
             _state = WAITING_FOR_SPEECH;
             _recEngine.startRecognition(dataSource, _recogListener);
 
