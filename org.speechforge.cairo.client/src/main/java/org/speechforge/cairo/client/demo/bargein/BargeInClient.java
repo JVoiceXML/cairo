@@ -240,7 +240,7 @@ public class BargeInClient  {
     					} while (_loop && !parrotString.contains("exit") && !parrotString.contains("quit"));
 
     					if (_parrot) {
-    						_client.playBlocking(false,parrotString);
+    						_client.playBlocking(parrotString);
     					}
 
     					_client.shutdown();

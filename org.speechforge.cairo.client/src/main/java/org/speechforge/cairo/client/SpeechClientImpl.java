@@ -22,14 +22,6 @@
  */
 package org.speechforge.cairo.client;
 
-import org.speechforge.cairo.client.SpeechClient;
-import org.speechforge.cairo.client.SpeechEventListener;
-import org.speechforge.cairo.client.SpeechEventListener.SpeechEventType;
-import org.speechforge.cairo.client.SpeechRequest.RequestType;
-import org.speechforge.cairo.client.recog.InvalidRecogResultException;
-import org.speechforge.cairo.client.recog.RecognitionResult;
-import org.speechforge.cairo.rtp.NativeMediaClient;
-import org.speechforge.cairo.sip.SdpMessage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -38,15 +30,18 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
-import org.apache.logging.log4j.Logger;
+
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mrcp4j.MrcpEventName;
 import org.mrcp4j.MrcpMethodName;
 import org.mrcp4j.MrcpRequestState;
@@ -63,6 +58,12 @@ import org.mrcp4j.message.header.IllegalValueException;
 import org.mrcp4j.message.header.MrcpHeader;
 import org.mrcp4j.message.header.MrcpHeaderName;
 import org.mrcp4j.message.request.MrcpRequest;
+import org.speechforge.cairo.client.SpeechEventListener.SpeechEventType;
+import org.speechforge.cairo.client.SpeechRequest.RequestType;
+import org.speechforge.cairo.client.recog.InvalidRecogResultException;
+import org.speechforge.cairo.client.recog.RecognitionResult;
+import org.speechforge.cairo.rtp.NativeMediaClient;
+import org.speechforge.cairo.sip.SdpMessage;
 
 /**
  * SpeechClient Implementation.
@@ -71,28 +72,27 @@ import org.mrcp4j.message.request.MrcpRequest;
  */
 public class SpeechClientImpl implements MrcpEventListener, SpeechClient, SpeechClientProvider {
 
-    /** The _logger. */
-    private static Logger _logger = LogManager.getLogger(SpeechClientImpl.class);
+    /** The logger instance. */
+    private static final Logger LOGGER =
+        LogManager.getLogger(SpeechClientImpl.class);
  
     //InetAddress _cairoSipInetAddress = null;
     //private  String _cairoSipHostName;
     //private  int _peerHostPort;
     
     /** The _tts channel. */
-    private MrcpChannel _ttsChannel;
+    private MrcpChannel ttsChannel;
     
     /** The _recog channel. */
-    private MrcpChannel _recogChannel;
+    private MrcpChannel recogChannel;
     
     /** The _barge in flag */
-    private boolean _bargeIn = false;
+    private boolean bargeIn;
 
     //used to construct mrcp channels (in the static metods below)
-    private static String protocol = MrcpProvider.PROTOCOL_TCP_MRCPv2;
     private static MrcpFactory factory = MrcpFactory.newInstance();
     private static MrcpProvider provider = factory.createProvider();
-    
-    
+
     /**
      * The Enum DtmfState.
      */
@@ -154,12 +154,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     public SpeechClientImpl(MrcpChannel tts, MrcpChannel recog) {
         super();
 
-        _ttsChannel = tts;
+        ttsChannel = tts;
         if (tts != null)
-           _ttsChannel.addEventListener(this);
-        _recogChannel = recog;
+           ttsChannel.addEventListener(this);
+        recogChannel = recog;
         if (recog != null)
-           _recogChannel.addEventListener(this); 
+           recogChannel.addEventListener(this); 
         listenerList = new java.util.ArrayList<SpeechEventListener>();
         
     }
@@ -173,8 +173,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.mrcp4j.client.MrcpEventListener#eventReceived(org.mrcp4j.message.MrcpEvent)
      */
     public void eventReceived(MrcpEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP event received:\n" + event.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP event received:\n" + event.toString());
         }
 
         try {
@@ -188,11 +188,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 break;
 
             default:
-                _logger.warn("Unexpected value for event resource type!");
+                LOGGER.warn("Unexpected value for event resource type!");
                 break;
             }
         } catch (IllegalValueException e) {
-            _logger.warn("Illegal value for event resource type!", e);
+            LOGGER.warn("Illegal value for event resource type!", e);
         }
    }
 
@@ -209,16 +209,16 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             if (MrcpEventName.SPEAK_COMPLETE.equals(event.getEventName())) {
 
                 // if there is an active recognition request and bargein is enabled, start the timer
-                if ((_bargeIn)&&(_activeRecognition != null)&&(!_activeRecognition.isCompleted())){
+                if ((bargeIn)&&(_activeRecognition != null)&&(!_activeRecognition.isCompleted())){
                     try {
                         sendStartInputTimersRequest();
                     } catch (MrcpInvocationException e) {
-                        _logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
-                        _logger.warn(e, e);
+                        LOGGER.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
+                        LOGGER.warn(e, e);
                     } catch (IOException e) {
-                        _logger.warn(e, e);
+                        LOGGER.warn(e, e);
                     } catch (InterruptedException e) {
-                        _logger.warn(e, e);
+                        LOGGER.warn(e, e);
                     }
                 }
                 
@@ -282,16 +282,16 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     			//TODO: DO you need to check if there is something to barge in on (what if the play already completed?  Or if there is no play in teh first place?
     			//used to check if part of a playAndRecognize.  But now that one can queue a play non-blocking and then call recognize with bargein enabled
     			//that check is no longer valid. 
-    			if ((_bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
+    			if ((bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
     				try {
     					sendBargeinRequest();
     				} catch (MrcpInvocationException e) {
-    					_logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
-    					_logger.warn(e, e);
+    					LOGGER.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
+    					LOGGER.warn(e, e);
     				} catch (IOException e) {
-    					_logger.warn(e, e);
+    					LOGGER.warn(e, e);
     				} catch (InterruptedException e) {
-    					_logger.warn(e, e);
+    					LOGGER.warn(e, e);
     				}
     			}
 
@@ -304,7 +304,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     				completionCause = (CompletionCause) completionCauseHeader.getValueObject();
     			} catch (IllegalValueException e) {
     				// TODO Auto-generated catch block
-    				_logger.warn("Illegal Value getting the completion cause", e);
+    				LOGGER.warn("Illegal Value getting the completion cause", e);
 
     			}
 
@@ -313,11 +313,11 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     				r = null; 
     			} else {
     				try {
-    					_logger.debug("Recognition event content: "+event.getContent());
+    					LOGGER.debug("Recognition event content: "+event.getContent());
     					r = RecognitionResult.constructResultFromString(event.getContent());
-    					_logger.debug("recognition result text: "+r.getText());
+    					LOGGER.debug("recognition result text: "+r.getText());
     				} catch (InvalidRecogResultException e) {
-    					_logger.warn("Illegal recognition result", e);
+    					LOGGER.warn("Illegal recognition result", e);
     					r = null;
     				}
     			}
@@ -342,15 +342,15 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     			completionCause = (CompletionCause) completionCauseHeader.getValueObject();
     		} catch (IllegalValueException e) {
     			// TODO Auto-generated catch block
-    			_logger.warn("Illegal Value getting the completion cause", e);
+    			LOGGER.warn("Illegal Value getting the completion cause", e);
     		}
     		if (completionCause.getCauseCode() == 0) { 
     			try {
-    				_logger.debug("Recognition event content: "+event.getContent());
+    				LOGGER.debug("Recognition event content: "+event.getContent());
     				r = RecognitionResult.constructResultFromString(event.getContent());
-    				_logger.debug("recognition result text: "+r.getText());
+    				LOGGER.debug("recognition result text: "+r.getText());
     			} catch (InvalidRecogResultException e) {
-    				_logger.warn("Illegal Recognition Result", e);
+    				LOGGER.warn("Illegal Recognition Result", e);
     				r = null;
     			}
     		}
@@ -367,12 +367,12 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
       throws MrcpInvocationException, IOException, InterruptedException {
 
         // construct request
-        MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.START_INPUT_TIMERS);
+        MrcpRequest request = recogChannel.createRequest(MrcpMethodName.START_INPUT_TIMERS);
 
         // send request
-        MrcpResponse response = _recogChannel.sendRequest(request);
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        MrcpResponse response = recogChannel.sendRequest(request);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
         return response.getRequestState();
     }
@@ -389,18 +389,18 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     public MrcpRequestState sendBargeinRequest()
       throws IOException, MrcpInvocationException, InterruptedException {
         
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("Sending a barge in occurred message to tts resource");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Sending a barge in occurred message to tts resource");
         }
 
         // construct request
-        MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.BARGE_IN_OCCURRED);
+        MrcpRequest request = ttsChannel.createRequest(MrcpMethodName.BARGE_IN_OCCURRED);
 
         // send request
-        MrcpResponse response = _ttsChannel.sendRequest(request);
+        MrcpResponse response = ttsChannel.sendRequest(request);
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MRCP response received:\n" + response.toString());
         }
 
         return response.getRequestState();
@@ -408,89 +408,138 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /**
-     * TODOC.
-     * 
-     * @param prompt the prompt
-     * @param urlPrompt the url prompt
-     * 
-     * @return recognition result string
-     * 
+     * {@inheritDoc} 
+     */
+    @Override
+    public SpeechRequest queuePrompt(String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+        if (ttsChannel == null) {
+            throw new  NoMediaControlChannelException();
+        }
+ 
+        // speak request
+        MrcpRequest request = ttsChannel.createRequest(MrcpMethodName.SPEAK);
+        request.setContent(_contentType, null, prompt);
+        return sendPlayRequest(request);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpeechRequest queuePrompt(URL prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+        if (ttsChannel == null) {
+            throw new  NoMediaControlChannelException();
+        }
+ 
+        // speak request
+        MrcpRequest request = ttsChannel.createRequest(MrcpMethodName.SPEAK);
+        request.setContent(_contentType, null, prompt);
+        return sendPlayRequest(request);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpeechRequest queuePrompt(List<URL> prompts) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+        if (ttsChannel == null) {
+            throw new  NoMediaControlChannelException();
+        }
+ 
+        // speak request
+        MrcpRequest request = ttsChannel.createRequest(MrcpMethodName.SPEAK);
+        final StringBuilder str = new StringBuilder();
+        for (URL url : prompts) {
+            if (str.length() > 0) {
+                str.append(System.lineSeparator());
+                str.append(url.toString());
+            }
+        }
+        request.setContent("text/uri-list", null, str.toString());
+        return sendPlayRequest(request);
+    }
+
+    /**
+     * Sends a play request.
+     * @param request the request to send
+     * @return queued request
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws MrcpInvocationException the mrcp invocation exception
      * @throws InterruptedException the interrupted exception
-     * @throws NoMediaControlChannelException error accessing the media control channel 
      */
-    public SpeechRequest play(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+    private SpeechRequest sendPlayRequest(MrcpRequest request)
+            throws IOException, MrcpInvocationException, InterruptedException {
+        MrcpResponse response = ttsChannel.sendRequest(request);
 
-    	if (_ttsChannel == null) 
-    		throw new  NoMediaControlChannelException();
-    	
- 
-        // speak request
-        MrcpRequest request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
-        if (!urlPrompt) {
-           request.setContent("text/plain", null, prompt);
-        } else {
-            request.setContent("text/uri-list", null, prompt); 
-        }
-        MrcpResponse response = _ttsChannel.sendRequest(request);
-           
-
-
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
-        }
-        
         //_activeRequestType = RequestType.play;
-        SpeechRequest queuedTts = new SpeechRequest(response.getRequestID(),RequestType.play,false);   
+        SpeechRequest queuedTts = new SpeechRequest(response.getRequestID(), RequestType.play, false);
         queuedTts.setBlockingCall(false);
 
         return queuedTts;
-
     }
-
     
     /**
-     * Recognize.
-     * 
-     * @param grammarUrl the grammar url
-     * @param hotword hotword detection enabled
-     * @param attachGrammar grammar should be attached
-     * @param noInputTimeout no-speech timeout in msec 
-     * 
-     * @return the speech request
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws MrcpInvocationException the mrcp invocation exception
-     * @throws InterruptedException the interrupted exception
-     * @throws IllegalValueException the illegal value exception
-     * @throws NoMediaControlChannelException error accessing the media control
-     * 		channel 
+     * {@inheritDoc} 
      */
-    public SpeechRequest recognize(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-  	
-    	if (_recogChannel == null)
-    		throw new  NoMediaControlChannelException();
-  
-        MrcpRequest request = constructRecogRequest(grammarUrl,hotword, attachGrammar,  noInputTimeout);
-      
-        _logger.debug("REQUEST: "+request.toString());
-        MrcpResponse response = _recogChannel.sendRequest(request);
-
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
+    @Override
+    public SpeechRequest recognize(String grammar, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        if (recogChannel == null) {
+            throw new  NoMediaControlChannelException();
         }
-
+        MrcpRequest request = constructRecogRequest(hotword, noInputTimeout);
+        request.setContent(_contentType, null, grammar);
+        MrcpResponse response = recogChannel.sendRequest(request);
         if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
-            throw new RuntimeException("Recognition failed to start!");           
+            throw new RuntimeException("Recognition failed to start!");
         }
         //_activeRequestType = RequestType.recognize;
         SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
         queuedRecognition.setBlockingCall(false);
-               
         return queuedRecognition;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpeechRequest recognize(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        BufferedReader in  = new BufferedReader(reader);
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = in.readLine()) != null) {
+            sb.append(line);
+            sb.append(System.lineSeparator());
+        }
+        return recognize(sb.toString(), hotword, noInputTimeout);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SpeechRequest recognize(List<URL> grammars, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        if (ttsChannel == null) {
+            throw new  NoMediaControlChannelException();
+        }
+ 
+        MrcpRequest request = constructRecogRequest(hotword, noInputTimeout);
+        final StringBuilder str = new StringBuilder();
+        for (URL url : grammars) {
+            if (str.length() > 0) {
+                str.append(System.lineSeparator());
+                str.append(url.toString());
+            }
+        }
+        request.setContent("text/uri-list", null, str.toString());
+        MrcpResponse response = recogChannel.sendRequest(request);
+        if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
+            throw new RuntimeException("Recognition failed to start!");
+        }
+        //_activeRequestType = RequestType.recognize;
+        SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
+        queuedRecognition.setBlockingCall(false);
+        return queuedRecognition;
+    }
     
     /**
      * Play and recognize.
@@ -509,21 +558,22 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws NoMediaControlChannelException error accessing the media control channel
      */
     public  SpeechRequest playAndRecognize(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword)
-    throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	if ((_ttsChannel == null) ||  (_recogChannel == null))
-    		throw new  NoMediaControlChannelException();
+            throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
+        if ((ttsChannel == null) ||  (recogChannel == null)) {
+            throw new  NoMediaControlChannelException();
+        }
     
         long noInputTimeout=0;
-        MrcpRequest request = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
+        MrcpRequest request = constructRecogRequest(hotword, noInputTimeout);
+        request.setContent(prompt);
         SpeechRequest speechRequest = internalPlayAndRecogize(urlPrompt, prompt, request);
 
         return speechRequest;  
-
     }
 
 
     /**
-     * Internal play and recogize.
+     * Internal play and recognize.
      * 
      * @param urlPrompt the url prompt
      * @param prompt the prompt
@@ -538,13 +588,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      */
     private SpeechRequest internalPlayAndRecogize(boolean urlPrompt, String prompt, MrcpRequest request) throws IOException, MrcpInvocationException, InterruptedException {
         // TODO delay start of recognition if barge-in is disabled!
-    	_logger.debug("Sending the mrcp request");
-    	MrcpResponse response = _recogChannel.sendRequest(request);
-
-          if (_logger.isDebugEnabled()) {
-              _logger.debug("MRCP response received:\n" + response.toString());
-          }
-
+    	LOGGER.debug("Sending the mrcp request");
+    	MrcpResponse response = recogChannel.sendRequest(request);
           if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
               throw new RuntimeException("Recognition failed to start!");
           }
@@ -558,16 +603,16 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
           //activeRequests.put(String.valueOf(response.getRequestID()),recognizeCall);   
 
           // speak request
-          request = _ttsChannel.createRequest(MrcpMethodName.SPEAK);
+          request = ttsChannel.createRequest(MrcpMethodName.SPEAK);
           if (!urlPrompt) {
               request.setContent("text/plain", null, prompt);
            } else {
                request.setContent("text/uri-list", null, prompt); 
            }
-          response = _ttsChannel.sendRequest(request);
+          response = ttsChannel.sendRequest(request);
 
-          if (_logger.isDebugEnabled()) {
-              _logger.debug("MRCP response received:\n" + response.toString());
+          if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("MRCP response received:\n" + response.toString());
           }
           
           _activeBlockingTts = new SpeechRequest(response.getRequestID(),RequestType.playAndRecognize,false);   
@@ -587,7 +632,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
 
     /**
-     * Construct recog request.
+     * Construct recog request but does not set the content.
      * 
      * @param grammarUrl the grammar url
      * 
@@ -596,81 +641,64 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @throws MalformedURLException the malformed URL exception
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    private MrcpRequest constructRecogRequest(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws MalformedURLException, IOException {
-
-          // recog request
-          MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-          
-          if (hotword) {
-              request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-           }
-           if (noInputTimeout != 0) {
-              request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
-              request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
-           } else {
-              request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
-           }
-          
-           if (hotword) {
-              request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-           }
-
-           if (attachGrammar) {
-              URL gUrl = new URL(grammarUrl);
-              request.setContent(_contentType, null, gUrl);
-          } else {
-              request.setContent("text/uri-list", null, grammarUrl);
-          }
-        return request;
-    } 
-
-    
-    /**
-     * Construct recog request.
-     * 
-     * @param reader the reader
-     * 
-     * @return the mrcp request
-     * 
-     * @throws MalformedURLException the malformed URL exception
-     * @throws IOException Signals that an I/O exception has occurred.
-     */
-    private MrcpRequest constructRecogRequest(Reader reader, boolean hotword, long noInputTimeout) throws MalformedURLException, IOException {
-
-        BufferedReader in  = new BufferedReader(reader);
-        StringBuilder sb = new StringBuilder();
-
-        String line = null;
-        while ((line = in.readLine()) != null) {
-            sb.append(line);
-            sb.append("\n");
-        }
+    private MrcpRequest constructRecogRequest(boolean hotword, long noInputTimeout) throws MalformedURLException, IOException {
+        MrcpRequest request = recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
         
-       _logger.debug("The grammar text: " +sb.toString());
-        
-        // recog request
-        MrcpRequest request = _recogChannel.createRequest(MrcpMethodName.RECOGNIZE);
-        if (noInputTimeout != 0) {
-            request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
-            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
-         } else {
-            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
-         }
         if (hotword) {
             request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-         }
-        request.setContent("application/jsgf", null, sb.toString());
+        }
+        if (noInputTimeout > 0) {
+            request.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
+            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.TRUE)); 
+        } else {
+            request.addHeader(MrcpHeaderName.START_INPUT_TIMERS.constructHeader(Boolean.FALSE));     
+        }
+        if (hotword) {
+            request.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
+        }
         return request;
     } 
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#playBlocking(boolean, java.lang.String)
+    /**
+     * {@inheritDoc}
      */
-    public synchronized void playBlocking(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
-    	if (_ttsChannel == null) 
-    		throw new  NoMediaControlChannelException();
-    
-        _activeBlockingTts = this.play(urlPrompt, prompt);
+    @Override
+    public synchronized void playBlocking(String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+        if (ttsChannel == null) { 
+            throw new  NoMediaControlChannelException();
+        }
+        _activeBlockingTts = queuePrompt(prompt);
+        waitPlayCompleted();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void playBlocking(URL prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+        if (ttsChannel == null) { 
+            throw new  NoMediaControlChannelException();
+        }
+        _activeBlockingTts = queuePrompt(prompt);
+        waitPlayCompleted();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void playBlocking(List<URL> prompts) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
+        if (ttsChannel == null) { 
+            throw new  NoMediaControlChannelException();
+        }
+        _activeBlockingTts = queuePrompt(prompts);
+        waitPlayCompleted();
+    }
+
+    /**
+     * Delays until a playback has been completed.
+     */
+    private void waitPlayCompleted() {
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
         _activeBlockingTts.setBlockingCall(true);
@@ -679,18 +707,18 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 try {
                     this.wait(1000);
                 } catch (InterruptedException e) {
-                	_logger.debug("Interrupt Excepton while waiting for tts to complete");
+                    return;
                 }
             }
         }
-        return;
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#recognizeBlocking(java.lang.String, boolean, boolean)
+    /**
+     * {@inheritDoc}
      */
+    @Override
     public synchronized RecognitionResult recognizeBlocking(String grammarUrl, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-        _activeRecognition = this.recognize(grammarUrl, hotword, attachGrammar, noInputTimeout);
+        _activeRecognition = this.recognize(grammarUrl, hotword, noInputTimeout);
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
         
@@ -700,7 +728,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 try {
                     this.wait(1000);
                 } catch (InterruptedException e) {
-                	_logger.debug("Interrupt Excepton while waiting for recognition to complete");
+                	LOGGER.debug("Interrupt Excepton while waiting for recognition to complete");
                 }
             }
   
@@ -708,16 +736,17 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         return _activeRecognition.getResult();
     }
     
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.lang.String, boolean)
+    /**
+     * {@inheritDoc}
      */
+    @Override
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, String grammarUrl, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	if ((_ttsChannel == null) ||  (_recogChannel == null))
-    		throw new  NoMediaControlChannelException();
-    
+        if ((ttsChannel == null) ||  (recogChannel == null)) {
+            throw new  NoMediaControlChannelException();
+        }
         long noInputTimeout=0;
-        MrcpRequest mrcpRequest = constructRecogRequest(grammarUrl, hotword, true,noInputTimeout);
-        _logger.debug("The requestis: "+mrcpRequest.toString());
+        MrcpRequest mrcpRequest = constructRecogRequest(hotword, noInputTimeout);
+        mrcpRequest.setContent(_contentType, null, grammarUrl);
         _activeRecognition = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
         
         //Block...
@@ -730,7 +759,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                     this.wait(1000);
                 } catch (InterruptedException e) {
                     // TODO Auto-generated catch block
-                	_logger.debug("Interrupt Excepton while waiting for recognition to complete");
+                	LOGGER.debug("Interrupt Excepton while waiting for recognition to complete");
                 }
             }
   
@@ -742,14 +771,14 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.speechforge.cairo.client.SpeechClient#turnOnBargeIn()
      */
     public void turnOnBargeIn() {
-        _bargeIn = true;    
+        bargeIn = true;    
     }
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClient#turnOffBargeIn()
      */
     public void turnOffBargeIn() {
-       _bargeIn = false;
+       bargeIn = false;
     }
 
 
@@ -772,13 +801,21 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      * @see org.speechforge.cairo.client.SpeechClient#playAndRecognizeBlocking(boolean, java.lang.String, java.io.Reader, boolean)
      */
     public synchronized RecognitionResult playAndRecognizeBlocking(boolean urlPrompt, String prompt, Reader reader, boolean hotword) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	if ((_ttsChannel == null) ||  (_recogChannel == null))
+    	if ((ttsChannel == null) ||  (recogChannel == null))
     		throw new  NoMediaControlChannelException();
     
     	
         long noInputTimeout=0;
-        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
-        SpeechRequest request = internalPlayAndRecogize(urlPrompt,prompt, mrcpRequest);
+        MrcpRequest mrcpRequest = constructRecogRequest(hotword, noInputTimeout);
+        BufferedReader in  = new BufferedReader(reader);
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = in.readLine()) != null) {
+            sb.append(line);
+            sb.append(System.lineSeparator());
+        }
+        mrcpRequest.setContent(_contentType, null, sb.toString());
+        SpeechRequest request = internalPlayAndRecogize(urlPrompt, prompt, mrcpRequest);
         
         //Block...
         //ActiveRequest request = activeRequests.get(String.valueOf(response.getRequestID()));
@@ -789,7 +826,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
                 try {
                     this.wait(1000);
                 } catch (InterruptedException e) {
-                   	_logger.debug("Interrupt Excepton while waiting for recognition to complete");
+                   	LOGGER.debug("Interrupt Excepton while waiting for recognition to complete");
                 }
             }
   
@@ -803,34 +840,22 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      */
     public synchronized RecognitionResult recognizeBlocking(Reader reader, boolean hotword, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
     	
-    	if (_recogChannel == null)
+    	if (recogChannel == null)
     		throw new  NoMediaControlChannelException();
   
-    	_logger.warn("The recognize blocking(reader,hotwordFlag) method is not implemented");
+    	LOGGER.warn("The recognize blocking(reader,hotwordFlag) method is not implemented");
         return null;
     }
-
-
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#queuePrompt(boolean, java.lang.String)
-     */
-    public SpeechRequest queuePrompt(boolean urlPrompt, String prompt) throws IOException, MrcpInvocationException, InterruptedException, NoMediaControlChannelException {
-    	if (_ttsChannel == null)
-    		throw new  NoMediaControlChannelException();
-    
-        return play(urlPrompt, prompt);
-    }
-
 
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.client.SpeechClientProvider#characterEventReceived(char)
      */
     public void characterEventReceived(char c) {
-        _logger.debug("speechclient.chareventreceived: "+c);
+        LOGGER.debug("speechclient.chareventreceived: "+c);
         
         if (_dtmfState == DtmfState.waitingForInput) {
-            _logger.debug("   waitingfor input...");
+            LOGGER.debug("   waitingfor input...");
             //if the first char, 
             //  1.  cancel the no input timer  and
             //  2.  start the no recognition timer and 
@@ -851,16 +876,16 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             
                 
             // if barge in enabled, send bareg in request (to transmitter)
-			if ((_bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
+			if ((bargeIn) ) { //&&  (_activeRequestType == RequestType.playAndRecognize)){
 				try {
 					sendBargeinRequest();
 				} catch (MrcpInvocationException e) {
-					_logger.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
-					_logger.warn(e, e);
+					LOGGER.warn("MRCPv2 Status Code "+ e.getResponse().getStatusCode());
+					LOGGER.warn(e, e);
 				} catch (IOException e) {
-					_logger.warn(e, e);
+					LOGGER.warn(e, e);
 				} catch (InterruptedException e) {
-					_logger.warn(e, e);
+					LOGGER.warn(e, e);
 				}
 			}
             
@@ -873,26 +898,26 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
             _charArray[0] = c;
             _length=1;    
             _inBuf =  new String(_charArray);
-            _logger.debug("The first inBuf is : "+ _inBuf);
+            LOGGER.debug("The first inBuf is : "+ _inBuf);
 
 
             // do the DTMF pattern matching
             checkForDtmfMatch(_inBuf);
             
         } else if (_dtmfState == DtmfState.waitingForMatch) {
-            _logger.debug("   waiting for match...");
+            LOGGER.debug("   waiting for match...");
 
                 //concatenate the new char to end of the dtmf string receievd up till now
           
                 _charArray[_length++] = c;
                 _inBuf =  new String(_charArray);
-                _logger.debug("The new inBuf is: "+_inBuf);
+                LOGGER.debug("The new inBuf is: "+_inBuf);
                 
                 // do the DTMF pattern matching
                 checkForDtmfMatch(_inBuf);
 
         } else {
-            _logger.warn("Got dtmf signal while dtmf was not enabled by the client: "+c+  "  Discarding it.");
+            LOGGER.warn("Got dtmf signal while dtmf was not enabled by the client: "+c+  "  Discarding it.");
         }
     }
 
@@ -905,7 +930,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
         //if it matches
         if (m.find()) {
-            _logger.debug("Got a dtmf match : "+_inBuf);
+            LOGGER.debug("Got a dtmf match : "+_inBuf);
             _dtmfState = DtmfState.complete;
             
             //cancel the recog timer
@@ -919,7 +944,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
            
 
         }  else {
-            _logger.debug("No match : "+_inBuf); 
+            LOGGER.debug("No match : "+_inBuf); 
         }
     }
 
@@ -976,7 +1001,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
 
         
         } else {   //already an active dtmf recognition request
-            _logger.warn("DTMF Recognition already active.");   
+            LOGGER.warn("DTMF Recognition already active.");   
         }
         
     }
@@ -1093,13 +1118,13 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
     
     public static MrcpChannel createTtsChannel(String xmitterChannelId, InetAddress remoteHostAdress, int xmitterPort) throws IllegalArgumentException, IllegalValueException, IOException {
         //Construct the MRCP Channels    
-        MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, protocol);
+        MrcpChannel ttsChannel = provider.createChannel(xmitterChannelId, remoteHostAdress, xmitterPort, MrcpProvider.PROTOCOL_TCP_MRCPv2);
         return ttsChannel;
     }
     
     public static MrcpChannel createRecogChannel(String receiverChannelId, InetAddress remoteHostAdress, int receiverPort) throws IllegalArgumentException, IllegalValueException, IOException {
         //Construct the MRCP Channels
-        MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, protocol);
+        MrcpChannel recogChannel = provider.createChannel(receiverChannelId, remoteHostAdress, receiverPort, MrcpProvider.PROTOCOL_TCP_MRCPv2);
         return recogChannel;
     }
     
@@ -1115,7 +1140,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         MediaDescription rtpChannel = SdpMessage.createRtpChannelRequest(localRtpPort, format);
         MediaDescription synthControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHSYNTH);
         MediaDescription recogControlChannel = SdpMessage.createMrcpChannelRequest(MrcpResourceType.SPEECHRECOG);
-        Vector v = new Vector();
+        Vector<MediaDescription> v = new Vector<MediaDescription>();
         v.add(synthControlChannel);
         v.add(recogControlChannel);
         v.add(rtpChannel);
@@ -1129,14 +1154,14 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
      */
     public void stopActiveRecognitionRequests() throws MrcpInvocationException, IOException, InterruptedException, NoMediaControlChannelException {
 
-    	if (_recogChannel == null) 
+    	if (recogChannel == null) 
     		throw new  NoMediaControlChannelException();
     	
-        MrcpRequest cancelRequest = _recogChannel.createRequest(MrcpMethodName.STOP);
-        MrcpResponse response = _recogChannel.sendRequest(cancelRequest);
+        MrcpRequest cancelRequest = recogChannel.createRequest(MrcpMethodName.STOP);
+        MrcpResponse response = recogChannel.sendRequest(cancelRequest);
 
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("Stopped Recognition, MRCP response received:\n" + response.toString());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Stopped Recognition, MRCP response received:\n" + response.toString());
         }
         
         //Blocking Methods need to be notified and unblocked
@@ -1161,7 +1186,7 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         try {
 	        this.stopActiveRecognitionRequests();
         } catch (NoMediaControlChannelException e) {
-	       _logger.debug("As part of shutting down the speech client, stopping active recognition requests.  No recog control channel so nothing to stop.");
+	       LOGGER.debug("As part of shutting down the speech client, stopping active recognition requests.  No recog control channel so nothing to stop.");
         }
         
         //shutdown the timers
@@ -1178,60 +1203,17 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         }
     }
 
-
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.client.SpeechClient#recognize(java.io.Reader, boolean, boolean)
-     */
-    public SpeechRequest recognize(Reader reader, boolean hotword, boolean attachGrammar, long noInputTimeout) throws IOException, MrcpInvocationException, InterruptedException, IllegalValueException, NoMediaControlChannelException {
-    	
-    	if (_recogChannel == null)
-    		throw new  NoMediaControlChannelException();
-    
-    	
-        MrcpRequest mrcpRequest = constructRecogRequest(reader,hotword,noInputTimeout);
-        
-        if (hotword) {
-            mrcpRequest.addHeader(MrcpHeaderName.RECOGNITION_MODE.constructHeader("hotword"));
-        }
-        if (noInputTimeout != 0) {
-            mrcpRequest.addHeader(MrcpHeaderName.NO_INPUT_TIMEOUT.constructHeader(new Long(noInputTimeout)));
-        }
-        
-        MrcpResponse response = _recogChannel.sendRequest(mrcpRequest);
-
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("MRCP response received:\n" + response.toString());
-        }
-
-        if (response.getRequestState().equals(MrcpRequestState.COMPLETE)) {
-            throw new RuntimeException("Recognition failed to start!");
-        }
-   
-        //_activeRequestType = RequestType.recognize;
-        SpeechRequest queuedRecognition = new SpeechRequest(response.getRequestID(),RequestType.recognize,false);   
-        queuedRecognition.setBlockingCall(false);
-        
-           
-        return queuedRecognition;
-        
-    }
-
-
-  
-	public void addListener(SpeechEventListener listener) {
+    public void addListener(SpeechEventListener listener) {
         synchronized (listenerList) {
-        	listenerList.add(listener);
+            listenerList.add(listener);
         }
-	    
     }
 
-
-	public void removeListener(SpeechEventListener listener) {
+    public void removeListener(SpeechEventListener listener) {
         synchronized (listenerList) {
-        	listenerList.remove(listener);
+            listenerList.remove(listener);
         }
     }
-
 
     private void fireSynthEvent(final SpeechEventType event) {
         synchronized (listenerList) {

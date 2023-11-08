@@ -24,7 +24,9 @@ package org.speechforge.cairo.client.demo.tts;
 
 import java.awt.Toolkit;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import javax.sip.SipException;
 
@@ -34,8 +36,8 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.mrcp4j.client.MrcpChannel;
 import org.mrcp4j.client.MrcpInvocationException;
 import org.mrcp4j.message.MrcpResponse;
@@ -208,9 +210,11 @@ public class SpeechSynthClient {
             try {
                 for (int i=0; i < _repetitions; i++) {
                     if (_url) {
-                       _client.playBlocking(true, text);  
+                       _client.playBlocking(text);  
                     } else {
-                    	_client.playBlocking(false, text);
+                        List<URL> urls = new java.util.ArrayList<URL>();
+                        urls.add(new URL(text));
+                    	_client.playBlocking(text);
                     }
                 }
             } catch (Exception e){
