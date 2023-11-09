@@ -44,11 +44,9 @@ import javax.media.MediaLocator;
 import javax.media.PackageManager;
 import javax.media.Processor;
 import javax.media.UnsupportedPlugInException;
-import javax.media.control.PacketSizeControl;
 import javax.media.control.TrackControl;
 //import javax.media.format.AudioFormat;
 import javax.media.format.UnsupportedFormatException;
-import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.RTPManager;
@@ -56,8 +54,8 @@ import javax.media.rtp.SendStream;
 import javax.media.rtp.SessionAddress;
 import javax.sound.sampled.AudioFormat;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.speechforge.cairo.util.CustomDataSource;
 
 
@@ -65,10 +63,11 @@ import org.speechforge.cairo.util.CustomDataSource;
  * Handles playing of audio prompt files over an RTP output stream.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class RTPPlayer implements ControllerListener {
-
-    private static Logger LOGGER = LogManager.getLogger(RTPPlayer.class);
+    /** Logger instance. */
+    private static final Logger LOGGER = LogManager.getLogger(RTPPlayer.class);
 
     private Object _lock = new Object();
     private Processor _processor;
@@ -82,26 +81,20 @@ public class RTPPlayer implements ControllerListener {
 
     public RTPPlayer(InetAddress localIpAddress, int localPort, InetAddress remoteAddress, int remotePort, AudioFormats af)
       throws InvalidSessionAddressException, IOException {
-
-    	try {
- 	       //SessionAddress localAddress = new SessionAddress(CairoUtil.getLocalHost(), localPort);
-	       SessionAddress localAddress = new SessionAddress(localIpAddress, localPort);
-	       _targetAddress = new SessionAddress(remoteAddress, remotePort);
-	  	   LOGGER.debug("Constructing the RtpPlayer, localAddress: "+localAddress.toString() +" and remote address: "+ _targetAddress.toString());	  	   
-	      _rtpManager = RTPManager.newInstance();
-	      _rtpManager.initialize(localAddress);
-	      _rtpManager.addTarget(_targetAddress);
-	      _af = af;
-    	} catch (InvalidSessionAddressException e) {
-    		
+        try {
+            //SessionAddress localAddress = new SessionAddress(CairoUtil.getLocalHost(), localPort);
+            SessionAddress localAddress = new SessionAddress(localIpAddress, localPort);
+            _targetAddress = new SessionAddress(remoteAddress, remotePort);
+            LOGGER.debug("Constructing the RtpPlayer, localAddress: "+localAddress.toString() +" and remote address: "+ _targetAddress.toString());	  	   
+            _rtpManager = RTPManager.newInstance();
+            _rtpManager.initialize(localAddress);
+            _rtpManager.addTarget(_targetAddress);
+            _af = af;
+        } catch (InvalidSessionAddressException | IOException e) {
             LOGGER.error(e.getMessage(), e);
-    		throw e;
-    	} catch (IOException e) {
-    		
-            LOGGER.warn(e.getMessage(), e);
-    		throw e;
-    	}
-      //registerDatasource();
+            throw e;
+        }
+        //registerDatasource();
     }
 
     public RTPPlayer(RTPManager rtpManager) {
@@ -111,21 +104,20 @@ public class RTPPlayer implements ControllerListener {
     }
     
     private void registerDatasource() {
-    	 Vector  packagePrefix = PackageManager.getProtocolPrefixList();
-    	 String myPackagePrefix = new String("org.speechforge");
-    	 // Add new package prefix to end of the package prefix list. 
-    	 packagePrefix.addElement(myPackagePrefix);
-    	 PackageManager.setProtocolPrefixList(packagePrefix);
-    	 // Save the changes to the package prefix list.
-    	 PackageManager.commitProtocolPrefixList();
-
-    	
+        @SuppressWarnings("unchecked")
+        Vector<String>  packagePrefix = PackageManager.getProtocolPrefixList();
+        String myPackagePrefix = new String("org.speechforge");
+        // Add new package prefix to end of the package prefix list. 
+        packagePrefix.addElement(myPackagePrefix);
+        PackageManager.setProtocolPrefixList(packagePrefix);
+        // Save the changes to the package prefix list.
+        PackageManager.commitProtocolPrefixList();
     }
 
     public void playPrompt(File promptFile) throws InterruptedException, IllegalStateException, IllegalArgumentException {
         if (promptFile != null && promptFile.exists()) {
             try {
-                MediaLocator source = new MediaLocator(promptFile.toURL());
+                MediaLocator source = new MediaLocator(promptFile.toURI().toURL());
                 playSource(source);
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException(e.getMessage(), e);
@@ -136,7 +128,7 @@ public class RTPPlayer implements ControllerListener {
     }
 
     public void playSource(MediaLocator source) throws InterruptedException, IllegalStateException {
-    	LOGGER.info("Source: " +source);
+    	LOGGER.info("playing source: " +source);
         try {
             synchronized(this) {
                 if (_processor != null) {

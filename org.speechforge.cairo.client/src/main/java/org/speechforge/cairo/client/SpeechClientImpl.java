@@ -452,8 +452,8 @@ public class SpeechClientImpl implements MrcpEventListener, SpeechClient, Speech
         for (URL url : prompts) {
             if (str.length() > 0) {
                 str.append(System.lineSeparator());
-                str.append(url.toString());
             }
+            str.append(url.toString());
         }
         request.setContent("text/uri-list", null, str.toString());
         return sendPlayRequest(request);

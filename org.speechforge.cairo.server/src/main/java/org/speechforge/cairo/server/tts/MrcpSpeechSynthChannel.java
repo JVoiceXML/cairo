@@ -28,8 +28,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
 import javax.media.rtp.InvalidSessionAddressException;
@@ -126,20 +129,22 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                 }
             } else if (contentType.equalsIgnoreCase("text/uri-list")) {
                 String text = request.getContent();
-                String[] uris = text.split("\\r");
-                LOGGER.debug(text);
+                List<URL> urls;
+                try {
+                    urls = parseUriList(text);
+                } catch (MalformedURLException e) {
+                    urls = new java.util.ArrayList<URL>();
+                    LOGGER.warn(e.getMessage(), e);
+                    statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
+                }
                 //TODO: Handle multiple URI's in a URI list
                 //should there be just one listener for the last prompt?  for now limiting to one.
-                if (uris.length > 1) {
-                   LOGGER.warn("Multiple URIs not supported yet.  Just playing the first URI.");
-                }
-                //for (int i=0; i<uris.length;i++) {
-                for (int i = 0; i < 1; i++) {
+                for (URL url : urls) {
                     try {
-                        URL url = new URL(uris[i]);
                         URLConnection uc = url.openConnection();
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug(uris[i] + "  " + uc.getContentType());
+                            LOGGER.debug("playing '" + url + "' with type '"
+                                    + uc.getContentType() + "'");
                         }
                         
                         if (uc.getContentType().equals("text/plain")) {
@@ -195,9 +200,7 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
                         } else {
                             LOGGER.warn("Unsupported content type for in the speak request: "+ uc.getContentType());
                         }
-                  
-                        
-                    } catch (IOException e) {
+                    } catch (IOException  e) {
                         LOGGER.warn(e, e);
                         statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                     }
@@ -210,6 +213,25 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         }
 
         return session.createResponse(statusCode, requestState);
+    }
+
+    /**
+     * Parses a list of URIs from the request content into a list. 
+     * @param content the request content
+     * @return determined list
+     * @throws MalformedURLException 
+     *          if the parsed line is not a URL
+     */
+    private List<URL> parseUriList(final String content) throws MalformedURLException {
+        final List<URL> uris = new java.util.ArrayList<URL>();
+        final Scanner scanner = new Scanner(content);
+        while (scanner.hasNextLine()) {
+            final String str = scanner.nextLine();
+            final URL url = new URL(str);
+            uris.add(url);
+        }
+        scanner.close();
+        return uris;
     }
 
     /* (non-Javadoc)
@@ -281,26 +303,41 @@ public class MrcpSpeechSynthChannel extends MrcpGenericChannel implements Speech
         throw new UnsupportedHeaderException();
     }
 
+    /**
+     * Copies the prompt from the provided URL to the local prompt directory.
+     * @param url the URL to play back
+     * @return copied file
+     * @throws IOException
+     *          if an error occurs reading from the source or writing the copied
+     *          file
+     */
     private File copyPrompt(URL url) throws IOException {
-        
         if (_promptDir == null || !_promptDir.isDirectory()) {
             throw new IllegalArgumentException("Directory file specified does not exist or is not a directory: " + _promptDir);
         }
-
-        String promptName = Long.toString(System.currentTimeMillis());
+        String urlString = url.toString();
+        String promptName;
+        if (urlString.contains(".")) {
+            String extension = urlString.substring(urlString.lastIndexOf("."));
+            promptName = Long.toString(System.currentTimeMillis()) 
+                    + extension;
+        } else {
+            promptName = Long.toString(System.currentTimeMillis());
+        }
         File promptFile = new File(_promptDir, promptName);
         
         InputStream is = url.openStream();
         FileOutputStream fos = new FileOutputStream(promptFile);
-    
-        // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = is.read(buf)) > 0) {
-            fos.write(buf, 0, len);
+        try {
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = is.read(buf)) > 0) {
+                fos.write(buf, 0, len);
+            }
+        } finally {
+            is.close();
+            fos.close();
         }
-        is.close();
-        fos.close();
         return promptFile;
     }
     

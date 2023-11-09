@@ -40,13 +40,12 @@ import org.speechforge.cairo.util.CairoUtil;
  * Handle requests for speech synthesis (TTS) to be streamed through an outbound RTP channel.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class RTPSpeechSynthChannel {
-
-    private static Logger _logger = LogManager.getLogger(RTPSpeechSynthChannel.class);
-
-    // TODO: move to config file
-    private static final File FEEDER_PROMPT_FILE = new File("../prompts/feeder.wav");
+    /** Logger instance. */
+    private static final Logger LOGGER = 
+            LogManager.getLogger(RTPSpeechSynthChannel.class);
 
     static final short IDLE = 0;
     static final short SPEAKING = 1;
@@ -62,7 +61,7 @@ public class RTPSpeechSynthChannel {
     private int _remotePort;
     private AudioFormats _af;
 
-	private InetAddress _localAddress;
+    private InetAddress _localAddress;
     
     /**
      * TODOC
@@ -82,12 +81,10 @@ public class RTPSpeechSynthChannel {
     }
 
     private boolean init() throws InvalidSessionAddressException, IOException {
-    	_logger.debug("calling init");
         if (_promptPlayer == null) {
             _promptPlayer = new RTPPlayer(_localAddress, _localPort, _remoteAddress, _remotePort, _af);
             (_sendThread = new SendThread()).start();
-        	_logger.debug("created a player and started it");
-
+            LOGGER.debug("created a player and started it");
             return true;
         }
         return false;
@@ -104,19 +101,9 @@ public class RTPSpeechSynthChannel {
         int state = _state;
         try {
             if (init()) {
-                if (FEEDER_PROMPT_FILE.exists()) {
-                    if (_logger.isDebugEnabled()) {
-                        _logger.debug("Queueing feeder prompt: " + FEEDER_PROMPT_FILE.getAbsolutePath());
-                    }
-                    _promptQueue.put(new PromptPlay(FEEDER_PROMPT_FILE, null));
-                } else if (_logger.isDebugEnabled()) {
-                    _logger.debug("Feeder prompt not found: " + FEEDER_PROMPT_FILE.getAbsolutePath());
-                }
+                _promptQueue.put(new PromptPlay(promptFile, listener));
+                _state = SPEAKING;
             }
-        	_logger.debug("queued a prompt");
-
-            _promptQueue.put(new PromptPlay(promptFile, listener));
-            _state = SPEAKING;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -161,26 +148,26 @@ public class RTPSpeechSynthChannel {
                     Thread.interrupted();
 
                     // get next prompt to play
-                    _logger.debug("taking next prompt from prompt queue...");
+                    LOGGER.debug("taking next prompt from prompt queue...");
                     promptPlay = _promptQueue.take();
-                    _logger.debug("playing next prompt...");
+                    LOGGER.debug("playing next prompt...");
                     _promptPlayer.playPrompt(promptPlay._promptFile);
 
                     // drain all prompts in queue if current prompt playback is interrupted (e.g. by STOP request)
                     drainQueue = Thread.interrupted();
 
                 } catch (InterruptedException e) {
-                    _logger.debug(e, e);
+                    LOGGER.debug(e, e);
                     // TODO: cancel current prompt playback
                     drainQueue = true;
 
                 } catch (Exception e) {
-                    _logger.debug(e, e);
+                    LOGGER.debug(e, e);
                     cause = e;
                 }
 
                 if (drainQueue) {
-                    _logger.debug("draining prompt queue...");
+                    LOGGER.debug("draining prompt queue...");
                     while (!_promptQueue.isEmpty()) {
                         try {
                             _promptQueue.take();
@@ -188,27 +175,27 @@ public class RTPSpeechSynthChannel {
                             // (e.g. save and put back in queue if not in cancel list)
                         } catch (InterruptedException e1) {
                             // should not happen since this is the only thread consuming from queue
-                            _logger.warn(e1, e1);
+                            LOGGER.warn(e1, e1);
                         }
                     }
                 } else if (promptPlay != null) {
                     if (promptPlay._listener != null) {
-                        _logger.debug("notifying prompt play listener...");
+                        LOGGER.debug("notifying prompt play listener...");
                         if (cause == null) {
                             try {
                                 // give rtp stream a chance to catch up...
                                 Thread.sleep(250);
                             } catch (InterruptedException e) {
-                                _logger.debug("InterruptedException encountered!", e);
+                                LOGGER.debug("InterruptedException encountered!", e);
                             }
                             promptPlay._listener.playCompleted();
                         } else {
                             promptPlay._listener.playFailed(cause);
                         }
-                        _logger.debug("prompt play listener notified.");
+                        LOGGER.debug("prompt play listener notified.");
                     }
                 } else {
-                    _logger.warn("promptPlay is null!", cause);
+                    LOGGER.warn("promptPlay is null!", cause);
                 }
 
                 _state = _promptQueue.isEmpty() ? IDLE : SPEAKING;
