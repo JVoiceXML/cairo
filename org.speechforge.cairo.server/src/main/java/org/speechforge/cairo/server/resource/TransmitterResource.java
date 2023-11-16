@@ -226,12 +226,12 @@ public class TransmitterResource extends ResourceImpl {
             //issue is that each resource needs a reference to a different pool so a common cleanup method will be hard
             //maybe just pass in an interface to "this" to the cleanup method that can get access to pools.
             if (channel instanceof TransmitterResources) {
-            	TransmitterResources r = (TransmitterResources) channel;
+                TransmitterResources r = (TransmitterResources) channel;
                 r.getRtpssc().shutdown();
                 _portPairPool.returnPort(r.getPort());
 
             } else {
-            	LOGGER.warn("Unsupported channel resource of type: "+channel.toString());
+                LOGGER.warn("Unsupported channel resource of type: " + channel.toString());
             }
    
         }

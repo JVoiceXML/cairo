@@ -53,7 +53,8 @@ public class RTPSpeechSynthChannel {
 
     volatile short _state = IDLE;
 
-    BlockingQueue<PromptPlay> _promptQueue = new LinkedBlockingQueue<PromptPlay>();
+    /** List of prompts to be played back. */
+    BlockingQueue<PromptPlay> promptQueue = new LinkedBlockingQueue<PromptPlay>();
     private SendThread _sendThread;
     RTPPlayer _promptPlayer;
     private int _localPort;
@@ -84,7 +85,9 @@ public class RTPSpeechSynthChannel {
         if (_promptPlayer == null) {
             _promptPlayer = new RTPPlayer(_localAddress, _localPort, _remoteAddress, _remotePort, _af);
             (_sendThread = new SendThread()).start();
-            LOGGER.debug("created a player and started it");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("created a player and started it");
+            }
             return true;
         }
         return false;
@@ -100,10 +103,10 @@ public class RTPSpeechSynthChannel {
 
         int state = _state;
         try {
-            if (init()) {
-                _promptQueue.put(new PromptPlay(promptFile, listener));
-                _state = SPEAKING;
-            }
+            init();
+            PromptPlay play = new PromptPlay(promptFile, listener); 
+            promptQueue.put(play);
+            _state = SPEAKING;
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -111,99 +114,81 @@ public class RTPSpeechSynthChannel {
     }
     
     public synchronized void stopPlayback() {
-        _sendThread.interrupt();
+        _sendThread.shutdown();
         //TODO: wait for send thread to complete?  (prevent double interrupt while draining queue)
     }
 
     private class SendThread extends Thread {
         
         volatile boolean _run = true;
-        
-//        @Override
-//        public synchronized void interrupt() {
-//            super.interrupt();
-//        }
-//        
-//        @Override
-//        public synchronized boolean isInterrupted() {
-//            return super.isInterrupted();
-//        }
 
-        /* (non-Javadoc)
-         * @see java.lang.Runnable#run()
+        /**
+         * {@inheritDoc}
          */
         @Override
         public void run() {
-            /*if (Thread.currentThread() != this) {
-                throw new RuntimeException();
-            }*/
             while (_run) {
                 PromptPlay promptPlay = null;
                 boolean drainQueue = false;
                 Exception cause = null;
 
                 try {
-
-                    // first clear interrupted status of current thread
-                    Thread.interrupted();
-
                     // get next prompt to play
-                    LOGGER.debug("taking next prompt from prompt queue...");
-                    promptPlay = _promptQueue.take();
-                    LOGGER.debug("playing next prompt...");
-                    _promptPlayer.playPrompt(promptPlay._promptFile);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("taking next prompt from prompt queue...");
+                    }
+                    promptPlay = promptQueue.take();
+                    if (promptPlay != null) {
+                        _promptPlayer.playPrompt(promptPlay._promptFile);
+                    }
 
                     // drain all prompts in queue if current prompt playback is interrupted (e.g. by STOP request)
-                    drainQueue = Thread.interrupted();
-
-                } catch (InterruptedException e) {
-                    LOGGER.debug(e, e);
+                    drainQueue = !_run;
+                } catch (Exception e) {
+                    LOGGER.warn(e, e);
+                    cause = e;
                     // TODO: cancel current prompt playback
                     drainQueue = true;
-
-                } catch (Exception e) {
-                    LOGGER.debug(e, e);
-                    cause = e;
                 }
 
                 if (drainQueue) {
-                    LOGGER.debug("draining prompt queue...");
-                    while (!_promptQueue.isEmpty()) {
+                    LOGGER.info("draining prompt queue...");
+                    while (!promptQueue.isEmpty()) {
                         try {
-                            _promptQueue.take();
+                            promptQueue.take();
                             //TODO: may need to remove only specific prompts
                             // (e.g. save and put back in queue if not in cancel list)
-                        } catch (InterruptedException e1) {
+                        } catch (InterruptedException e) {
                             // should not happen since this is the only thread consuming from queue
-                            LOGGER.warn(e1, e1);
+                            LOGGER.warn(e, e);
                         }
                     }
                 } else if (promptPlay != null) {
                     if (promptPlay._listener != null) {
-                        LOGGER.debug("notifying prompt play listener...");
                         if (cause == null) {
                             try {
                                 // give rtp stream a chance to catch up...
                                 Thread.sleep(250);
                             } catch (InterruptedException e) {
-                                LOGGER.debug("InterruptedException encountered!", e);
+                                LOGGER.warn("InterruptedException encountered!", e);
                             }
                             promptPlay._listener.playCompleted();
                         } else {
                             promptPlay._listener.playFailed(cause);
                         }
-                        LOGGER.debug("prompt play listener notified.");
                     }
                 } else {
                     LOGGER.warn("promptPlay is null!", cause);
                 }
 
-                _state = _promptQueue.isEmpty() ? IDLE : SPEAKING;
+                _state = promptQueue.isEmpty() ? IDLE : SPEAKING;
             }
         }
         
         public void shutdown() {
             _run = false;
+            // Add an empty play to trigger the playback
+            promptQueue.offer(null);
         }
     }
 

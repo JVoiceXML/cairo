@@ -128,7 +128,7 @@ public class RTPPlayer implements ControllerListener {
     }
 
     public void playSource(MediaLocator source) throws InterruptedException, IllegalStateException {
-    	LOGGER.info("playing source: " +source);
+    	LOGGER.info("playing source: " + source);
         try {
             synchronized(this) {
                 if (_processor != null) {
