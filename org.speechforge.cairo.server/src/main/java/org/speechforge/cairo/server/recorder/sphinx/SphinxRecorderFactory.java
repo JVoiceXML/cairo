@@ -40,46 +40,56 @@ import org.apache.logging.log4j.LogManager;
  * Serves to create a pool of {@link org.speechforge.cairo.server.recog.sphinx.SphinxRecEngine} instances.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class SphinxRecorderFactory extends AbstractPoolableObjectFactory {
-
-    private static Logger _logger = LogManager.getLogger(SphinxRecorderFactory.class);
-
-    URL _sphinxConfigURL = null;
-    ConfigurationManager _cm;
+    /** Logger instance. */
+    private static final Logger LOGGER =
+            LogManager.getLogger(SphinxRecorderFactory.class);
+    /** Used Sphinx configuration file. */
+    URL sphinxConfigURL;
+    /** The Sphinx configuration manager to load the configuration. */
+    ConfigurationManager cm;
+    /** Number of the created recorder. */
     private int id = 1;
 
-    public SphinxRecorderFactory(URL sphinxConfigURL) {
-        _sphinxConfigURL = sphinxConfigURL;
-        _cm = new ConfigurationManager(_sphinxConfigURL);
-    }
-
-    /* (non-Javadoc)
-     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+    /**
+     * Constructs a new object.
+     * @param url URL of the Sphinx configuration file
      */
-    @Override
-    public PoolableObject makeObject() throws Exception {
-
-        return new SphinxRecorder(_cm, id++);
+    public SphinxRecorderFactory(URL url) {
+        sphinxConfigURL = url;
+        cm = new ConfigurationManager(sphinxConfigURL);
     }
 
     /**
-     * TODOC
-     * @param sphinxConfigURL URL of the sphinx configuration
+     * {@inheritDoc}
+     */
+    @Override
+    public PoolableObject makeObject() throws Exception {
+        return new SphinxRecorder(cm, id++);
+    }
+
+    /**
+     * Creates a new object pool with the provided Sphinx configuration file
+     * with the provided number of instances.
+     * @param url URL of the sphinx configuration
      * @param instances number of instances to create
      * @return created pool
-     * @throws InstantiationException if initializing the object pool triggers an exception.
+     * @throws InstantiationException if initializing the object pool triggers
+     *           an exception.
      */
-    public static ObjectPool createObjectPool(URL sphinxConfigURL, int instances)
+    @SuppressWarnings("rawtypes")
+    public static ObjectPool createObjectPool(URL url, int instances)
       throws InstantiationException {
-        
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("creating new rec engine pool... instances: " + instances);
-        }
+        LOGGER.info("creating new rec engine pool with " + instances
+                + " instances...");
 
-        PoolableObjectFactory factory = new SphinxRecorderFactory(sphinxConfigURL);
-        GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);
+        PoolableObjectFactory factory = new SphinxRecorderFactory(url);
+        GenericObjectPool.Config config =
+                ObjectPoolUtil.getGenericObjectPoolConfig(instances);
 
+        @SuppressWarnings("unchecked")
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         initPool(objectPool);
         return objectPool;
