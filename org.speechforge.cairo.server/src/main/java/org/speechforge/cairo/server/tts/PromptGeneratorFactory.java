@@ -36,63 +36,70 @@ import org.apache.logging.log4j.LogManager;
  * Serves to create a pool of {@link org.speechforge.cairo.server.tts.FreeTTSPromptGenerator} instances.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class PromptGeneratorFactory extends AbstractPoolableObjectFactory {
-
-    private static final Logger LOGGER = LogManager.getLogger(PromptGeneratorFactory.class);
-
-    private String _voiceName;
-    private String _speechSynthesizer;
+    /** Logger instance. */
+    private static final Logger LOGGER = 
+            LogManager.getLogger(PromptGeneratorFactory.class);
+    /** VOice name that is used by teh synthesizer. */
+    private String voiceName;
+    /** Name of the synthesizer to create from this object pool. */
+    private String speechSynthesizer;
 
     /**
      * Constructs a new object.
-     * @param speechSynthesizer the speech synthesizer
-     * @param voiceName name of the voice to use to play prompts
+     * @param synthesizer name of the speech synthesizer. Must be one of 
+     *          {@code FreeTTS}, {@code Festival} or {@code Mary}.
+     * @param voice name of the voice to use to play prompts
      */
-    public PromptGeneratorFactory(String speechSynthesizer, String voiceName) {
-        _speechSynthesizer = speechSynthesizer;
-        _voiceName = voiceName;
+    public PromptGeneratorFactory(String synthesizer, String voice) {
+        speechSynthesizer = synthesizer;
+        voiceName = voice;
     }
 
-    /* (non-Javadoc)
-     * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
+    /**
+     * {@inheritDoc}
      */
     @Override
     public PoolableObject makeObject() throws Exception {
-        if (_speechSynthesizer == null) {
-            return new FreeTTSPromptGenerator(_voiceName);
+        if (speechSynthesizer == null) {
+            return new FreeTTSPromptGenerator(voiceName);
         }
-        if(_speechSynthesizer.equals("Festival")) {
-            return new FestivalPromptGenerator(_voiceName);
-        } else if (_speechSynthesizer.equals("Mary")) {
-            return new MaryPromptGenerator(_voiceName);
+        if(speechSynthesizer.equals("Festival")) {
+            return new FestivalPromptGenerator(voiceName);
+        } else if (speechSynthesizer.equals("Mary")) {
+            return new MaryPromptGenerator(voiceName);
         } else {
-            return new FreeTTSPromptGenerator(_voiceName);
+            return new FreeTTSPromptGenerator(voiceName);
         }
     }
 
     /**
-     * TODOC
+     * Creates a new object pool for the provided synthesizer and voice with
+     * the provided number of instances. 
      * @param speechSynthesizer the synthesizer to use
      * @param voiceName name of the voice to use to play prompts
      * @param instances number of instances to create
      * @return created pool
      * @throws InstantiationException error creating the pool
      */
-    public static ObjectPool createObjectPool(String speechSynthesizer, String voiceName, int instances)
+    @SuppressWarnings("rawtypes")
+    public static ObjectPool createObjectPool(String speechSynthesizer,
+            String voiceName, int instances)
       throws InstantiationException {
+        LOGGER.info("creating new prompt generator pool with " + instances
+                + " instance(s)...");
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("creating new prompt generator pool... instances: " + instances);
-        }
-
-        PoolableObjectFactory factory = new PromptGeneratorFactory(speechSynthesizer, voiceName);
+        PoolableObjectFactory factory = 
+                new PromptGeneratorFactory(speechSynthesizer, voiceName);
 
         // TODO: adapt config to prompt generator constraints
-        GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(instances);
+        GenericObjectPool.Config config = 
+                ObjectPoolUtil.getGenericObjectPoolConfig(instances);
+        @SuppressWarnings("unchecked")
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         initPool(objectPool);
         return objectPool;
     }
-
 }

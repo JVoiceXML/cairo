@@ -48,26 +48,25 @@ import edu.cmu.sphinx.recognizer.Recognizer;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 public class SphinxRecorder extends AbstractPoolableObject implements SpeechEventListener {
+    /** Logger instance. */
     private static Logger LOGGER = LogManager.getLogger(SphinxRecorder.class);
     
-	private FrontEnd _fe;
-	private int _id;
+    private FrontEnd _fe;
+    private int _id;
     private RawAudioProcessor _rawAudioProcessor;
     private RawAudioTransferHandler _rawAudioTransferHandler;
     private RecorderListener _recorderListener;
     private SpeechDataStreamer streamer ;
     private String _uri;
     
-	public SphinxRecorder(ConfigurationManager cm, int id) throws InstantiationException {
+    public SphinxRecorder(ConfigurationManager cm, int id)
+            throws InstantiationException {
+        LOGGER.info("Creating Recorder #" + id);
+        _id = id;
+        _fe = (FrontEnd) cm.lookup("frontEnd" + id);
+        _fe.initialize();
 
-    	LOGGER.info("Creating Recorder # "+id);
-    	_id = id;
-        _fe = (FrontEnd) cm.lookup("frontEnd"+id);
-		_fe.initialize();
-        
-
-
-        Object primaryInput = cm.lookup("primaryInput"+id);
+        Object primaryInput = cm.lookup("primaryInput" + id);
         if (primaryInput instanceof RawAudioProcessor) {
             _rawAudioProcessor = (RawAudioProcessor) primaryInput;
         } else {
