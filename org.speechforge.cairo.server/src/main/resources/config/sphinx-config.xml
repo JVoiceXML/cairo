@@ -40,6 +40,13 @@
         <property name="decoder" value="decoder1"/>
     </component>
 
+    <!-- ******************************************************** -->
+    <!-- word recognizer configuration  #2                       -->
+    <!-- ******************************************************** -->
+
+    <component name="recognizer2" type="edu.cmu.sphinx.recognizer.Recognizer">
+        <property name="decoder" value="decoder2"/>
+    </component>
 
     <!-- ******************************************************** -->
     <!-- The Decoder   configuration  #1                          -->
@@ -73,6 +80,37 @@
         <property name="frontend" value="frontend1"/>
     </component>
 
+    <!-- ******************************************************** -->
+    <!-- The Decoder   configuration  #2                          -->
+    <!-- ******************************************************** -->
+
+    <component name="decoder2" type="edu.cmu.sphinx.decoder.Decoder">
+        <property name="searchManager" value="searchManager2"/>
+    </component>
+
+    <component name="searchManager2"
+               type="edu.cmu.sphinx.decoder.search.SimpleBreadthFirstSearchManager">
+        <property name="logMath" value="logMath"/>
+        <property name="linguist" value="linguist"/>
+        <property name="pruner" value="pruner2"/>
+        <property name="scorer" value="scorer2"/>
+        <property name="activeListFactory" value="activeListFactory2"/>
+    </component>
+
+    <component name="activeListFactory2"
+               type="edu.cmu.sphinx.decoder.search.SortingActiveListFactory">
+        <property name="logMath" value="logMath"/>
+        <property name="absoluteBeamWidth" value="${absoluteBeamWidth}"/>
+        <property name="relativeBeamWidth" value="${relativeBeamWidth}"/>
+    </component>
+
+    <component name="pruner2"
+               type="edu.cmu.sphinx.decoder.pruner.SimplePruner"/>
+
+    <component name="scorer2"
+               type="edu.cmu.sphinx.decoder.scorer.ThreadedAcousticScorer">
+        <property name="frontend" value="frontend1"/>
+    </component>
 
     <!-- ******************************************************** -->
     <!-- The linguist  configuration                              -->
@@ -211,6 +249,77 @@
 		   type="edu.cmu.sphinx.frontend.feature.LDA">	
 		<property name="loader" value="loader"/>
 	</component>
+
+    <!-- ******************************************************** -->
+    <!-- The frontend configuration  #2                           -->
+    <!-- ******************************************************** -->
+
+    <component name="frontend2" type="edu.cmu.sphinx.frontend.FrontEnd">
+        <propertylist name="pipeline">
+            <item>primaryInput2</item>
+            <item>speechClassifier2</item>
+            <item>speechMarker2</item>
+            <item>speechDataMonitor2</item>
+            <item>speechDataRecorder2</item>
+        </propertylist>
+    </component>
+
+    <component name="primaryInput2"
+               type="org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor"/>
+
+    <component name="speechClassifier2"
+               type="edu.cmu.sphinx.frontend.endpoint.SpeechClassifier">
+        <property name="useSnrThreshold" value="false"/>
+        <property name="threshold" value="${speechClassifierThreshold}"/>
+        <property name="debug" value="false"/>
+    </component>
+
+    <component name="speechMarker2"
+               type="edu.cmu.sphinx.frontend.endpoint.SpeechMarker" >
+        <property name="speechTrailer" value="500"/>
+        <property name="endSilence" value="1500"/>
+        <property name="startSpeech" value="200"/>
+        <property name="speechLeader" value="500"/>
+    </component>
+
+    <component name="speechDataMonitor2"
+               type="org.speechforge.cairo.rtp.server.sphinx.SpeechDataMonitor"/>
+
+    <component name="speechDataRecorder2"
+               type="org.speechforge.cairo.rtp.server.sphinx.SpeechDataRecorder"/>
+
+    <component name="preemphasizer2"
+               type="edu.cmu.sphinx.frontend.filter.Preemphasizer"/>
+
+    <component name="windower2"
+               type="edu.cmu.sphinx.frontend.window.RaisedCosineWindower"/>
+
+    <component name="fft2"
+               type="edu.cmu.sphinx.frontend.transform.DiscreteFourierTransform"/>
+
+    <component name="melFilterBank2"
+               type="edu.cmu.sphinx.frontend.frequencywarp.MelFrequencyFilterBank">
+               <property name="minimumFrequency" value="200"/>
+               <property name="maximumFrequency" value="3500"/>
+               <property name="numberFilters" value="31"/>
+    </component>
+
+    <component name="dct2"
+               type="edu.cmu.sphinx.frontend.transform.DiscreteCosineTransform"/>
+
+    <component name="cmn2"
+               type="edu.cmu.sphinx.frontend.feature.LiveCMN"/>
+
+    <component name="featureExtraction2"
+               type="edu.cmu.sphinx.frontend.feature.DeltasFeatureExtractor"/>
+                              
+    <component name="dither2"
+               type="edu.cmu.sphinx.frontend.filter.Dither"/>
+
+    <component name="LDA2" 
+           type="edu.cmu.sphinx.frontend.feature.LDA">  
+        <property name="loader" value="loader"/>
+    </component>
 
     <!-- ******************************************************* -->
     <!--  monitors                                               -->
