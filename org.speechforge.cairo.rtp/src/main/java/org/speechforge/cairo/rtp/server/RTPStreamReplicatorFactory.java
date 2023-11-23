@@ -65,7 +65,8 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
     public Object makeObject() throws Exception {
-        return new RTPStreamReplicator(_localInetAdress, _portPairPool.borrowPort());
+        return new RTPStreamReplicator(_localInetAdress, 
+                _portPairPool.borrowPort());
     }
 
     /* (non-Javadoc)

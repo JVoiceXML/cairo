@@ -193,7 +193,6 @@ public class ResourceServerImpl implements SessionListener {
         if (transmitter) {
             request = processTransmitterInvite(request, session);
         }
-
         if (receiver) {
             request = processReceiverInvite(request, session);
         } // TODO: catch exception and release transmitter resources
@@ -231,7 +230,7 @@ public class ResourceServerImpl implements SessionListener {
         final String id = session.getId();
         LOGGER.info("inviting receiver for " + id);
         request = resource.invite(request, id);
-        session.getResources().add(resource);
+        session.addResource(resource);
         return request;
     }
 
@@ -256,19 +255,29 @@ public class ResourceServerImpl implements SessionListener {
         final String id = session.getId();
         LOGGER.info("inviting transmitter for " + id);
         request = resource.invite(request, id);
-        session.getResources().add(resource);
+        session.addResource(resource);
         return request;
     }
 
-    public void processByeRequest(SipSession session) throws RemoteException, InterruptedException {
-        for (SipResource r : session.getResources()) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void processByeRequest(SipSession session) 
+            throws RemoteException, InterruptedException {
+        for (SipResource resource : session.getResources()) {
             String sessionId = session.getId();
-            r.bye(sessionId);
+            resource.bye(sessionId);
         }
     }
 
-    public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException,
-            ResourceUnavailableException, RemoteException {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SdpMessage processInviteRequest(SdpMessage request, 
+            SipSession session) throws SdpException,
+                ResourceUnavailableException, RemoteException {
         final SdpMessage m = invite(request, session);
         try {
             _ua.sendResponse(session, m);
@@ -279,8 +288,11 @@ public class ResourceServerImpl implements SessionListener {
         return m;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
-        // TODO Auto-generated method stub
         return null;
     }
     

@@ -41,10 +41,11 @@ import org.mrcp4j.client.MrcpChannel;
  * Represents a SIP session.
  * 
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class SipSession {
-
-    private static Logger _logger = LogManager.getLogger(SipSession.class);
+    /** Logger instance. */
+    private static final Logger LOGGER = LogManager.getLogger(SipSession.class);
 
     
     // Note.  Considered adding additional states (active and inactive).  decided against it
@@ -138,12 +139,20 @@ public class SipSession {
     }
 
     /**
+     * Retrieves all known resources.
      * @return the resources
      */
     public List<SipResource> getResources() {
         return resources;
     }
 
+    /**
+     * Adds the provided resource to the list of known resources.
+     * @param resource the resource to add
+     */
+    public void addResource(SipResource resource) {
+        resources.add(resource);
+    }
     /**
      * @param resources the resources to set
      */
@@ -178,12 +187,12 @@ public class SipSession {
     	agent.sendreInvite(this, rtpHost, rtpPort);  
     	
     	while (getState() == SipSession.SessionState.waitingForInviteResponse) {
-    		_logger.info("in loop not done...");
+    		LOGGER.info("in loop not done...");
     		synchronized (this) {        
 	            try {
 	            	this.wait();
 	            } catch (InterruptedException e) {
-	                _logger.debug("Interupt Exception while blocked in sip reInvite method.");
+	                LOGGER.debug("Interupt Exception while blocked in sip reInvite method.");
 	            }
     		}
         }    	
@@ -208,7 +217,7 @@ public class SipSession {
             pendingSessions.put(session.getCtx().toString(), session);
         } else {
             // TODO: invalid session
-            _logger.info("Can not add to pending queue.  Invalid session.  No client side tx.");
+            LOGGER.info("Can not add to pending queue.  Invalid session.  No client side tx.");
         }
     }
 
@@ -221,11 +230,11 @@ public class SipSession {
                 sessions.put(session.getSipDialog().getDialogId(), s);
             } else {
                 // TODO: invalid session
-                _logger.info("Can not move from pending queue to established queue.  Invalid session.  No client side tx.");
+                LOGGER.info("Can not move from pending queue to established queue.  Invalid session.  No client side tx.");
             }
         } else {
             // TODO: invalid session
-            _logger.info("Can not move from pending queue to established queue.  Invalid session.  No dialog.");
+            LOGGER.info("Can not move from pending queue to established queue.  Invalid session.  No dialog.");
         }
     }
 
@@ -234,7 +243,7 @@ public class SipSession {
             sessions.put(session.getSipDialog().getDialogId(), session);
         } else {
             // TODO: invalid session
-            _logger.info("Can not add to session queue.  Invalid session.  No dialog.");
+            LOGGER.info("Can not add to session queue.  Invalid session.  No dialog.");
         }
     }
 
@@ -243,7 +252,7 @@ public class SipSession {
             sessions.remove(session.getSipDialog().getDialogId());
         } else {
             // TODO: invalid session
-            _logger.info("Can not remove from session queue.  Invalid session.  No dialog.");
+            LOGGER.info("Can not remove from session queue.  Invalid session.  No dialog.");
         }
     }
 
@@ -253,7 +262,7 @@ public class SipSession {
             pendingSessions.remove(key);
         } else {
             // TODO: invalid session
-            _logger.info("Can not remove from pending queue.  Invalid session.  No client side tx.");
+            LOGGER.info("Can not remove from pending queue.  Invalid session.  No client side tx.");
         }
     }
 

@@ -64,10 +64,11 @@ import org.apache.logging.log4j.LogManager;
  * events via JAIN SIP.
  * 
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class SipListenerImpl implements SipListener {
-
-    static Logger LOGGER = LogManager.getLogger(SipListenerImpl.class);
+    /** Logger instance. */
+    private static final Logger LOGGER = LogManager.getLogger(SipListenerImpl.class);
 
     private SipAgent sipClient;
 
@@ -576,8 +577,9 @@ public class SipListenerImpl implements SipListener {
             SipAgent.sendResponse(stx, response);
 
             // release resources
+            String sessionId = session.getId();
             for (SipResource r: session.getResources() ){
-                r.bye(session.getId());
+                r.bye(sessionId);
             }
 
             // cleanup the session
