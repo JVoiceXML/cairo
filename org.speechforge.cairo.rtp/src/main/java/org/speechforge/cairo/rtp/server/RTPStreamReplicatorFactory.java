@@ -40,17 +40,16 @@ import org.apache.logging.log4j.LogManager;
  * Serves to create a pool of {@link org.speechforge.cairo.rtp.server.RTPStreamReplicator} instances.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
+@SuppressWarnings("rawtypes")
 public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
-
-    private static Logger _logger = LogManager.getLogger(RTPStreamReplicatorFactory.class);
-
     private PortPairPool _portPairPool;
 
-	private InetAddress _localInetAdress;
+    private InetAddress _localInetAdress;
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @param basePort 
      * @param portPairPool 
      */
@@ -66,7 +65,7 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      * @see org.apache.commons.pool.PoolableObjectFactory#makeObject()
      */
     public Object makeObject() throws Exception {
-        return new RTPStreamReplicator(_localInetAdress,_portPairPool.borrowPort());
+        return new RTPStreamReplicator(_localInetAdress, _portPairPool.borrowPort());
     }
 
     /* (non-Javadoc)
@@ -81,7 +80,7 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
     /* (non-Javadoc)
      * @see org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
      */
-    public boolean validateObject(Object arg0) {
+    public boolean validateObject(Object obj) {
         //RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
         return true;
     }
@@ -89,28 +88,34 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
     /* (non-Javadoc)
      * @see org.apache.commons.pool.PoolableObjectFactory#activateObject(java.lang.Object)
      */
-    public void activateObject(Object arg0) throws Exception {
+    public void activateObject(Object obj) throws Exception {
         //RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
     }
 
     /* (non-Javadoc)
      * @see org.apache.commons.pool.PoolableObjectFactory#passivateObject(java.lang.Object)
      */
-    public void passivateObject(Object arg0) throws Exception {
-        //RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
+    public void passivateObject(Object obj) throws Exception {
+        RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
+        replicator.shutdown();
     }
 
     /**
-     * TODOC
+     * Creates a new object pool for {@link RTPStreamReplicator}s.
      * @param rtpBasePort RTP base port
      * @param maxConnects max number of connects
      * @param localAddress the local address
      * @return created pool
      */
-    public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects, InetAddress localAddress) {
+    @SuppressWarnings("rawtypes")
+    public static ObjectPool createObjectPool(int rtpBasePort, int maxConnects,
+            InetAddress localAddress) {
         PortPairPool ppp = new PortPairPool(rtpBasePort, maxConnects);
-        PoolableObjectFactory factory = new RTPStreamReplicatorFactory(rtpBasePort, ppp, localAddress);
-        GenericObjectPool.Config config = ObjectPoolUtil.getGenericObjectPoolConfig(maxConnects);
+        PoolableObjectFactory factory = 
+                new RTPStreamReplicatorFactory(rtpBasePort, ppp, localAddress);
+        GenericObjectPool.Config config = 
+                ObjectPoolUtil.getGenericObjectPoolConfig(maxConnects);
+        @SuppressWarnings("unchecked")
         ObjectPool objectPool = new GenericObjectPool(factory, config);
         return objectPool;
     }

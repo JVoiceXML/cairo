@@ -95,8 +95,9 @@ public class RTPStreamReplicator extends RTPConsumer {
             _processor.close();
             _processor = null;
         }
-        if (_replicator != null) 
+        if (_replicator != null) {
             _replicator = null;
+        }
         //_replicator.cleanup();
         super.shutdown();
     }

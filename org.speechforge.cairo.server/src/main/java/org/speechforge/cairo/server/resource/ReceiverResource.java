@@ -74,17 +74,22 @@ import org.speechforge.cairo.util.CairoUtil;
  * that require processing of audio data streamed to the resource.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 @SuppressWarnings("serial")
 public class ReceiverResource extends ResourceImpl {
-
-    private static final Logger LOGGER = LogManager.getLogger(ReceiverResource.class);
+    /** Logger instance. */
+    private static final Logger LOGGER =
+            LogManager.getLogger(ReceiverResource.class);
 
     public static final Resource.Type RESOURCE_TYPE = Resource.Type.RECEIVER;
 
     private MrcpServerSocket _mrcpServer;
+    @SuppressWarnings("rawtypes")
     private ObjectPool _replicatorPool;
+    @SuppressWarnings("rawtypes")
     private ObjectPool _recEnginePool;
+    @SuppressWarnings("rawtypes")
     private ObjectPool _recorderEnginePool;
         
 
@@ -104,20 +109,25 @@ public class ReceiverResource extends ResourceImpl {
         //	localIpAddress = CairoUtil.getLocalHost();
         //}
         _replicatorPool = RTPStreamReplicatorFactory.createObjectPool(
-                config.getRtpBasePort(), config.getMaxConnects(), localIpAddress);
+                config.getRtpBasePort(), config.getMaxConnects(),
+                localIpAddress);
         _recEnginePool = SphinxRecEngineFactory.createObjectPool(
                 config.getSphinxConfigURL(), config.getEngines());
         _recorderEnginePool = SphinxRecorderFactory.createObjectPool(
-                config.getSphinxRecorderConfigURL(), config.getRecorderEngines());
+                config.getSphinxRecorderConfigURL(), 
+                config.getRecorderEngines());
     }
 
     /* (non-Javadoc)
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
+    @SuppressWarnings("unchecked")
+    @Override
     public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException {
-        LOGGER.debug("receiver invite for");
-        LOGGER.debug(request.getSessionDescription());
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("receiver invite for " 
+                    + request.getSessionDescription());
+        }
         // Create a resource session object
         // TODO: Check if there is already a session (ie. This is a re-invite)        
         ResourceSession session = ResourceSession.createResourceSession(sessionId);
@@ -130,9 +140,8 @@ public class ReceiverResource extends ResourceImpl {
             List<MediaDescription> channels = request.getMrcpReceiverChannels();
             List<MediaDescription> c2 = request.getMrcpRecorderChannels();
             channels.addAll(c2);
-            Vector formatsInRequest = null;
+            Vector<String> formatsInRequest = null;
             if (channels.size() > 0) {
-
                 for(MediaDescription md: channels) {
                     String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
                     String rt =  md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
@@ -145,7 +154,6 @@ public class ReceiverResource extends ResourceImpl {
                     } else if (rt.equalsIgnoreCase("recorder")) {
                         resourceType = MrcpResourceType.RECORDER;
                     }
-
 
                     List<MediaDescription> rtpmd = null;
                     RTPStreamReplicator replicator = null;
@@ -201,8 +209,9 @@ public class ReceiverResource extends ResourceImpl {
 
                          //if null, borrow a replicator.  else we will use the same one fo the other channel in this request
                          //TODO: Is this correct in all cases?  Could there be seperate rtp channels for recording and recognizing? 
-                         if (replicator == null )
+                         if (replicator == null ) {
                              replicator =  (RTPStreamReplicator) _replicatorPool.borrowObject();
+                         }
                          if (rtpmd.size() > 0) {
                              //TODO: What if there is more than 1 media channels?
 
@@ -239,7 +248,6 @@ public class ReceiverResource extends ResourceImpl {
                     default:
                         throw new ResourceUnavailableException("Unsupported resource type: " + resourceType);
                     }
-
                 }
             }
         } catch (ResourceUnavailableException e) {
@@ -254,40 +262,48 @@ public class ReceiverResource extends ResourceImpl {
         return request;
     }
 
-    public void bye(String sessionId) throws  RemoteException {      
+    /**
+     * {@inheritDoc}
+     * Clean up receiver resources.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void bye(String sessionId) throws  RemoteException {
         ResourceSession session = ResourceSession.getSession(sessionId);
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         for(ChannelResources channel: sessionChannels.values()) {
-        	//always close the mrcp channel (common to resources)
-            _mrcpServer.closeChannel(channel.getChannelId());
-            
+            //always close the mrcp channel (common to resources)
+            String channelId = channel.getChannelId();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("cleaning channel '" + channelId);
+            }
+            _mrcpServer.closeChannel(channelId);
             //then do resource specific cleanup
             //TODO: remove instanceof if statements (and casting) and add specific code to resources class (abstract method)
             //issue is that each resource needs a reference to a different pool so a common cleanup method will be hard
             //maybe just pass in an interface to "this" to the cleanup method that can get access to pools.
             if (channel instanceof RecognizerResources) {
-            	RecognizerResources r = (RecognizerResources) channel;
-	            //r.getRecog().closeProcessor();
-            	r.getReplicator().shutdown();
-	            try {
-	                _replicatorPool.returnObject(r.getReplicator());
-	            } catch (Exception e) {
-	                LOGGER.debug(e, e);
-	                throw new RemoteException(e.getMessage(), e);
-	            }
+                RecognizerResources r = (RecognizerResources) channel;
+                RTPStreamReplicator replicator = r.getReplicator();
+                try {
+                    _replicatorPool.returnObject(replicator);
+                } catch (Exception e) {
+                    LOGGER.warn(e, e);
+                    throw new RemoteException(e.getMessage(), e);
+                }
             } else if (channel instanceof RecorderResources) {
-            	RecorderResources r = (RecorderResources) channel;
-	            //r.getRecorder().closeProcessor();
-	            try {
-	                _replicatorPool.returnObject(r.getRecorderReplicator());
-	            } catch (Exception e) {
-	                LOGGER.debug(e, e);
-	                throw new RemoteException(e.getMessage(), e);
-	            }
+                RecorderResources r = (RecorderResources) channel;
+                //r.getRecorder().closeProcessor();
+                try {
+                    _replicatorPool.returnObject(r.getRecorderReplicator());
+                } catch (Exception e) {
+                    LOGGER.warn(e, e);
+                    throw new RemoteException(e.getMessage(), e);
+                }
             } else {
-            	LOGGER.warn("Unsupported channle resource of type "+channel.toString());
+                LOGGER.warn("Unsupported channel resource of type "
+                        + channel.toString());
             }
-            
         }
         ResourceSession.removeSession(session);
     }

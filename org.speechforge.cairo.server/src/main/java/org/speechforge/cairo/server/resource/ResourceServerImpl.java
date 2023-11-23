@@ -262,7 +262,8 @@ public class ResourceServerImpl implements SessionListener {
 
     public void processByeRequest(SipSession session) throws RemoteException, InterruptedException {
         for (SipResource r : session.getResources()) {
-            r.bye(session.getId());
+            String sessionId = session.getId();
+            r.bye(sessionId);
         }
     }
 
