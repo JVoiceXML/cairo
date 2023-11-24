@@ -97,8 +97,7 @@ public class RTPStreamReplicatorFactory implements PoolableObjectFactory {
      * @see org.apache.commons.pool.PoolableObjectFactory#passivateObject(java.lang.Object)
      */
     public void passivateObject(Object obj) throws Exception {
-        RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
-        replicator.shutdown();
+        //RTPStreamReplicator replicator = (RTPStreamReplicator) obj;
     }
 
     /**

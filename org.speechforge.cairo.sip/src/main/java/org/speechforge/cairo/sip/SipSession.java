@@ -153,12 +153,6 @@ public class SipSession {
     public void addResource(SipResource resource) {
         resources.add(resource);
     }
-    /**
-     * @param resources the resources to set
-     */
-    public void setResources(List<SipResource> resources) {
-        this.resources = resources;
-    }
     
     public String getId() {
         return sipDialog.getDialogId();

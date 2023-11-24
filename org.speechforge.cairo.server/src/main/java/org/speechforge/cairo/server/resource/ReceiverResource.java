@@ -273,7 +273,7 @@ public class ReceiverResource extends ResourceImpl {
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         for(ChannelResources channel: sessionChannels.values()) {
             //always close the mrcp channel (common to resources)
-            String channelId = channel.getChannelId();
+            final String channelId = channel.getChannelId();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("cleaning channel '" + channelId);
             }
@@ -283,8 +283,8 @@ public class ReceiverResource extends ResourceImpl {
             //issue is that each resource needs a reference to a different pool so a common cleanup method will be hard
             //maybe just pass in an interface to "this" to the cleanup method that can get access to pools.
             if (channel instanceof RecognizerResources) {
-                RecognizerResources r = (RecognizerResources) channel;
-                RTPStreamReplicator replicator = r.getReplicator();
+                RecognizerResources resource = (RecognizerResources) channel;
+                RTPStreamReplicator replicator = resource.getReplicator();
                 try {
                     _replicatorPool.returnObject(replicator);
                 } catch (Exception e) {
@@ -292,10 +292,12 @@ public class ReceiverResource extends ResourceImpl {
                     throw new RemoteException(e.getMessage(), e);
                 }
             } else if (channel instanceof RecorderResources) {
-                RecorderResources r = (RecorderResources) channel;
+                RecorderResources resource = (RecorderResources) channel;
                 //r.getRecorder().closeProcessor();
                 try {
-                    _replicatorPool.returnObject(r.getRecorderReplicator());
+                    final RTPStreamReplicator replicator = 
+                            resource.getRecorderReplicator();
+                    _replicatorPool.returnObject(replicator);
                 } catch (Exception e) {
                     LOGGER.warn(e, e);
                     throw new RemoteException(e.getMessage(), e);
