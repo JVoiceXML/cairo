@@ -55,17 +55,18 @@ import org.speechforge.cairo.util.CairoUtil;
  * Manages connection with and consumption from an incoming RTP audio stream.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public abstract class RTPConsumer implements SessionListener, ReceiveStreamListener {
-
-    private static Logger _logger = LogManager.getLogger(RTPConsumer.class);
-    
+    /** Logger instance. */
+    private static final Logger LOGGER = 
+            LogManager.getLogger(RTPConsumer.class);
+    /** Highest possible TCP port. */
     public static final int TCP_PORT_MAX = 65536;
-
-    protected RTPManager _rtpManager;
+    /** The RTP manger that is controlled by this consumer. */
+    protected RTPManager rtpManager;
     private SessionAddress _localAddress;
     private SessionAddress _targetAddress;
-    
     
     private Format[] preferredMediaFormats;
 
@@ -98,7 +99,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     
     /**
      * Instantiates a new RTP consumer.  It needs both the local and remote host names 
-     * as well ast the local and remote port.
+     * as well as the local and remote port.
      * 
      * @param localHost the local host
      * @param localPort the local port
@@ -166,45 +167,60 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         init();
     }
     
+    /**
+     * Initializes this RTP Consumer
+     * @throws IOException
+     *          error initializing
+     */
     private void init() throws IOException {
-           
-        _rtpManager = RTPManager.newInstance();
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("RTPManager class: " + _rtpManager.getClass().getName());
+        /** Create a new RTP manager. */
+        rtpManager = RTPManager.newInstance();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Created new RTPManager '" + 
+                    rtpManager.getClass().getName() + "'");
+            LOGGER.debug("Initializing RTPManager with local address '" 
+                    + _localAddress + "'");
         }
-        _rtpManager.addSessionListener(this);
-        _rtpManager.addReceiveStreamListener(this);
+        rtpManager.addSessionListener(this);
+        rtpManager.addReceiveStreamListener(this);
 
         try {
-            _rtpManager.initialize(_localAddress);
-            _rtpManager.addTarget(_targetAddress);
+            rtpManager.initialize(_localAddress);
+            rtpManager.addTarget(_targetAddress);
         } catch (InvalidSessionAddressException e) {
-            throw (IOException) new IOException(e.getMessage()).initCause(e);
+            IOException ioe = new IOException(e.getMessage());
+            ioe.initCause(e);
+            throw ioe;
         }
     }
 
     /**
-     * TODOC
+     * Shutdown this RTP Consumer and free resources.
      */
     public synchronized void shutdown() {
         // close RTP streams
-        if (_rtpManager != null) {
-            _rtpManager.removeTargets("RTP receiver shutting down.");
-            _rtpManager.dispose();
-            _rtpManager = null;
+        if (rtpManager != null) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("shutting down RTPManager with local address '"
+                        +  _localAddress + "'");
+            }
+            rtpManager.removeTargets("RTP receiver shutting down.");
+            rtpManager.dispose();
+            rtpManager = null;
         }
 
     }
 
-    /* (non-Javadoc)
-     * @see javax.media.rtp.SessionListener#update(javax.media.rtp.event.SessionEvent)
+    /**
+     * {@inheritDoc}
      */
+    @Override
     public synchronized void update(SessionEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("SessionEvent received: " + event);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SessionEvent received: " + event);
             if (event instanceof NewParticipantEvent) {
                 Participant p = ((NewParticipantEvent) event).getParticipant();
-                _logger.debug("  - A new participant has just joined: " + p.getCNAME());
+                LOGGER.debug("A new participant has just joined: " + p.getCNAME());
             }
         }
     }
@@ -213,13 +229,13 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      * @see javax.media.rtp.ReceiveStreamListener#update(javax.media.rtp.event.ReceiveStreamEvent)
      */
     public synchronized void update(ReceiveStreamEvent event) {
-        if (_logger.isDebugEnabled()) {
-            _logger.debug("ReceiveStreamEvent received: " + event);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("ReceiveStreamEvent received: " + event);
         }
 
         if (event instanceof RemotePayloadChangeEvent) {
-            _logger.warn("  - Received an RTP PayloadChangeEvent.\nSorry, cannot handle payload change.");
-            //System.exit(0);
+            LOGGER.warn("Received an RTP PayloadChangeEvent.\n"
+                    + "Sorry, cannot handle payload change.");
             return;
         }
 
@@ -227,21 +243,21 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
 
         if (event instanceof NewReceiveStreamEvent) {
             if (stream == null) {
-                _logger.debug("NewReceiveStreamEvent: receive stream is null!");
+                LOGGER.warn("NewReceiveStreamEvent: receive stream is null!");
             } else {
                 DataSource dataSource = stream.getDataSource();
                 if (dataSource == null) {
-                    _logger.debug("NewReceiveStreamEvent: data source is null!");
+                    LOGGER.warn("NewReceiveStreamEvent: data source is null!");
                 } else if (!(dataSource instanceof PushBufferDataSource)) {
-                    _logger.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
+                    LOGGER.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
                 } else {
-                    if (_logger.isDebugEnabled()) {
+                    if (LOGGER.isDebugEnabled()) {
                         // Find out the formats.
                         RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
                         if (control != null) {
-                            _logger.debug("  - Recevied new RTP stream: " + control.getFormat());
+                            LOGGER.debug("Received new RTP stream: " + control.getFormat());
                         } else {
-                            _logger.debug("  - Recevied new RTP stream: RTPControl is null!");
+                            LOGGER.debug("Recevied new RTP stream: RTPControl is null!");
                         }
                     }
                     this.streamReceived(stream, (PushBufferDataSource) dataSource, preferredMediaFormats);
@@ -249,16 +265,18 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             }
         } else if (event instanceof StreamMappedEvent) {
             Participant participant = event.getParticipant();
-            if (participant != null && _logger.isDebugEnabled()) {
+            if (participant != null && LOGGER.isDebugEnabled()) {
                 for (Iterator it = participant.getSourceDescription().iterator(); it.hasNext(); ) {
                     SourceDescription sd = (SourceDescription) it.next();
-                    _logger.debug("Source description: " + toString(sd));
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Source description: " + toString(sd));
+                    }
                 }
             }
             if (stream == null) {
-                _logger.debug("StreamMappedEvent: receive stream is null!");
+                LOGGER.warn("StreamMappedEvent: receive stream is null!");
             } else if (participant == null) {
-                _logger.debug("StreamMappedEvent: participant is null!");
+                LOGGER.warn("StreamMappedEvent: participant is null!");
             } else {
                 this.streamMapped(stream, participant);
             }

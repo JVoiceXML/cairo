@@ -35,10 +35,12 @@ import org.apache.logging.log4j.LogManager;
  * Manages pooling of TCP port pairs that are required for each RTP channel.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class PortPairPool {
-
-    private static Logger _logger = LogManager.getLogger(PortPairPool.class);
+    /** Logger instance. */
+    private static final Logger LOGGER = 
+            LogManager.getLogger(PortPairPool.class);
 
     private int[] _ports;
     private boolean[] _availables;
@@ -63,11 +65,11 @@ public class PortPairPool {
             _availables[i] = true;
         }
 
-        if (_logger.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             StringBuilder sb = new StringBuilder("creating new port pair pool... range: (");
             sb.append(_ports[0]).append(", ").append(_ports[0] + 1).append(") - (");
             sb.append(_ports[_size-1]).append(", ").append(_ports[_size-1] + 1).append(')');
-            _logger.debug(sb);
+            LOGGER.debug(sb);
         }
     }
 

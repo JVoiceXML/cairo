@@ -25,6 +25,7 @@ package org.speechforge.cairo.sip;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.sdp.MediaDescription;
@@ -52,11 +53,12 @@ import javax.sip.header.CSeqHeader;
 import javax.sip.header.ContentTypeHeader;
 import javax.sip.header.Header;
 import javax.sip.header.ToHeader;
+import javax.sip.message.MessageFactory;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -64,10 +66,12 @@ import org.apache.logging.log4j.LogManager;
  * events via JAIN SIP.
  * 
  * @author Spencer Lord {@literal <}<a href="mailto:salord@users.sourceforge.net">salord@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class SipListenerImpl implements SipListener {
-
-    static Logger LOGGER = LogManager.getLogger(SipListenerImpl.class);
+    /** Logger instance. */
+    private static final Logger LOGGER =
+            LogManager.getLogger(SipListenerImpl.class);
 
     private SipAgent sipClient;
 
@@ -565,36 +569,31 @@ public class SipListenerImpl implements SipListener {
         // 2) If the callee is currently not willing or able to take additional
         // calls at this end system. A 486 (Busy Here)
         // SHOULD be returned in such a scenario.
-        LOGGER.info("Could not process invite request.");
+        LOGGER.warn("Could not process invite request, need to reject");
         SipProvider sipProvider = (SipProvider) requestEvent.getSource();
         Request request = requestEvent.getRequest();
         try {
             if (stx == null) {
                 stx = sipProvider.getNewServerTransaction(request);
             }
-            Response response = sipClient.getMessageFactory().createResponse(Response.NOT_ACCEPTABLE_HERE, request);
+            final MessageFactory factory = sipClient.getMessageFactory();
+            final Response response = factory.createResponse(
+                    Response.NOT_ACCEPTABLE_HERE, request);
             SipAgent.sendResponse(stx, response);
 
             // release resources
-            for (SipResource r: session.getResources() ){
-                r.bye(session.getId());
+            String sessionId = session.getId();
+            List<SipResource> resources = session.getResources();
+            for (SipResource resource : resources){
+                resource.bye(sessionId);
             }
-
+        } catch (SipException | InvalidArgumentException | ParseException 
+                | RemoteException | InterruptedException e) {
+            LOGGER.error(e, e);
+        } finally {
             // cleanup the session
             SipSession.removeSession(session);
-            
-        } catch (SipException e) {
-            LOGGER.error(e, e);
-        } catch (InvalidArgumentException e) {
-            LOGGER.error(e, e);
-        } catch (ParseException e) {
-            LOGGER.error(e, e);
-        } catch (RemoteException e) {
-            LOGGER.warn(e.getMessage(), e);
-        } catch (InterruptedException e) {
-            LOGGER.warn(e.getMessage(), e);
         }
-        
     }
 
     public void processCancel(RequestEvent requestEvent) {
@@ -641,24 +640,20 @@ public class SipListenerImpl implements SipListener {
         // dialog. It is RECOMMENDED that a 487 (Request Terminated) response
         // be generated to those pending requests."
         if (session == null) {
-            LOGGER.info("Receieved a BYE for which there is no corresponding session.  SessionID: "+dialog.getDialogId());
+            LOGGER.info("Receieved a BYE for which there is no corresponding "
+                    + "session with SessionID: " + dialog.getDialogId());
         } else {
             try {
-                //process the invitaion (the resource manager processInviteRequest method)
-                sipClient.getSessionListener().processByeRequest(session);
-                SipSession.removeSession(session);
-                Response response = sipClient.getMessageFactory().createResponse(200, request);
+                final SessionListener listener = sipClient.getSessionListener();
+                listener.processByeRequest(session);
+                final MessageFactory factory = sipClient.getMessageFactory();
+                final Response response = factory.createResponse(200, request);
                 SipAgent.sendResponse(stx, response);
-            } catch (SipException e) {
-                LOGGER.error(e, e);
-            } catch (ParseException e) {
-                LOGGER.error(e, e);
-            } catch (InvalidArgumentException e) {
-                LOGGER.error(e, e);
-            } catch (RemoteException e) {
+            } catch (SipException | ParseException | InvalidArgumentException 
+                    | RemoteException | InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
+            } finally {
+                SipSession.removeSession(session);
             }
         }
     }

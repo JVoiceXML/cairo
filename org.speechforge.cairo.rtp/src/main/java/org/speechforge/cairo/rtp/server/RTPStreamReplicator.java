@@ -68,8 +68,9 @@ public class RTPStreamReplicator extends RTPConsumer {
         _port = port;
     }
     
-    public RTPStreamReplicator(InetAddress localAddress, int port) throws IOException {
-        super(localAddress,port);
+    public RTPStreamReplicator(InetAddress localAddress, int port) 
+            throws IOException {
+        super(localAddress, port);
         _port = port;
     }
     
@@ -82,23 +83,23 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
     
     public void removeReplicant(PushBufferDataSource pbds) {
-    	_replicator.removeReplicator(pbds);
-    	
+        _replicator.removeReplicator(pbds);
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.server.rtp.RTPConsumer#shutdown()
+    /**
+     * {@inheritDoc}
      */
     @Override
     public void shutdown() {
-    	if (_processor != null) {
-    		_processor.close();
-    		_processor = null;
-    	}
-    	if (_replicator != null) 
-    	   _replicator = null;
-    	//_replicator.cleanup();
-        //super.shutdown();
+        if (_processor != null) {
+            _processor.close();
+            _processor = null;
+        }
+        if (_replicator != null) {
+            _replicator = null;
+        }
+        //_replicator.cleanup();
+        super.shutdown();
     }
 
     /* (non-Javadoc)
@@ -122,7 +123,9 @@ public class RTPStreamReplicator extends RTPConsumer {
                     throw (IOException) new IOException(e.getMessage()).initCause(e);
                 }
 
-                LOGGER.debug("Internal Processor realized.");
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Internal Processor realized.");
+                }
 
                 PushBufferDataSource pbds = (PushBufferDataSource) _processor.getDataOutput();
                 _replicator = new PBDSReplicator(pbds);
@@ -151,20 +154,20 @@ public class RTPStreamReplicator extends RTPConsumer {
     public synchronized void streamInactive(ReceiveStream stream, boolean byeEvent) {
         //if (byeEvent) {
 
-            //_replicator.shutdown();
-            _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
-            if (_processor != null) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
-                }
-                _processor.close();
-                _processor = null;
-                if (LOGGER.isDebugEnabled()) {
-                    if (recorder != null) {
-                        recorder.streamInactive(null, false);
-                    }
+        //_replicator.shutdown();
+        _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
+        if (_processor != null) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
+            }
+            _processor.close();
+            _processor = null;
+            if (LOGGER.isDebugEnabled()) {
+                if (recorder != null) {
+                    recorder.streamInactive(null, false);
                 }
             }
+        }
         //}
     }
 

@@ -138,7 +138,7 @@ public class RTPSpeechSynthChannel {
                         LOGGER.debug("taking next prompt from prompt queue...");
                     }
                     promptPlay = promptQueue.take();
-                    if (promptPlay != null) {
+                    if (promptPlay != null && _run) {
                         _promptPlayer.playPrompt(promptPlay._promptFile);
                     }
 
@@ -188,7 +188,8 @@ public class RTPSpeechSynthChannel {
         public void shutdown() {
             _run = false;
             // Add an empty play to trigger the playback
-            promptQueue.offer(null);
+            final PromptPlay play = new PromptPlay(null, null);
+            promptQueue.offer(play);
         }
     }
 

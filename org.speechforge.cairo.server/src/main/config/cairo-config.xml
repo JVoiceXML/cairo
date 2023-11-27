@@ -5,8 +5,8 @@
             <mrcpPort>32416</mrcpPort>
             <rtpBasePort>42050</rtpBasePort>
             <maxConnects>50</maxConnects>
-            <engines>1</engines>
-            <recorderEngines>1</recorderEngines>
+            <engines>2</engines>
+            <recorderEngines>2</recorderEngines>
             <baseRecordingDir>@@RECORD_DIR@@</baseRecordingDir>
             <baseGrammarDir>@@GRAMMAR_DIR@@</baseGrammarDir>
             <ipAddress>@@IP@@</ipAddress>
@@ -21,7 +21,7 @@
             <mrcpPort>32417</mrcpPort>
             <rtpBasePort>42150</rtpBasePort>
             <maxConnects>50</maxConnects>
-            <engines>1</engines>
+            <engines>2</engines>
             <voiceName>@@VOICE@@</voiceName>
             <basePromptDir>@@PROMPT_DIR@@</basePromptDir>
             <!-- Synthesizer could Festival, Mary or FreeTTs -->

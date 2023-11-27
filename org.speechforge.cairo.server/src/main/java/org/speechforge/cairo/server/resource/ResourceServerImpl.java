@@ -27,12 +27,11 @@ import java.io.File;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.List;
 
 import javax.sdp.MediaDescription;
 import javax.sdp.SdpException;
@@ -160,30 +159,12 @@ public class ResourceServerImpl implements SessionListener {
         // determine if there receivers and/or transmitter channel requests in the invite
         // and preprocess the message so that it can be sent back as a response to the inviter
         // (i.e. set the channel and setup attributes).
-        boolean receiver = false;
-        boolean transmitter = false;
+        boolean receiver;
+        boolean transmitter;
         try {
-            for (MediaDescription md : request.getMrcpReceiverChannels()) {
-                String channelID = getNextChannelID();
-                String chanid = channelID + '@' + MrcpResourceType.SPEECHRECOG.toString();
-                md.setAttribute("channel", chanid);
-                md.setAttribute("setup", "passive");
-                receiver = true;
-            }
-            for (MediaDescription md : request.getMrcpRecorderChannels()) {
-                String channelID = getNextChannelID();
-                String chanid = channelID + '@' + MrcpResourceType.RECORDER.toString();
-                md.setAttribute("channel", chanid);
-                md.setAttribute("setup", "passive");
-                receiver = true;
-            }
-            for (MediaDescription md : request.getMrcpTransmitterChannels()) {
-                String channelID = getNextChannelID();
-                String chanid = channelID + '@' + MrcpResourceType.SPEECHSYNTH.toString();
-                md.setAttribute("channel", chanid);
-                md.setAttribute("setup", "passive");
-                transmitter = true;
-            }
+            receiver = handleRecognizerChannelRequests(request) 
+                    || handleRecordererChannelRequests(request);
+            transmitter = hanldeTransmitterChannelRequests(request);
         } catch (SdpException e) {
             LOGGER.warn(e.getMessage(), e);
             throw e;
@@ -193,7 +174,6 @@ public class ResourceServerImpl implements SessionListener {
         if (transmitter) {
             request = processTransmitterInvite(request, session);
         }
-
         if (receiver) {
             request = processReceiverInvite(request, session);
         } // TODO: catch exception and release transmitter resources
@@ -211,6 +191,74 @@ public class ResourceServerImpl implements SessionListener {
     }
 
     /**
+     * Checks if a recognizer is requested because there are channel requests.
+     * @param request the SDP request.
+     * @return {@code true} if a receiver should be created
+     * @throws SdpException
+     *          error evaluating the SDP message
+     */
+    private boolean handleRecognizerChannelRequests(SdpMessage request)
+            throws SdpException {
+        boolean receiver = false;
+        List<MediaDescription> descriptions = request.getMrcpReceiverChannels();
+        for (MediaDescription md : descriptions) {
+            String channelID = getNextChannelID();
+            String chanid = channelID + '@' 
+                    + MrcpResourceType.SPEECHRECOG.toString();
+            md.setAttribute("channel", chanid);
+            md.setAttribute("setup", "passive");
+            receiver = true;
+        }
+        return receiver;
+    }
+
+    /**
+     * Checks if a recorder is requested because there are channel requests.
+     * @param request the SDP request.
+     * @return {@code true} if a receiver should be created
+     * @throws SdpException
+     *          error evaluating the SDP message
+     */
+    private boolean handleRecordererChannelRequests(SdpMessage request)
+            throws SdpException {
+        boolean receiver = false;
+        List<MediaDescription> descriptions = request.getMrcpRecorderChannels();
+        for (MediaDescription md : descriptions) {
+            String channelID = getNextChannelID();
+            String chanid = channelID + '@' 
+                    + MrcpResourceType.RECORDER.toString();
+            md.setAttribute("channel", chanid);
+            md.setAttribute("setup", "passive");
+            receiver = true;
+        }
+        return receiver;
+    }
+
+    /**
+     * Checks if a recorder is requested because there are channel requests.
+     * @param request the SDP request.
+     * @return {@code true} if a transmitter should be created
+     * @throws SdpException
+     *          error evaluating the SDP message
+     */
+    private boolean hanldeTransmitterChannelRequests(SdpMessage request)
+            throws SdpException {
+        boolean transmitter = false;
+        List<MediaDescription> descriptions =
+                request.getMrcpTransmitterChannels();
+        for (MediaDescription md : descriptions) {
+            String channelID = getNextChannelID();
+            String chanid = channelID + '@' 
+                    + MrcpResourceType.SPEECHSYNTH.toString();
+            md.setAttribute("channel", chanid);
+            md.setAttribute("setup", "passive");
+            transmitter = true;
+        }
+        return transmitter;
+    }
+
+
+    /**
      * Process the INVITE at a receiver.
      * @param request the received request.
      * @param session the SIP session
@@ -221,7 +269,7 @@ public class ResourceServerImpl implements SessionListener {
     private SdpMessage processReceiverInvite(SdpMessage request,
             SipSession session)
             throws RemoteException, ResourceUnavailableException {
-        Resource resource;
+        final Resource resource;
         try {
             resource = registryImpl.getResource(Resource.Type.RECEIVER);
         } catch (org.speechforge.cairo.exception.ResourceUnavailableException e) {
@@ -231,7 +279,10 @@ public class ResourceServerImpl implements SessionListener {
         final String id = session.getId();
         LOGGER.info("inviting receiver for " + id);
         request = resource.invite(request, id);
-        session.getResources().add(resource);
+        session.addResource(resource);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("receiver proxy: " + resource);
+        }
         return request;
     }
 
@@ -256,18 +307,47 @@ public class ResourceServerImpl implements SessionListener {
         final String id = session.getId();
         LOGGER.info("inviting transmitter for " + id);
         request = resource.invite(request, id);
-        session.getResources().add(resource);
+        session.addResource(resource);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("transmitter proxy: " + resource);
+        }
         return request;
     }
 
-    public void processByeRequest(SipSession session) throws RemoteException, InterruptedException {
-        for (SipResource r : session.getResources()) {
-            r.bye(session.getId());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void processByeRequest(SipSession session) 
+            throws RemoteException, InterruptedException {
+        RemoteException re = null;
+        List<SipResource> resources = session.getResources();
+        String sessionId = session.getId();
+        for (SipResource resource : resources) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("removing resource from session '" + sessionId 
+                        + "' with proxy: " + resource);
+            }
+            try {
+                resource.bye(sessionId);
+            } catch (RemoteException e) {
+                re = e;
+                LOGGER.warn("error removing resource after bye " 
+                        + e.getMessage(), e);
+            }
+        }
+        if (re != null) {
+            throw re;
         }
     }
 
-    public SdpMessage processInviteRequest(SdpMessage request, SipSession session) throws SdpException,
-            ResourceUnavailableException, RemoteException {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SdpMessage processInviteRequest(SdpMessage request, 
+            SipSession session) throws SdpException,
+                ResourceUnavailableException, RemoteException {
         final SdpMessage m = invite(request, session);
         try {
             _ua.sendResponse(session, m);
@@ -278,8 +358,11 @@ public class ResourceServerImpl implements SessionListener {
         return m;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public SdpMessage processInviteResponse(boolean ok, SdpMessage response, SipSession session) {
-        // TODO Auto-generated method stub
         return null;
     }
     

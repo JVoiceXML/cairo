@@ -107,6 +107,7 @@ public class TransmitterResource extends ResourceImpl {
 
      * @see org.speechforge.cairo.server.resource.Resource#invite(org.speechforge.cairo.server.resource.ResourceMessage)
      */
+    @SuppressWarnings("unchecked")
     public SdpMessage invite(SdpMessage request, String sessionId) throws ResourceUnavailableException, RemoteException {
         LOGGER.debug("transmitter invite for");
         LOGGER.debug(request.getSessionDescription());
@@ -141,7 +142,7 @@ public class TransmitterResource extends ResourceImpl {
                     // }
                     AudioFormats af = null;
                     List<MediaDescription> rtpmd = request.getAudioChansForThisControlChan(md);
-                    Vector formatsInRequest = null;
+                    Vector<String> formatsInRequest = null;
                     if (rtpmd.size() > 0) {
                         //TODO: Complete the method below that checks if audio format is supported.  
                         //      If not resource not available exception should be shown.
@@ -174,7 +175,11 @@ public class TransmitterResource extends ResourceImpl {
                         _mrcpServer.openChannel(channelID, mrcpChannel);
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
                         rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
-                        LOGGER.debug("Created a SPEECHSYNTH Channel.  id is: "+channelID+" rtp remotehost:port is: "+ mediaHost+":"+remotePort);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Created a SPEECHSYNTH Channel. id: "
+                                    + channelID + " rtp remotehost/port: "
+                                    + mediaHost + ":" + remotePort);
+                        }
                         break;
 
                     default:
@@ -211,27 +216,37 @@ public class TransmitterResource extends ResourceImpl {
         return request;
     }
 
-
-
+    /**
+     * {@inheritDoc}
+     * 
+     * Clean up transmitter resources.
+     */
+    @Override
     public void bye(String sessionId) throws  RemoteException, InterruptedException {
         ResourceSession session = ResourceSession.getSession(sessionId);
         Map<String, ChannelResources> sessionChannels = session.getChannels();
         for(ChannelResources channel: sessionChannels.values()) {
+            String channelId = channel.getChannelId();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("cleaning channel '" + channelId);
+            }
             
-           	//always close the mrcp channel (common to resources)
-            _mrcpServer.closeChannel(channel.getChannelId());
+           //always close the mrcp channel (common to resources)
+            _mrcpServer.closeChannel(channelId);
             
             //then do resource specific cleanup
             //TODO: remove instanceof if statements (and casting) and add specific code to resources class (abstract method)
             //issue is that each resource needs a reference to a different pool so a common cleanup method will be hard
             //maybe just pass in an interface to "this" to the cleanup method that can get access to pools.
             if (channel instanceof TransmitterResources) {
-                TransmitterResources r = (TransmitterResources) channel;
-                r.getRtpssc().shutdown();
-                _portPairPool.returnPort(r.getPort());
-
+                final TransmitterResources resource = 
+                        (TransmitterResources) channel;
+                final RTPSpeechSynthChannel synthChannel = resource.getRtpssc();
+                synthChannel.shutdown();
+                _portPairPool.returnPort(resource.getPort());
             } else {
-                LOGGER.warn("Unsupported channel resource of type: " + channel.toString());
+                LOGGER.warn("Unsupported channel resource of type: " 
+                        + channel.toString());
             }
    
         }

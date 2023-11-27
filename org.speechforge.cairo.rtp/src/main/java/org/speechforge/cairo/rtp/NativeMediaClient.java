@@ -59,7 +59,7 @@ public class NativeMediaClient extends RTPConsumer {
     public NativeMediaClient(String localHost, int localPort, InetAddress remoteAddress, int remotePort, Format[] formats)
     throws IOException {
       super(localHost, localPort, remoteAddress, remotePort, formats);
-      _rtpPlayer = new RTPPlayer(_rtpManager);
+      _rtpPlayer = new RTPPlayer(rtpManager);
   }
 
     /**
@@ -72,7 +72,7 @@ public class NativeMediaClient extends RTPConsumer {
     public NativeMediaClient(int localPort, InetAddress remoteAddress, int remotePort)
       throws IOException {
         super(localPort, remoteAddress, remotePort);
-        _rtpPlayer = new RTPPlayer(_rtpManager);
+        _rtpPlayer = new RTPPlayer(rtpManager);
     }
 
     /**
