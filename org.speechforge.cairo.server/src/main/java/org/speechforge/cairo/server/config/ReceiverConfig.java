@@ -34,6 +34,7 @@ import org.apache.commons.configuration.XMLConfiguration;
  * Class encapsulating configuration information for a receiver resource.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  *
  */
 public class ReceiverConfig extends ResourceConfig {
@@ -47,7 +48,7 @@ public class ReceiverConfig extends ResourceConfig {
     private int _recorderEngines;
 
     /**
-     * TODOC
+     * Constructs a new object.
      * @param index index of the instance
      * @param config the configuration to use
      * @throws ConfigurationException error in the configuration
@@ -64,7 +65,7 @@ public class ReceiverConfig extends ResourceConfig {
                 // ignore
             }
             if (_sphinxConfigURL == null) {
-                _sphinxConfigURL = this.getClass().getResource("/config/sphinx-config.xml");
+                _sphinxConfigURL = this.getClass().getResource("/sphinx-config.xml");
                 if (_sphinxConfigURL == null) {
                     throw new ConfigurationException("Sphinx config URL not found in either cairo config file or cairo classpath!");
                 } else if (_logger.isDebugEnabled()) {
@@ -81,7 +82,7 @@ public class ReceiverConfig extends ResourceConfig {
                 // ignore
             }
             if (_sphinxRecorderConfigURL == null) {
-            	_sphinxRecorderConfigURL = this.getClass().getResource("/config/sphinx-recorder-config.xml");
+            	_sphinxRecorderConfigURL = this.getClass().getResource("/sphinx-recorder-config.xml");
                 if (_sphinxRecorderConfigURL == null) {
                     throw new ConfigurationException("Sphinx recorder config URL not found in either cairo config file or cairo classpath!");
                 } else if (_logger.isDebugEnabled()) {

@@ -82,7 +82,7 @@ public class SphinxRecorderFactory extends AbstractPoolableObjectFactory {
     @SuppressWarnings("rawtypes")
     public static ObjectPool createObjectPool(URL url, int instances)
       throws InstantiationException {
-        LOGGER.info("creating new rec engine pool with " + instances
+        LOGGER.info("creating new recorder engine pool with " + instances
                 + " instances...");
 
         PoolableObjectFactory factory = new SphinxRecorderFactory(url);
