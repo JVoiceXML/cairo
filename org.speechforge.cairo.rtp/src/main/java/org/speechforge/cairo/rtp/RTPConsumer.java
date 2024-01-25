@@ -109,7 +109,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      * 
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public RTPConsumer(String localHost, int localPort, InetAddress remoteAddress, int remotePort, Format[] preferredMediaFormats) throws IOException {
+    public RTPConsumer(String localHost, int localPort, 
+            InetAddress remoteAddress, int remotePort, 
+            Format[] preferredMediaFormats) throws IOException {
         if (localPort < 0 || localPort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid local port value: " + localPort);
         }
@@ -225,68 +227,118 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.media.rtp.ReceiveStreamListener#update(javax.media.rtp.event.ReceiveStreamEvent)
+    /**
+     * {@inheritDoc}
      */
+    @Override
     public synchronized void update(ReceiveStreamEvent event) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("ReceiveStreamEvent received: " + event);
         }
 
+        final ReceiveStream stream = event.getReceiveStream();
         if (event instanceof RemotePayloadChangeEvent) {
-            LOGGER.warn("Received an RTP PayloadChangeEvent.\n"
-                    + "Sorry, cannot handle payload change.");
-            return;
-        }
-
-        ReceiveStream stream = event.getReceiveStream();
-
-        if (event instanceof NewReceiveStreamEvent) {
-            if (stream == null) {
-                LOGGER.warn("NewReceiveStreamEvent: receive stream is null!");
-            } else {
-                DataSource dataSource = stream.getDataSource();
-                if (dataSource == null) {
-                    LOGGER.warn("NewReceiveStreamEvent: data source is null!");
-                } else if (!(dataSource instanceof PushBufferDataSource)) {
-                    LOGGER.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
-                } else {
-                    if (LOGGER.isDebugEnabled()) {
-                        // Find out the formats.
-                        RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
-                        if (control != null) {
-                            LOGGER.debug("Received new RTP stream: " + control.getFormat());
-                        } else {
-                            LOGGER.debug("Recevied new RTP stream: RTPControl is null!");
-                        }
-                    }
-                    this.streamReceived(stream, (PushBufferDataSource) dataSource, preferredMediaFormats);
-                }
-            }
+            handlePayloadChangeEvent((RemotePayloadChangeEvent) event);
+        } else if (event instanceof NewReceiveStreamEvent) {
+            handleNewReceiveStreamEvent(stream);
         } else if (event instanceof StreamMappedEvent) {
-            Participant participant = event.getParticipant();
-            if (participant != null && LOGGER.isDebugEnabled()) {
-                for (Iterator it = participant.getSourceDescription().iterator(); it.hasNext(); ) {
-                    SourceDescription sd = (SourceDescription) it.next();
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Source description: " + toString(sd));
+            handleStreamMappedEvent(event, stream);
+        } else if (event instanceof InactiveReceiveStreamEvent || event instanceof ByeEvent) {
+            handleInactiveStreamEvent(event, stream);
+        } else {
+            LOGGER.warn("Received unknown RTP event: " + event);
+        }
+    }
+
+    /**
+     * Handle inactive stream event.
+     * 
+     * @param event
+     *            the event
+     * @param stream
+     *            the stream
+     */
+    private void handleInactiveStreamEvent(ReceiveStreamEvent event,
+            final ReceiveStream stream) {
+        if (stream != null) {
+            this.streamInactive(stream, (event instanceof ByeEvent));
+        }
+    }
+
+    /**
+     * Handle stream mapped event.
+     * 
+     * @param event
+     *            the event
+     * @param stream
+     *            the stream
+     */
+    private void handleStreamMappedEvent(ReceiveStreamEvent event,
+            final ReceiveStream stream) {
+        Participant participant = event.getParticipant();
+        if (participant != null && LOGGER.isDebugEnabled()) {
+            for (Object o : participant.getSourceDescription()) {
+                final SourceDescription sd = (SourceDescription) o;
+                LOGGER.debug("Source description: " + toString(sd));
+            }
+        }
+        if (stream == null) {
+            LOGGER.warn("StreamMappedEvent: receive stream is null!");
+        } else if (participant == null) {
+            LOGGER.warn("StreamMappedEvent: participant is null!");
+        } else {
+            this.streamMapped(stream, participant);
+        }
+    }
+
+    /**
+     * Handle new receive stream event.
+     * 
+     * @param stream
+     *            the receive stream
+     */
+    private void handleNewReceiveStreamEvent(ReceiveStream stream) {
+        if (stream == null) {
+            LOGGER.warn("NewReceiveStreamEvent: receive stream is null!");
+        } else {
+            DataSource dataSource = stream.getDataSource();
+            if (dataSource == null) {
+                LOGGER.warn("NewReceiveStreamEvent: data source is null!");
+            } else if (!(dataSource instanceof PushBufferDataSource)) {
+                LOGGER.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
+            } else {
+                if (LOGGER.isDebugEnabled()) {
+                    // Find out the formats.
+                    RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
+                    if (control != null) {
+                        LOGGER.debug("Received new RTP stream: " + control.getFormat());
+                    } else {
+                        LOGGER.debug("Recevied new RTP stream: RTPControl is null!");
                     }
                 }
-            }
-            if (stream == null) {
-                LOGGER.warn("StreamMappedEvent: receive stream is null!");
-            } else if (participant == null) {
-                LOGGER.warn("StreamMappedEvent: participant is null!");
-            } else {
-                this.streamMapped(stream, participant);
-            }
-        } else if (event instanceof InactiveReceiveStreamEvent || event instanceof ByeEvent) {
-            if (stream != null) {
-                this.streamInactive(stream, (event instanceof ByeEvent));
+                this.streamReceived(stream, (PushBufferDataSource) dataSource, preferredMediaFormats);
             }
         }
     }
 
+    /**
+     * Handle payload change event.
+     * @param event the payload change event
+     */
+    private void handlePayloadChangeEvent(RemotePayloadChangeEvent event) {
+        final int dtmfPayloadType = 101;
+        int payload = event.getNewPayload();
+
+        // Check if the new payload type is for DTMF events
+        if (payload == dtmfPayloadType) {
+            LOGGER.warn("Handling of DTMF payload types not implemented yet.");
+        } else {
+            LOGGER.warn("Received an RTP PayloadChangeEvent. "
+                    + "Sorry, cannot handle payload change.");
+        }
+    }
+
+    
     public abstract void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource,Format[] preferredMediaFormats);
 
     public abstract void streamMapped(ReceiveStream stream, Participant participant);
@@ -294,7 +346,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     public abstract void streamInactive(ReceiveStream stream, boolean byeEvent);
 
     private static String toString(SourceDescription sd) {
-        StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         switch (sd.getType()) {
         case SourceDescription.SOURCE_DESC_CNAME:
             sb.append("SOURCE_DESC_CNAME");

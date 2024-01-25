@@ -50,7 +50,7 @@ public class CairoConfig {
      * @throws ConfigurationException error in the configuration
      */
     public CairoConfig(URL cairoConfigURL) throws ConfigurationException {
-        LOGGER.info("using configuration at '" + cairoConfigURL + "''");
+        LOGGER.info("using configuration at '" + cairoConfigURL + "'");
         config = new XMLConfiguration(cairoConfigURL);
     }
 
