@@ -36,6 +36,7 @@ import java.util.Vector;
 
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.FileTypeDescriptor;
+import javax.media.rtp.RTPManager;
 import javax.sdp.MediaDescription;
 
 import org.apache.commons.cli.CommandLine;

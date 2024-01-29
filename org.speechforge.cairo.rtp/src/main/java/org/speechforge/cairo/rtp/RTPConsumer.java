@@ -24,9 +24,11 @@ package  org.speechforge.cairo.rtp;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Iterator;
+import java.util.Vector;
 
 import javax.media.Format;
+import javax.media.PlugInManager;
+import javax.media.format.AudioFormat;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
 import javax.media.rtp.InvalidSessionAddressException;
@@ -47,9 +49,13 @@ import javax.media.rtp.event.SessionEvent;
 import javax.media.rtp.event.StreamMappedEvent;
 import javax.media.rtp.rtcp.SourceDescription;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.speechforge.cairo.jmf.codec.audio.dtmf.JavaDecoder;
 import org.speechforge.cairo.util.CairoUtil;
+
+import com.ibm.media.codec.audio.AudioCodec;
+
 
 /**
  * Manages connection with and consumption from an incoming RTP audio stream.
@@ -87,7 +93,17 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         init();
     }
 
-    
+    /**
+     * Instantiates a new RTP consumer. Needs a local host name and port.
+     * 
+     * @param localHost
+     *            the local host
+     * @param port
+     *            the port
+     * 
+     * @throws IOException
+     *             Signals that an I/O exception has occurred.
+     */
     public RTPConsumer(InetAddress localAddress, int port) throws IOException {
         if (port < 0 || port >= TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid port value: " + port);
@@ -175,6 +191,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      *          error initializing
      */
     private void init() throws IOException {
+        registerDTMFSupport();
+
         /** Create a new RTP manager. */
         rtpManager = RTPManager.newInstance();
         if (LOGGER.isDebugEnabled()) {
@@ -183,6 +201,10 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             LOGGER.debug("Initializing RTPManager with local address '" 
                     + _localAddress + "'");
         }
+        
+        // Register DTMD handling
+        rtpManager.addFormat(JavaDecoder.DTMF_FORMAT,
+                JavaDecoder.DTMF_PAYLOAD);
         rtpManager.addSessionListener(this);
         rtpManager.addReceiveStreamListener(this);
 
@@ -190,9 +212,42 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             rtpManager.initialize(_localAddress);
             rtpManager.addTarget(_targetAddress);
         } catch (InvalidSessionAddressException e) {
-            IOException ioe = new IOException(e.getMessage());
-            ioe.initCause(e);
-            throw ioe;
+            throw new IOException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Registers DTMF support.
+     * 
+     * @throws IOException
+     *             error registering DTMF support
+     */
+    private void registerDTMFSupport() throws IOException {
+        JavaDecoder decoder = new JavaDecoder();
+        Format[] supportedOutputFormats = new Format[] {
+                new AudioFormat(
+                AudioFormat.LINEAR,
+                Format.NOT_SPECIFIED,
+                16,
+                Format.NOT_SPECIFIED,
+                AudioFormat.LITTLE_ENDIAN,
+                AudioFormat.SIGNED,
+                16,
+                Format.NOT_SPECIFIED,
+                Format.byteArray
+                )
+                };
+        PlugInManager.addPlugIn(JavaDecoder.class.getCanonicalName(), 
+                decoder.getSupportedInputFormats(), supportedOutputFormats, 
+                PlugInManager.CODEC );
+        PlugInManager.commit();
+        @SuppressWarnings("unchecked")
+        Vector<String> codecs = PlugInManager.getPlugInList(null, null, 
+                PlugInManager.CODEC);
+        for (String codec : codecs) {
+            if (codec.equals(JavaDecoder.class.getCanonicalName())) {
+                LOGGER.info("Registered DTMF Decoder");
+            }
         }
     }
 
@@ -284,11 +339,13 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         }
         if (stream == null) {
             LOGGER.warn("StreamMappedEvent: receive stream is null!");
-        } else if (participant == null) {
-            LOGGER.warn("StreamMappedEvent: participant is null!");
-        } else {
-            this.streamMapped(stream, participant);
+            return;
         }
+        if (participant == null) {
+            LOGGER.warn("StreamMappedEvent: participant is null!");
+            return;
+        } 
+        streamMapped(stream, participant);
     }
 
     /**
@@ -300,25 +357,28 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     private void handleNewReceiveStreamEvent(ReceiveStream stream) {
         if (stream == null) {
             LOGGER.warn("NewReceiveStreamEvent: receive stream is null!");
-        } else {
-            DataSource dataSource = stream.getDataSource();
-            if (dataSource == null) {
-                LOGGER.warn("NewReceiveStreamEvent: data source is null!");
-            } else if (!(dataSource instanceof PushBufferDataSource)) {
-                LOGGER.debug("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
+            return;
+        } 
+        DataSource dataSource = stream.getDataSource();
+        if (dataSource == null) {
+            LOGGER.warn("NewReceiveStreamEvent: data source is null!");
+            return;
+        }
+        if (!(dataSource instanceof PushBufferDataSource)) {
+            LOGGER.warn("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
+            return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            // Find out the formats.
+            RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
+            if (control != null) {
+                LOGGER.debug("Received new RTP stream: " + control.getFormat());
             } else {
-                if (LOGGER.isDebugEnabled()) {
-                    // Find out the formats.
-                    RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
-                    if (control != null) {
-                        LOGGER.debug("Received new RTP stream: " + control.getFormat());
-                    } else {
-                        LOGGER.debug("Recevied new RTP stream: RTPControl is null!");
-                    }
-                }
-                this.streamReceived(stream, (PushBufferDataSource) dataSource, preferredMediaFormats);
+                LOGGER.debug("Recevied new RTP stream: RTPControl is null!");
             }
         }
+        streamReceived(stream, (PushBufferDataSource) dataSource, 
+                preferredMediaFormats);
     }
 
     /**
@@ -326,15 +386,18 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      * @param event the payload change event
      */
     private void handlePayloadChangeEvent(RemotePayloadChangeEvent event) {
-        final int dtmfPayloadType = 101;
         int payload = event.getNewPayload();
 
         // Check if the new payload type is for DTMF events
-        if (payload == dtmfPayloadType) {
+        if (payload == JavaDecoder.DTMF_PAYLOAD) {
             LOGGER.warn("Handling of DTMF payload types not implemented yet.");
+            
+            final ReceiveStream stream = event.getReceiveStream();
+            DataSource source = stream.getDataSource();
+            LOGGER.info("Source: "+ source);
         } else {
-            LOGGER.warn("Received an RTP PayloadChangeEvent. "
-                    + "Sorry, cannot handle payload change.");
+            LOGGER.warn("Received an RTP PayloadChangeEvent of " + payload 
+                    + ". Sorry, cannot handle payload change.");
         }
     }
 
