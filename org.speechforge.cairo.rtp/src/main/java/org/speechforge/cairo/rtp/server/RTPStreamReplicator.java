@@ -58,7 +58,7 @@ public class RTPStreamReplicator extends RTPConsumer {
             LogManager.getLogger(RTPStreamReplicator.class);
 
     private PBDSReplicator _replicator;
-    private Processor _processor;
+    private Processor processor;
     private RecorderMediaClient recorder;
     private int _port;
     
@@ -91,9 +91,9 @@ public class RTPStreamReplicator extends RTPConsumer {
      */
     @Override
     public void shutdown() {
-        if (_processor != null) {
-            _processor.close();
-            _processor = null;
+        if (processor != null) {
+            processor.close();
+            processor = null;
         }
         if (_replicator != null) {
             _replicator = null;
@@ -113,8 +113,8 @@ public class RTPStreamReplicator extends RTPConsumer {
                         dataSource, preferredFormats, CONTENT_DESCRIPTOR_RAW);
                 try {
                     LOGGER.debug("Creating realized processor...");
-                    _processor = Manager.createRealizedProcessor(pm);
-                    _processor.addControllerListener(new ProcessorStarter());
+                    processor = Manager.createRealizedProcessor(pm);
+                    processor.addControllerListener(new ProcessorStarter());
                 } catch (IOException e){
                     throw e;
                 } catch (javax.media.CannotRealizeException e){
@@ -127,12 +127,12 @@ public class RTPStreamReplicator extends RTPConsumer {
                     LOGGER.debug("Internal Processor realized.");
                 }
 
-                PushBufferDataSource pbds = (PushBufferDataSource) _processor.getDataOutput();
+                PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
                 _replicator = new PBDSReplicator(pbds);
-                _processor.start();
+                processor.start();
                 this.notifyAll();
             } catch (IOException e) {
-                _processor = null;
+                processor = null;
                 _replicator = null;  // TODO: close properly
                 LOGGER.warn(e, e);
             }
@@ -156,12 +156,12 @@ public class RTPStreamReplicator extends RTPConsumer {
 
         //_replicator.shutdown();
         _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
-        if (_processor != null) {
+        if (processor != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
             }
-            _processor.close();
-            _processor = null;
+            processor.close();
+            processor = null;
             if (LOGGER.isDebugEnabled()) {
                 if (recorder != null) {
                     recorder.streamInactive(null, false);
@@ -201,7 +201,7 @@ public class RTPStreamReplicator extends RTPConsumer {
         PushBufferDataSource pbds = _replicator.replicate();
         ProcessorModel pm = new ProcessorModel(
         		pbds, preferredMediaFormats, outputContentDescriptor);
-        Processor processor =null;
+        Processor processor = null;
         try {
             LOGGER.debug("Creating realized processor...");
             processor = Manager.createRealizedProcessor(pm);

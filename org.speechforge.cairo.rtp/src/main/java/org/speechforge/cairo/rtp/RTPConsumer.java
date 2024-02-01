@@ -224,31 +224,32 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      */
     private void registerDTMFSupport() throws IOException {
         JavaDecoder decoder = new JavaDecoder();
-        Format[] supportedOutputFormats = new Format[] {
-                new AudioFormat(
-                AudioFormat.LINEAR,
-                Format.NOT_SPECIFIED,
-                16,
-                Format.NOT_SPECIFIED,
-                AudioFormat.LITTLE_ENDIAN,
-                AudioFormat.SIGNED,
-                16,
-                Format.NOT_SPECIFIED,
-                Format.byteArray
-                )
-                };
         PlugInManager.addPlugIn(JavaDecoder.class.getCanonicalName(), 
-                decoder.getSupportedInputFormats(), supportedOutputFormats, 
-                PlugInManager.CODEC );
+                decoder.getSupportedInputFormats(), 
+                decoder.getSupportedInputFormats(), PlugInManager.CODEC );
         PlugInManager.commit();
+        if (isDTMFCodecInstalled()) {
+            LOGGER.info("registered DTMF Decoder");
+        } else {
+            LOGGER.warn("DTMF Decoder not registered");
+        }
+    }
+
+    /**
+     * Checks if the DTMF codec is installed.
+     * 
+     * @return true, if the DTMF codec is installed
+     */
+    private boolean isDTMFCodecInstalled() {
         @SuppressWarnings("unchecked")
         Vector<String> codecs = PlugInManager.getPlugInList(null, null, 
                 PlugInManager.CODEC);
         for (String codec : codecs) {
             if (codec.equals(JavaDecoder.class.getCanonicalName())) {
-                LOGGER.info("Registered DTMF Decoder");
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -293,7 +294,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
 
         final ReceiveStream stream = event.getReceiveStream();
         if (event instanceof RemotePayloadChangeEvent) {
-            handlePayloadChangeEvent((RemotePayloadChangeEvent) event);
+            handlePayloadChangeEvent((RemotePayloadChangeEvent) event, stream);
         } else if (event instanceof NewReceiveStreamEvent) {
             handleNewReceiveStreamEvent(stream);
         } else if (event instanceof StreamMappedEvent) {
@@ -384,23 +385,38 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     /**
      * Handle payload change event.
      * @param event the payload change event
+     * @param stream the receive stream
      */
-    private void handlePayloadChangeEvent(RemotePayloadChangeEvent event) {
+    private void handlePayloadChangeEvent(RemotePayloadChangeEvent event,
+            ReceiveStream stream) {
         int payload = event.getNewPayload();
 
         // Check if the new payload type is for DTMF events
         if (payload == JavaDecoder.DTMF_PAYLOAD) {
             LOGGER.warn("Handling of DTMF payload types not implemented yet.");
-            
-            final ReceiveStream stream = event.getReceiveStream();
-            DataSource source = stream.getDataSource();
-            LOGGER.info("Source: "+ source);
+            handleDTMFPayload(event, stream);
         } else {
             LOGGER.warn("Received an RTP PayloadChangeEvent of " + payload 
                     + ". Sorry, cannot handle payload change.");
         }
     }
 
+    /**
+     * Handle DTMF payload.
+     * 
+     * @param event the event
+     * @param stream the receive stream
+     */
+    private void handleDTMFPayload(RemotePayloadChangeEvent event,
+            ReceiveStream stream) {
+        final DataSource dataSource = stream.getDataSource();
+        try {
+            dataSource.connect();
+        } catch (IOException e) {
+            LOGGER.warn("Error connecting data source: " + e.getMessage(), e);
+        }
+        
+    }
     
     public abstract void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource,Format[] preferredMediaFormats);
 
