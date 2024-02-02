@@ -29,8 +29,10 @@ import java.util.Vector;
 import javax.media.Format;
 import javax.media.PlugInManager;
 import javax.media.format.AudioFormat;
+import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
+import javax.media.protocol.PushBufferStream;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.Participant;
 import javax.media.rtp.RTPControl;
@@ -409,8 +411,13 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      */
     private void handleDTMFPayload(RemotePayloadChangeEvent event,
             ReceiveStream stream) {
-        final DataSource dataSource = stream.getDataSource();
+        final PushBufferDataSource dataSource = (PushBufferDataSource) stream.getDataSource();
         try {
+            RTPControl control = (RTPControl) dataSource.getControl(
+                    RTPControl.class.getCanonicalName());
+            control.addFormat(JavaDecoder.DTMF_FORMAT, JavaDecoder.DTMF_PAYLOAD);
+            LOGGER.info("Received new RTP stream: " + control.getFormat());
+            
             dataSource.connect();
         } catch (IOException e) {
             LOGGER.warn("Error connecting data source: " + e.getMessage(), e);

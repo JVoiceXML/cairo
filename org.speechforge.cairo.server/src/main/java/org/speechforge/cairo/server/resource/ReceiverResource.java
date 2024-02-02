@@ -36,7 +36,7 @@ import java.util.Vector;
 
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.FileTypeDescriptor;
-import javax.media.rtp.RTPManager;
+import javax.sdp.Media;
 import javax.sdp.MediaDescription;
 
 import org.apache.commons.cli.CommandLine;
@@ -45,9 +45,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.pool.ObjectPool;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.io.IoBuilder;
 import org.mrcp4j.MrcpResourceType;
 import org.mrcp4j.server.MrcpServerSocket;
@@ -69,6 +69,8 @@ import org.speechforge.cairo.server.resource.session.RecorderResources;
 import org.speechforge.cairo.sip.ResourceUnavailableException;
 import org.speechforge.cairo.sip.SdpMessage;
 import org.speechforge.cairo.util.CairoUtil;
+
+import gov.nist.javax.sdp.fields.AttributeField;
 
 /**
  * Implements a {@link org.speechforge.cairo.server.resource.Resource} for handling MRCPv2 requests
@@ -143,7 +145,7 @@ public class ReceiverResource extends ResourceImpl {
             channels.addAll(c2);
             Vector<String> formatsInRequest = null;
             if (channels.size() > 0) {
-                for(MediaDescription md: channels) {
+                for (MediaDescription md: channels) {
                     String channelID = md.getAttribute(SdpMessage.SDP_CHANNEL_ATTR_NAME);
                     String rt =  md.getAttribute(SdpMessage.SDP_RESOURCE_ATTR_NAME);
                     MrcpResourceType resourceType = null;
@@ -183,7 +185,15 @@ public class ReceiverResource extends ResourceImpl {
                         RTPRecogChannel recog = new RTPRecogChannel(_recEnginePool, replicator);
                         _mrcpServer.openChannel(channelID, new MrcpRecogChannel(channelID, recog, _baseGrammarDir));
                         md.getMedia().setMediaPort(_mrcpServer.getPort());
-                        rtpmd.get(0).getMedia().setMediaFormats(af.filterOutUnSupportedFormatsInOffer());
+                        MediaDescription m = rtpmd.get(0);
+                        Media media = m.getMedia();
+                        Vector<String> v = af.filterOutUnSupportedFormatsInOffer();
+                        media.setMediaFormats(v);
+                        // TODO remove this hard coded value
+                        AttributeField af1 = new AttributeField();
+                        af1.setName("fmtp");
+                        af1.setValue("100 0-15");
+                        m.addAttribute(af1);
                         
                         // Create a channel resources object and put it in the channel map (which is in the session).  
                         // These resources must be returned to the pool when the channel is closed.  In the case of a 

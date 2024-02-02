@@ -5,6 +5,7 @@ import javax.media.Format;
 import javax.sound.sampled.AudioFormat;
 
 import org.apache.logging.log4j.Logger;
+import org.speechforge.cairo.jmf.codec.audio.dtmf.JavaDecoder;
 import org.apache.logging.log4j.LogManager;
 
 public class AudioFormats {
@@ -66,7 +67,7 @@ public class AudioFormats {
         //TODO: determine the supported formats and save in supported formats array (for now hardcoded to ulaw)
     } 
     
-    public  Vector filterOutUnSupportedFormatsInOffer() throws ResourceUnavailableException {
+    public  Vector<String> filterOutUnSupportedFormatsInOffer() throws ResourceUnavailableException {
         //TODO: Really check the formats instead of just hardcoding
         //      Also need to take accoustic models into account.
         //      Also need to take into account what Sphinx can handle it uses PREFERRED_MEDIA_FORMAT which appears to be a third format
@@ -80,18 +81,24 @@ public class AudioFormats {
         //for (int j=0;j<PREFERRED_MEDIA_FORMATS.length;j++) {
         //    PREFERRED_MEDIA_FORMATS[j].get..
         //}
-        Vector v = new Vector();
+        Vector<String> v = new Vector<String>();
         boolean foundAtLeastOne = false;
         for (int i=0; i<requestedFormatsSDP.size(); i++) {
             //LOGGER.info(i+" format type is: "+requestedFormatsSDP.get(i).getClass().getCanonicalName());
             //LOGGER.info("   ...and it is: "+requestedFormatsSDP.get(i).toString());
-            if (((String) requestedFormatsSDP.get(i)).equals(PCMU_SDP)) {
+            String requestedFormat = (String) requestedFormatsSDP.get(i);
+            if (requestedFormat.equals(PCMU_SDP)) {
                 foundAtLeastOne = true;
-                v.add(requestedFormatsSDP.get(i));
+                v.add(requestedFormat);
+            } else if (requestedFormat.equals(
+                    Integer.toString(JavaDecoder.DTMF_PAYLOAD))) {
+                foundAtLeastOne = true;
+                v.add(requestedFormat);
             }
         }
-        if (!foundAtLeastOne)
-            throw new ResourceUnavailableException();
+        if (!foundAtLeastOne) {
+            throw new ResourceUnavailableException("No supported format found");
+        }
         return v;
     }
     
