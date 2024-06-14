@@ -362,7 +362,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             LOGGER.warn("NewReceiveStreamEvent: receive stream is null!");
             return;
         } 
-        DataSource dataSource = stream.getDataSource();
+        final DataSource dataSource = stream.getDataSource();
         if (dataSource == null) {
             LOGGER.warn("NewReceiveStreamEvent: data source is null!");
             return;
@@ -398,6 +398,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             LOGGER.warn("Handling of DTMF payload types not implemented yet.");
             handleDTMFPayload(event, stream);
         } else {
+            // This will also be called after the DTMF payload type has been
+            // handled, with a payplod type of 0
             LOGGER.warn("Received an RTP PayloadChangeEvent of " + payload 
                     + ". Sorry, cannot handle payload change.");
         }
@@ -411,7 +413,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
      */
     private void handleDTMFPayload(RemotePayloadChangeEvent event,
             ReceiveStream stream) {
-        final PushBufferDataSource dataSource = (PushBufferDataSource) stream.getDataSource();
+        final PushBufferDataSource dataSource = 
+                (PushBufferDataSource) stream.getDataSource();
         try {
             RTPControl control = (RTPControl) dataSource.getControl(
                     RTPControl.class.getCanonicalName());
@@ -425,12 +428,19 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         
     }
     
-    public abstract void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource,Format[] preferredMediaFormats);
+    public abstract void streamReceived(ReceiveStream stream, 
+            PushBufferDataSource dataSource,Format[] preferredMediaFormats);
 
-    public abstract void streamMapped(ReceiveStream stream, Participant participant);
+    public abstract void streamMapped(ReceiveStream stream, 
+            Participant participant);
 
     public abstract void streamInactive(ReceiveStream stream, boolean byeEvent);
 
+    /**
+     * Generates a string representation of the given source description.
+     * @param sd the source description
+     * @return string representation of the source description
+     */
     private static String toString(SourceDescription sd) {
         final StringBuilder sb = new StringBuilder();
         switch (sd.getType()) {

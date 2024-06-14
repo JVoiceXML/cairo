@@ -32,8 +32,12 @@ import org.speechforge.cairo.jmf.ProcessorStarter;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import javax.media.CannotRealizeException;
+import javax.media.ControllerListener;
 import javax.media.Format;
 import javax.media.Manager;
+import javax.media.NoProcessorException;
+import javax.media.NotRealizedError;
 import javax.media.Processor;
 import javax.media.ProcessorModel;
 import javax.media.protocol.ContentDescriptor;
@@ -45,11 +49,12 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * Serves to replicate an incoming RTP audio stream so that it may be consumed by multiple
- * destinations at varying time intervals without starting or stopping the underlying data
- * source.
+ * Serves to replicate an incoming RTP audio stream so that it may be consumed
+ * by multiple destinations at varying time intervals without starting or
+ * stopping the underlying data source.
  *
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Niels Godfredsen {@literal <}<a href=
+ *         "mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  * @author Dirk Schnelle-Walka
  */
 public class RTPStreamReplicator extends RTPConsumer {
@@ -57,7 +62,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     private static final Logger LOGGER =
             LogManager.getLogger(RTPStreamReplicator.class);
 
-    private PBDSReplicator _replicator;
+    private PBDSReplicator replicator;
     private Processor processor;
     private RecorderMediaClient recorder;
     private int _port;
@@ -75,7 +80,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
     
     /**
-     * TODOC
+     * Retrieves the port that this replicator is listening on.
      * @return Returns the port.
      */
     public int getPort() {
@@ -83,7 +88,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
     
     public void removeReplicant(PushBufferDataSource pbds) {
-        _replicator.removeReplicator(pbds);
+        replicator.removeReplicator(pbds);
     }
 
     /**
@@ -95,47 +100,62 @@ public class RTPStreamReplicator extends RTPConsumer {
             processor.close();
             processor = null;
         }
-        if (_replicator != null) {
-            _replicator = null;
+        if (replicator != null) {
+            replicator = null;
         }
         //_replicator.cleanup();
         super.shutdown();
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamReceived(javax.media.rtp.ReceiveStream, javax.media.protocol.PushBufferDataSource)
+    /**
+     * {@inheritDoc}
      */
     @Override
-    public synchronized void streamReceived(ReceiveStream stream, PushBufferDataSource dataSource, Format[] preferredFormats) {
-        if (_replicator == null) {
-            try {
-                ProcessorModel pm = new ProcessorModel(
-                        dataSource, preferredFormats, CONTENT_DESCRIPTOR_RAW);
-                try {
-                    LOGGER.debug("Creating realized processor...");
-                    processor = Manager.createRealizedProcessor(pm);
-                    processor.addControllerListener(new ProcessorStarter());
-                } catch (IOException e){
-                    throw e;
-                } catch (javax.media.CannotRealizeException e){
-                    throw (IOException) new IOException(e.getMessage()).initCause(e);
-                } catch (javax.media.NoProcessorException e){
-                    throw (IOException) new IOException(e.getMessage()).initCause(e);
-                }
+    public synchronized void streamReceived(ReceiveStream stream, 
+            PushBufferDataSource dataSource, Format[] preferredFormats) {
+        if (replicator == null) {
+            createNewReplicator(dataSource, preferredFormats);
+        }
+    }
 
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Internal Processor realized.");
-                }
-
-                PushBufferDataSource pbds = (PushBufferDataSource) processor.getDataOutput();
-                _replicator = new PBDSReplicator(pbds);
-                processor.start();
-                this.notifyAll();
-            } catch (IOException e) {
-                processor = null;
-                _replicator = null;  // TODO: close properly
-                LOGGER.warn(e, e);
+    /**
+     * Creates a new replicator for the given data source.
+     * 
+     * @param dataSource
+     *            the data source to replicate
+     * @param preferredFormats
+     *            the preferred formats
+     * @throws NotRealizedError
+     *             if the processor could not be realized
+     */
+    private void createNewReplicator(PushBufferDataSource dataSource,
+            Format[] preferredFormats) throws NotRealizedError {
+        try {
+            ProcessorModel pm = new ProcessorModel(
+                    dataSource, preferredFormats, CONTENT_DESCRIPTOR_RAW);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Creating realized processor...");
             }
+            processor = Manager.createRealizedProcessor(pm);
+            final ControllerListener listener = new ProcessorStarter();
+            processor.addControllerListener(listener);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Internal Processor realized.");
+            }
+
+            final PushBufferDataSource pbds = 
+                    (PushBufferDataSource) processor.getDataOutput();
+            replicator = new PBDSReplicator(pbds);
+            processor.start();
+            this.notifyAll();
+        } catch (IOException | NoProcessorException | CannotRealizeException e) {
+            processor = null;
+            replicator = null;  // TODO: close properly
+            LOGGER.warn(e, e);
+            final NotRealizedError nre = new NotRealizedError(
+                    "Could not create processor: " + e.getMessage());
+            nre.initCause(e);
+            throw nre;
         }
     }
 
@@ -155,7 +175,7 @@ public class RTPStreamReplicator extends RTPConsumer {
         //if (byeEvent) {
 
         //_replicator.shutdown();
-        _replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
+        replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
         if (processor != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
@@ -183,7 +203,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     public synchronized ProcessorReplicatorPair createRealizedProcessor(ContentDescriptor outputContentDescriptor, long maxWait, Format[] preferredMediaFormats)
       throws IOException, IllegalStateException {
 
-        if (_replicator == null) {
+        if (replicator == null) {
             if (maxWait >= 0) {
                 try {
                     this.wait(maxWait); //TODO: make sure timeout period has passed
@@ -192,13 +212,13 @@ public class RTPStreamReplicator extends RTPConsumer {
                     LOGGER.warn(e, e);
                 }
             }
-            if (_replicator == null) {
+            if (replicator == null) {
                 throw new IllegalStateException("No RTP stream yet received!");
             }
         }
 
 
-        PushBufferDataSource pbds = _replicator.replicate();
+        PushBufferDataSource pbds = replicator.replicate();
         ProcessorModel pm = new ProcessorModel(
         		pbds, preferredMediaFormats, outputContentDescriptor);
         Processor processor = null;
