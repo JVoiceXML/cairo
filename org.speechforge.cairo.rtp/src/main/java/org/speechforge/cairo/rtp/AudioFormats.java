@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 public class AudioFormats {
     
     /***********************************************************************
-     * Format types in the sdp message (in teh sip invite body) use the type to 
+     * Format types in the sdp message (in the sip invite body) use the type to 
      * identify the format (i.e. 0 indicates 8kHZ PCMU).  
      * JMF has a format string that indiactes format.  need a way to map the two.
      * 
@@ -140,11 +140,39 @@ public class AudioFormats {
     }
 
 
+
+    /**
+     * Return a JMF AudioFormat for a given Jingle Payload type.
+     * Return null if the payload is not supported by this jmf API.
+     *
+     * @param payloadtype payloadtype
+     * @return correspondent audioType
+     */
+    public static javax.media.format.AudioFormat getAudioFormat(int payloadtype) {
+
+        switch (payloadtype) {
+            case 0:
+                return new javax.media.format.AudioFormat(
+                        javax.media.format.AudioFormat.ULAW_RTP, 8000d, 8, 1,
+                        javax.media.format.AudioFormat.NOT_SPECIFIED,
+                        javax.media.format.AudioFormat.NOT_SPECIFIED);
+            case 3:
+                return new javax.media.format.AudioFormat(
+                        javax.media.format.AudioFormat.GSM_RTP);
+            case 4:
+                return new javax.media.format.AudioFormat(
+                        javax.media.format.AudioFormat.G723_RTP);
+            default:
+                return null;
+        }
+    }
+
     /**
      * @param af the supportedFormatsJMF to set
      * @return supported audio format
      */
-   public  static javax.media.format.AudioFormat convertToJmfFormat(AudioFormat af) {
+   public  static javax.media.format.AudioFormat convertToJmfFormat(
+           AudioFormat af) {
     	
     	String encoding;
     	double sampleRate;

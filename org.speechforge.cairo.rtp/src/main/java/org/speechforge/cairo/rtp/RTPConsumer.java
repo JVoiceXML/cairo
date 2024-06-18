@@ -29,10 +29,8 @@ import java.util.Vector;
 import javax.media.Format;
 import javax.media.PlugInManager;
 import javax.media.format.AudioFormat;
-import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.media.protocol.PushBufferDataSource;
-import javax.media.protocol.PushBufferStream;
 import javax.media.rtp.InvalidSessionAddressException;
 import javax.media.rtp.Participant;
 import javax.media.rtp.RTPControl;
@@ -56,8 +54,6 @@ import org.apache.logging.log4j.Logger;
 import org.speechforge.cairo.jmf.codec.audio.dtmf.JavaDecoder;
 import org.speechforge.cairo.util.CairoUtil;
 
-import com.ibm.media.codec.audio.AudioCodec;
-
 
 /**
  * Manages connection with and consumption from an incoming RTP audio stream.
@@ -78,6 +74,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     
     private Format[] preferredMediaFormats;
 
+    private AudioFormat currentFormat;
+    
     /**
      * Instantiates a new RTP consumer.  Just needs a remote port.  
      * Assumes the local and remote host is the localhost.
@@ -371,14 +369,15 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             LOGGER.warn("NewReceiveStreamEvent: data source is not PushBufferDataSource!");
             return;
         }
-        if (LOGGER.isDebugEnabled()) {
-            // Find out the formats.
-            RTPControl control = (RTPControl) dataSource.getControl("javax.media.rtp.RTPControl");
-            if (control != null) {
-                LOGGER.debug("Received new RTP stream: " + control.getFormat());
-            } else {
-                LOGGER.debug("Recevied new RTP stream: RTPControl is null!");
-            }
+        // Find out the formats.
+        final RTPControl control = (RTPControl) dataSource.getControl(
+                "javax.media.rtp.RTPControl");
+        if (control != null) {
+            currentFormat = (AudioFormat) control.getFormat();
+            LOGGER.info("Received new RTP stream: " + currentFormat);
+        } else {
+            LOGGER.warn("Received new RTP stream: RTPControl is null, "
+                    + "unable to determine format!");
         }
         streamReceived(stream, (PushBufferDataSource) dataSource, 
                 preferredMediaFormats);
@@ -400,8 +399,14 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         } else {
             // This will also be called after the DTMF payload type has been
             // handled, with a payplod type of 0
-            LOGGER.warn("Received an RTP PayloadChangeEvent of " + payload 
+            LOGGER.warn("Received an RTP PayloadChangeEvent to " + payload 
                     + ". Sorry, cannot handle payload change.");
+            AudioFormat requestedAudioFormat =
+                    AudioFormats.getAudioFormat(payload);
+            if (currentFormat.matches(requestedAudioFormat)) {
+                // TODO This may change once DTMD handling is implemented
+                LOGGER.info("reverting to original format: " + currentFormat);
+            }
         }
     }
 
@@ -418,8 +423,12 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         try {
             RTPControl control = (RTPControl) dataSource.getControl(
                     RTPControl.class.getCanonicalName());
-            control.addFormat(JavaDecoder.DTMF_FORMAT, JavaDecoder.DTMF_PAYLOAD);
-            LOGGER.info("Received new RTP stream: " + control.getFormat());
+            control.addFormat(JavaDecoder.DTMF_FORMAT, 
+                    JavaDecoder.DTMF_PAYLOAD);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("DTMF payload with format: " + 
+                        control.getFormat());
+            }
             
             dataSource.connect();
         } catch (IOException e) {

@@ -113,6 +113,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     @Override
     public synchronized void streamReceived(ReceiveStream stream, 
             PushBufferDataSource dataSource, Format[] preferredFormats) {
+        LOGGER.info("Stream received for SSRC=" + stream.getSSRC());
         if (replicator == null) {
             createNewReplicator(dataSource, preferredFormats);
         }
@@ -177,9 +178,7 @@ public class RTPStreamReplicator extends RTPConsumer {
         //_replicator.shutdown();
         replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
         if (processor != null) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Closing RTP processor for SSRC=" + stream.getSSRC());
-            }
+            LOGGER.info("Stream deactivated for SSRC=" + stream.getSSRC());
             processor.close();
             processor = null;
             if (LOGGER.isDebugEnabled()) {
