@@ -27,7 +27,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.Validate;
@@ -36,13 +35,16 @@ import org.apache.commons.lang.Validate;
  * Manages the storage and retrieval of temporary grammar files on the file system.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class GrammarManager {
-
-    private Map<String, GrammarLocation> _grammars = new HashMap<String, GrammarLocation>();
-
-    private File _grammarDir;
-    private URL _grammarDirUrl;
+    /** Map of grammar IDs to grammar locations */
+    private Map<String, GrammarLocation> grammars = 
+            new java.util.HashMap<String, GrammarLocation>();
+    /** Directory for grammars */
+    private File grammarDir;
+    /** URL of the grammar directory */
+    private URL grammarDirUrl;
 
     /**
      * Constructs a new object.
@@ -50,35 +52,41 @@ public class GrammarManager {
      * @param baseGrammarDir the base directory for grammars
      */
     public GrammarManager(String channelID, File baseGrammarDir) {
-        Validate.isTrue(baseGrammarDir.isDirectory(), "baseGrammarDir parameter was not a directory: ", baseGrammarDir);
-        _grammarDir = new File(baseGrammarDir, channelID);
-        if (!_grammarDir.mkdir()) {
-            throw new IllegalArgumentException("Specified directory not valid: " + _grammarDir.getAbsolutePath());
+        Validate.isTrue(baseGrammarDir.isDirectory(), 
+                "baseGrammarDir parameter was not a directory: ",
+                baseGrammarDir);
+        grammarDir = new File(baseGrammarDir, channelID);
+        if (!grammarDir.mkdir()) {
+            throw new IllegalArgumentException("Specified directory not valid: "
+                    + grammarDir.getAbsolutePath());
         }
         try {
-            _grammarDirUrl = _grammarDir.toURL();
+            grammarDirUrl = grammarDir.toURI().toURL();
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Specified directory not valid: " + _grammarDir.getAbsolutePath(), e);
+            throw new IllegalArgumentException("Specified directory not valid: "
+                    + grammarDir.getAbsolutePath(), e);
         }
     }
     
     /**
-     * TODOC
+     * Saves a grammar to the file system.
      * @param grammarID the ID if the grammar
      * @param grammarText the grammar
      * @return location of the grammar
      * @throws IOException error writing the grammar
      */
-    // NOTE: could reduce sync scope but not necessary since generally single threaded access
-    public synchronized GrammarLocation saveGrammar(String grammarID, String grammarText)
-      throws IOException {
-
+    // NOTE: could reduce sync scope but not necessary since generally single
+    // threaded access
+    public synchronized GrammarLocation saveGrammar(String grammarID,
+            String grammarText)
+                    throws IOException {
         // generate grammar name and location
         String grammarName = Long.toString(System.currentTimeMillis());
-        GrammarLocation location = new GrammarLocation(_grammarDirUrl, grammarName);
+        GrammarLocation location = new GrammarLocation(
+                grammarDirUrl, grammarName);
 
-        // write grammar to filesystem
-        File grammarFile = new File(_grammarDir, location.getFilename());
+        // write grammar to file system
+        File grammarFile = new File(grammarDir, location.getFilename());
         FileWriter fw = new FileWriter(grammarFile);
         try {
             fw.write(grammarText);
@@ -88,19 +96,19 @@ public class GrammarManager {
 
         if (grammarID != null && grammarID.length() > 0) {
             // store for future reference in session
-            _grammars.put(grammarID, location);
+            grammars.put(grammarID, location);
         }
 
         return location;
     }
 
     /**
-     * TODOC
+     * Retrieves the location of a grammar with the specified ID.
      * @param grammarID the ID of the grammar
      * @return location of the grammar
      */
     public synchronized GrammarLocation getGrammarLocation(String grammarID) {
-        return _grammars.get(grammarID);
+        return grammars.get(grammarID);
     }
 
 }

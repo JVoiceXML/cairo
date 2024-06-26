@@ -109,7 +109,6 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
      * @see org.mrcp4j.server.provider.RecogOnlyRequestHandler#recognize(org.mrcp4j.message.request.MrcpRequestFactory.UnimplementedRequest, org.mrcp4j.server.MrcpSession)
      */
     public synchronized MrcpResponse recognize(UnimplementedRequest request, MrcpSession session) {
-
         MrcpRequestState requestState = MrcpRequestState.COMPLETE;
         MrcpHeader completionCauseHeader = null;
         MrcpHeader completionReasonHeader = null;
@@ -122,17 +121,15 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
             GrammarLocation grammarLocation = null;
             if (request.hasContent()) {
                 String contentType = request.getContentType();
-                if (contentType.equalsIgnoreCase("application/jsgf")) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("processing jsgf");
-                    }
-                    // save grammar to file
-                    MrcpHeader contentIdHeader = request.getHeader(MrcpHeaderName.CONTENT_ID);
-                    String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValueString();
+                if (isJSGFGrammar(contentType)) {
                     try {
-                        grammarLocation = _grammarManager.saveGrammar(grammarID, request.getContent());
+                        final String grammarUrl = request.getContent();
+                        MrcpHeader contentIdHeader =
+                                request.getHeader(MrcpHeaderName.CONTENT_ID);
+                        grammarLocation = processJSGFGrammar(grammarUrl,
+                                contentIdHeader);
                     } catch (IOException e) {
-                        LOGGER.debug(e, e);
+                        LOGGER.warn(e, e);
                         statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
                     }
                 } else if (contentType.equalsIgnoreCase("text/uri-list")) {
@@ -141,112 +138,53 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                     }
                     String text = request.getContent();
                     final List<String> uris = parseUriList(text);
+                    MrcpHeader contentIdHeader =
+                            request.getHeader(MrcpHeaderName.CONTENT_ID);
                     for (String str : uris) {
                         try {
-                            URL url = new URL(str);
-                            URLConnection uc = url.openConnection();
-                            LOGGER.debug(str + "  " + uc.getContentType());
-                            
-                            //TODO:  Should replace this check content type and not always assume it is JSGF 
-                            //       (But using the URI-LIST as a work around for large grammars not supported in mrcp4j 
-                            //        and in some cases the uri does not hav a content type (file uri's)).
-                            //if ((uc.getContentType().equals("text/plain")) ||                //TODO: Remove this should not assume text/plain is jsgf
-                            //    (uc.getContentType().equals("application/jsgf"))){
-                               BufferedReader in = new BufferedReader(
-                                                    new InputStreamReader(
-                                                    uc.getInputStream()));
-                               
-                               //TODO: Make this more efficient
-                               String inputLine;
-                               String grammarText = new String();
-                               while ((inputLine = in.readLine()) != null) {
-                                   grammarText = grammarText +inputLine+"\n";
-                               }
-                               in.close();
-                              LOGGER.debug(grammarText);
-                               
-                               // save grammar to file
-                               MrcpHeader contentIdHeader = request.getHeader(MrcpHeaderName.CONTENT_ID);
-                               String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValueString();
-                               try {
-                                   grammarLocation = _grammarManager.saveGrammar(grammarID, grammarText);
-                               } catch (IOException e) {
-                                   LOGGER.debug(e, e);
-                                   statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
-                               }
-                           
-                            //} else {
-                            //    _logger.warn("Unsupported content type for in the recognize request: "+ uc.getContentType());
-                            //}
-                      
-                            
+                            processJSGFGrammar(str, contentIdHeader);
                         } catch (IOException e) {
                             LOGGER.warn(e.getMessage(), e);
                             statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
                         }
                     }
                 } else {
-                    LOGGER.warn("unsupported grammar type '" + contentType + "'");
+                    LOGGER.warn("unsupported grammar type '" + contentType +
+                            "'");
                     statusCode = MrcpResponse.STATUS_UNSUPPORTED_HEADER_VALUE;
                 }
             }
-            if (statusCode < 0) { // status not yet set
+            if (statusCode < 0) { 
+                // if no error so far, start recognition
                 try {
-                    Boolean startInputTimers = (Boolean) getParam(MrcpHeaderName.START_INPUT_TIMERS, request, DEFAULT_START_INPUT_TIMERS);
-                    Long noInputTimeout = (startInputTimers.booleanValue()) ?
-                            (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT) : LONG_MINUS_ONE;
-                    //TODO: get the hotword mode from mrcp message        
-                    boolean hotword = false;
-                    String hw = (String) getParam(MrcpHeaderName.RECOGNITION_MODE, request, "normal");
-                    if (hw.equals("hotword")) {
-                       hotword = true;
-                    }
-                    LOGGER.debug("Recognition Mode is : "+hw+ "  So hotword flag is now: "+hotword);
-                    LOGGER.debug("No input timeout value is "+noInputTimeout.longValue());
-                    _rtpChannel.recognize(new Listener(session), grammarLocation, noInputTimeout.longValue(), hotword);
+                    requestState = startRecognition(request, session,
+                            grammarLocation);
                     statusCode = MrcpResponse.STATUS_SUCCESS;
-                    requestState = MrcpRequestState.IN_PROGRESS;
-                    _state = RECOGNIZING;
                 } catch (IllegalStateException e) {
-                    LOGGER.debug(e, e);
+                    LOGGER.warn(e, e);
                     statusCode = MrcpResponse.STATUS_METHOD_NOT_VALID_IN_STATE;
                     // TODO: cancel or queue request instead (depending upon value of 'cancel-if-queue' header)
-                } catch (IOException e) {
-                    LOGGER.debug(e, e);
+                } catch (IOException | ResourceUnavailableException e) {
+                    LOGGER.warn("recognize error : " + e, e);
                     statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
-                    CompletionCause completionCause = new CompletionCause((short) 6, "recognizer-error");
+                    CompletionCause completionCause = 
+                            new CompletionCause((short) 6, "recognizer-error");
                     completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
                     completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
-                } catch (ResourceUnavailableException e) {
-                    LOGGER.debug(e, e);
-                    statusCode = MrcpResponse.STATUS_SERVER_INTERNAL_ERROR;
-                    CompletionCause completionCause = new CompletionCause((short) 6, "recognizer-error");
-                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
-                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
-                } catch (GrammarException e) {
-                    LOGGER.debug(e, e);
+                } catch (GrammarException | JSGFGrammarException 
+                        | JSGFGrammarParseException e) {
+                    LOGGER.warn("grammar load failure: " + e, e);
                     statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                    CompletionCause completionCause = new CompletionCause((short) 4, "grammar-load-failure");
+                    CompletionCause completionCause = 
+                            new CompletionCause((short) 4, "grammar-load-failure");
                     completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
                     completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
                 } catch (IllegalValueException e) {
-                    LOGGER.debug(e, e);
+                    LOGGER.warn(e, e);
                     statusCode = MrcpResponse.STATUS_ILLEGAL_VALUE_FOR_HEADER;
                     // TODO: add completion cause header
                     // TODO: add bad value headers
-                } catch (JSGFGrammarParseException e) {
-                    LOGGER.debug(e, e);
-                    statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                    CompletionCause completionCause = new CompletionCause((short) 4, "grammar-load-failure");
-                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
-                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
-				} catch (JSGFGrammarException e) {
-                    LOGGER.debug(e, e);
-                    statusCode = MrcpResponse.STATUS_OPERATION_FAILED;
-                    CompletionCause completionCause = new CompletionCause((short) 4, "grammar-load-failure");
-                    completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
-                    completionReasonHeader = MrcpHeaderName.COMPLETION_REASON.constructHeader(e.getMessage());
-				}
+		}
             }
         }
 
@@ -254,6 +192,102 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         response.addHeader(completionCauseHeader);
         response.addHeader(completionReasonHeader);
         return response;
+    }
+
+    /**
+     * Processes a JSGF grammar.
+     * @param grammarURL the URL of the grammar to load
+     * @return the grammar location
+     * @throws IOException
+     *           if an I/O error occurs
+     */
+    private GrammarLocation processJSGFGrammar(final String grammarURL,
+            final MrcpHeader contentIdHeader)
+                throws IOException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("processing jsgf '" + grammarURL + "'");
+        }
+        // save grammar to file
+        final URL url = new URL(grammarURL);
+        final URLConnection uc = url.openConnection();
+        
+        //TODO:  Should replace this check content type and not a lways assume it is JSGF 
+        //       (But using the URI-LIST as a work around for large grammars not supported in mrcp4j 
+        //        and in some cases the uri does not hav a content type (file uri's)).
+        //if ((uc.getContentType().equals("text/plain")) ||                //TODO: Remove this should not assume text/plain is jsgf
+        //    (uc.getContentType().equals("application/jsgf"))){
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                        uc.getInputStream()));
+           
+        //TODO: Make this more efficient
+        String inputLine;
+        String grammarText = new String();
+        while ((inputLine = in.readLine()) != null) {
+            grammarText = grammarText + inputLine+"\n";
+        }
+        in.close();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(grammarText);
+        }
+        String grammarID = (contentIdHeader == null) ? null : contentIdHeader.getValueString();
+        return _grammarManager.saveGrammar(grammarID, grammarText);
+    }
+
+    /**
+     * Checks if the content type is a JSGF grammar.
+     * 
+     * @param contentType
+     *            the content type
+     * @return true if the content type is a JSGF grammar
+     */
+    private boolean isJSGFGrammar(String contentType) {
+        return contentType.equalsIgnoreCase("application/jsgf") ||
+                contentType.equalsIgnoreCase("application/x-jsgf");
+    }
+
+    /**
+     * Starts the recognition process.
+     * @param request the MRCP request
+     * @param session t
+     * @param grammarLocation the location of the grammar
+     * @return the request state
+     * @throws IllegalValueException
+     * @throws IOException
+     * @throws ResourceUnavailableException
+     * @throws GrammarException
+     * @throws JSGFGrammarParseException
+     * @throws JSGFGrammarException
+     */
+    private MrcpRequestState startRecognition(UnimplementedRequest request,
+            MrcpSession session, GrammarLocation grammarLocation)
+            throws IllegalValueException, IOException,
+            ResourceUnavailableException, GrammarException,
+            JSGFGrammarParseException, JSGFGrammarException {
+        MrcpRequestState requestState;
+        Boolean startInputTimers = (Boolean) getParam(
+                MrcpHeaderName.START_INPUT_TIMERS, request,
+                DEFAULT_START_INPUT_TIMERS);
+        Long noInputTimeout = (startInputTimers.booleanValue()) ?
+                (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, 
+                        DEFAULT_NO_INPUT_TIMEOUT) : LONG_MINUS_ONE;
+        //TODO: get the hotword mode from mrcp message        
+        boolean hotword = false;
+        String hw = (String) getParam(MrcpHeaderName.RECOGNITION_MODE, request,
+                "normal");
+        if (hw.equals("hotword")) {
+           hotword = true;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Starting recognition with grammar '" + 
+                grammarLocation.getFilename() + "' and hotword mode " +
+                hotword + " and no input timeout " + 
+                noInputTimeout.longValue() + " ms.");
+        }
+        _rtpChannel.recognize(new Listener(session), grammarLocation, 
+                noInputTimeout.longValue(), hotword);
+        requestState = MrcpRequestState.IN_PROGRESS;
+        _state = RECOGNIZING;
+        return requestState;
     }
 
     /**
