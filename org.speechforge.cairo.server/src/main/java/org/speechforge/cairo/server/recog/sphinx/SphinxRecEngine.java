@@ -222,7 +222,6 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     private RecognitionResult waitForResult(boolean hotword) {
         Result result = null;
         
-        LOGGER.debug("The hotword flag is: "+hotword);
         //if hotword mode, run recognize until a match occurs
         if (hotword) {
             RecognitionResult rr = new RecognitionResult();
@@ -245,7 +244,11 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
          
         //if not hotword, just run recognize once
         } else {
-             result = recognizer.recognize();
+            try {
+                result = recognizer.recognize();
+            } catch (IllegalStateException e) {
+                LOGGER.warn("error waiting for result " + e.getMessage(), e);
+            } 
         }
         stopProcessing();
         if (result != null) {
@@ -254,7 +257,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
                 LOGGER.debug("waitForResult(): result2clear not null!");
             }
         } else {
-            LOGGER.info("waitForResult(): got null result from recognizer!");
+            LOGGER.info("got no result from recognizer!");
             return null;
         }
         return new RecognitionResult(result, (RuleGrammar) _jsgfGrammar.getRuleGrammar());
@@ -305,7 +308,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
             RecognitionResult result = SphinxRecEngine.this.waitForResult(hotword);
 
-            if (LOGGER.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled() && (result != null)) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n**************************************************************");
                 sb.append("\nRecogThread got result: ").append(result);

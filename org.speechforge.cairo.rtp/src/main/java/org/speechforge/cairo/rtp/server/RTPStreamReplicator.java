@@ -62,21 +62,42 @@ public class RTPStreamReplicator extends RTPConsumer {
     private static final Logger LOGGER =
             LogManager.getLogger(RTPStreamReplicator.class);
 
+    /** The replicator that replicates the incoming stream. */
     private PBDSReplicator replicator;
+    /** The processor that processes the replicated stream. */
     private Processor processor;
+    /** The recorder that records the replicated stream. */
     private RecorderMediaClient recorder;
-    private int _port;
+    /** The port that this replicator is listening on. */
+    private int port;
     
-
-    public RTPStreamReplicator(int port) throws IOException {
-        super(port);
-        _port = port;
+    /**
+     * Creates a new RTP stream replicator that listens on the given port.
+     * 
+     * @param replicatorPort
+     *            the port to listen on
+     * @throws IOException
+     *             if the replicator could not be created
+     */
+    public RTPStreamReplicator(int replicatorPort) throws IOException {
+        super(replicatorPort);
+        port = replicatorPort;
     }
     
-    public RTPStreamReplicator(InetAddress localAddress, int port) 
+    /**
+     * Creates a new RTP stream replicator that listens on the given port.
+     * 
+     * @param localAddress
+     *            the local address to bind to
+     * @param replicatorPort
+     *            the port to listen on
+     * @throws IOException
+     *             if the replicator could not be created
+     */
+    public RTPStreamReplicator(InetAddress localAddress, int replicatorPort) 
             throws IOException {
-        super(localAddress, port);
-        _port = port;
+        super(localAddress, replicatorPort);
+        port = replicatorPort;
     }
     
     /**
@@ -84,11 +105,17 @@ public class RTPStreamReplicator extends RTPConsumer {
      * @return Returns the port.
      */
     public int getPort() {
-        return _port;
+        return port;
     }
     
+    /**
+     * Removes a replicant from the list of replicants.
+     * @param pbds the data source to remove
+     */
     public void removeReplicant(PushBufferDataSource pbds) {
-        replicator.removeReplicator(pbds);
+        if (replicator != null) {
+            replicator.removeReplicator(pbds);
+        }
     }
 
     /**
@@ -160,23 +187,25 @@ public class RTPStreamReplicator extends RTPConsumer {
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamMapped(javax.media.rtp.ReceiveStream, javax.media.rtp.Participant)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public void streamMapped(ReceiveStream stream, Participant participant) {
         // ignore
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.server.rtp.RTPConsumer#streamInactive(javax.media.rtp.ReceiveStream, boolean)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public synchronized void streamInactive(ReceiveStream stream, boolean byeEvent) {
         //if (byeEvent) {
 
         //_replicator.shutdown();
-        replicator = null; // TODO: close data source properly, make sure this triggers EndOfStreamEvent in replicated PBDS
+        replicator = null; 
+        // TODO: close data source properly, make sure this triggers
+        // EndOfStreamEvent in replicated PBDS
         if (processor != null) {
             LOGGER.info("Stream deactivated for SSRC=" + stream.getSSRC());
             processor.close();
@@ -199,9 +228,10 @@ public class RTPStreamReplicator extends RTPConsumer {
      * @throws IOException if there are I/O problems creating the processor from the stream.
      * @throws IllegalStateException if the stream has not been received yet, and is not received within the maximum time to wait.
      */
-    public synchronized ProcessorReplicatorPair createRealizedProcessor(ContentDescriptor outputContentDescriptor, long maxWait, Format[] preferredMediaFormats)
-      throws IOException, IllegalStateException {
-
+    public synchronized ProcessorReplicatorPair createRealizedProcessor(
+            ContentDescriptor outputContentDescriptor, long maxWait, 
+            Format[] preferredMediaFormats)
+                    throws IOException, IllegalStateException {
         if (replicator == null) {
             if (maxWait >= 0) {
                 try {
@@ -220,17 +250,13 @@ public class RTPStreamReplicator extends RTPConsumer {
         PushBufferDataSource pbds = replicator.replicate();
         ProcessorModel pm = new ProcessorModel(
         		pbds, preferredMediaFormats, outputContentDescriptor);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Creatin realized processor...");
+        }
         Processor processor = null;
         try {
-            LOGGER.debug("Creating realized processor...");
             processor = Manager.createRealizedProcessor(pm);
-            LOGGER.debug("Done Creating realized processor...");
-        } catch (IOException e){
-            LOGGER.warn(e.getMessage(), e);
-           // throw e;
-        } catch (javax.media.CannotRealizeException e){
-            LOGGER.warn(e.getMessage(), e);
-        } catch (javax.media.NoProcessorException e){
+        } catch (IOException | javax.media.CannotRealizeException | javax.media.NoProcessorException e){
             LOGGER.warn(e.getMessage(), e);
         }
 
@@ -245,11 +271,10 @@ public class RTPStreamReplicator extends RTPConsumer {
                 LOGGER.warn(e.getMessage(), e);
             }
         }*/
-
-        LOGGER.debug("Processor realized.");
-
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Processor realized.");
+        }
         return new ProcessorReplicatorPair(processor,pbds);
-
     }
 
     public class ProcessorReplicatorPair {
