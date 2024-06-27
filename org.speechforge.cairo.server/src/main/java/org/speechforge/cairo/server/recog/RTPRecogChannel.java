@@ -220,9 +220,8 @@ public class RTPRecogChannel {
     }
 
     private class NoInputTimeoutTask extends TimerTask {
-
-        /* (non-Javadoc)
-         * @see java.util.TimerTask#run()
+        /**
+         * {@inheritDoc}
          */
         @Override
         public void run() {

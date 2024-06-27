@@ -140,7 +140,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      * TODOC
      */
     public synchronized void stopProcessing() {
-        LOGGER.debug("SphinxRecEngine  #"+_id +"stopping processing...");
+        LOGGER.debug("SphinxRecEngine  #" + _id + " stopping processing...");
         if (_rawAudioTransferHandler != null) {
             _rawAudioTransferHandler.stopProcessing();
             _rawAudioTransferHandler = null;
@@ -189,8 +189,10 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      */
     public synchronized void startRecognition(PushBufferDataSource dataSource, RecogListener listener)
       throws UnsupportedEncodingException {
-
-        LOGGER.debug("SphinxRecEngine  #"+_id +"starting  recognition...");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                    "SphinxRecEngine #" + _id + " starting recognition...");
+        }
         if (_rawAudioTransferHandler != null) {
             throw new IllegalStateException("Recognition already in progress!");
         }
@@ -228,11 +230,12 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             boolean inGrammarResult = false;
             while (!inGrammarResult) {
                  result = recognizer.recognize();
-
-                 if (result == null) {
-                     LOGGER.debug("result is null");
-                 } else {
-                     LOGGER.debug("result is:"+result.toString());
+                 if (LOGGER.isDebugEnabled()) {
+                     if (result == null) {
+                         LOGGER.debug("result is null");
+                     } else {
+                         LOGGER.debug("result is: " + result.toString());
+                     }
                  }
                  rr.setNewResult(result, (RuleGrammar) _jsgfGrammar.getRuleGrammar());
                  LOGGER.debug("Rec result: "+rr.toString());

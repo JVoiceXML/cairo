@@ -80,7 +80,8 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
     static short RECOGNIZING = 1;
     static short RECOGNIZED = 2;
 
-    private RTPRecogChannel _rtpChannel;
+    /** The RTP channel. */
+    private RTPRecogChannel rtpChannel;
     /*volatile*/ short _state = IDLE;
     //private String _channelID;
     private GrammarManager _grammarManager;
@@ -88,12 +89,13 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
     /**
      * Constructs a new object.
      * @param channelID the ID of the channel 
-     * @param rtpChannel the RTP channel
-     * @param baseGrammarDir base directoy for grammars
+     * @param channel the RTP channel
+     * @param baseGrammarDir base directory for grammars
      */
-    public MrcpRecogChannel(String channelID, RTPRecogChannel rtpChannel, File baseGrammarDir) {
+    public MrcpRecogChannel(String channelID, RTPRecogChannel channel,
+            File baseGrammarDir) {
         //_channelID = channelID;
-        _rtpChannel = rtpChannel;
+        rtpChannel = channel;
         _grammarManager = new GrammarManager(channelID, baseGrammarDir);
     }
 
@@ -283,7 +285,8 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
                 hotword + " and no input timeout " + 
                 noInputTimeout.longValue() + " ms.");
         }
-        _rtpChannel.recognize(new Listener(session), grammarLocation, 
+        final RecogListener listener = new Listener(session);
+        rtpChannel.recognize(listener, grammarLocation, 
                 noInputTimeout.longValue(), hotword);
         requestState = MrcpRequestState.IN_PROGRESS;
         _state = RECOGNIZING;
@@ -330,7 +333,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
 
         try {
             Long noInputTimeout = (Long) getParam(MrcpHeaderName.NO_INPUT_TIMEOUT, request, DEFAULT_NO_INPUT_TIMEOUT);
-            _rtpChannel.startInputTimers(noInputTimeout.longValue());
+            rtpChannel.startInputTimers(noInputTimeout.longValue());
             response = session.createResponse(MrcpResponse.STATUS_SUCCESS, MrcpRequestState.COMPLETE);
         } catch (IllegalStateException e) {
             LOGGER.debug(e, e);
@@ -349,7 +352,7 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
      */
     public synchronized MrcpResponse stop(StopRequest request, MrcpSession session) {
         
-        LOGGER.debug("Stop recognition called, mrcp channel state: "+_state+" rtp channel state: "+_rtpChannel._state);
+        LOGGER.debug("Stop recognition called, mrcp channel state: "+_state+" rtp channel state: "+rtpChannel._state);
 
 
 
@@ -361,21 +364,21 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
             //Nothing to cancel
             LOGGER.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is RECOGNIZED");            
         } else if (_state == RECOGNIZING) {
-            LOGGER.info("Stopping recognition.  Mrcp channel state is RECOGNIZING and rtp channel state is is "+_rtpChannel._state);
-            if (_rtpChannel._state == RTPRecogChannel.WAITING_FOR_SPEECH) {
-                if (_rtpChannel._noInputTimeoutTask != null) {
-                   _rtpChannel._noInputTimeoutTask.cancel();
+            LOGGER.info("Stopping recognition.  Mrcp channel state is RECOGNIZING and rtp channel state is is "+rtpChannel._state);
+            if (rtpChannel._state == RTPRecogChannel.WAITING_FOR_SPEECH) {
+                if (rtpChannel._noInputTimeoutTask != null) {
+                   rtpChannel._noInputTimeoutTask.cancel();
                    LOGGER.info("Stopping recognition, canceled no input timer");
                 }
-                _rtpChannel.closeProcessor();
+                rtpChannel.closeProcessor();
                 //TODO: Add  active-request-id-list header containing the request-id of the RECOGNIZE request that was terminated.
-            } else if (_rtpChannel._state == RTPRecogChannel.SPEECH_IN_PROGRESS) {
-                _rtpChannel.closeProcessor();
+            } else if (rtpChannel._state == RTPRecogChannel.SPEECH_IN_PROGRESS) {
+                rtpChannel.closeProcessor();
                 //TODO: Add  active-request-id-list header containing the request-id of the RECOGNIZE request that was terminated.
-            } else if (_rtpChannel._state == RTPRecogChannel.COMPLETE) {
+            } else if (rtpChannel._state == RTPRecogChannel.COMPLETE) {
                 LOGGER.warn("Stopping recognition, but nothing to cancel.  Mrcp channel state is recognizing, but rtp chan state is complete");
             } else {
-                LOGGER.warn("Stopping recognition, but invalid rtp channel state: "+_rtpChannel._state);
+                LOGGER.warn("Stopping recognition, but invalid rtp channel state: "+rtpChannel._state);
             }
             
         } else {
@@ -391,102 +394,106 @@ public class MrcpRecogChannel extends MrcpGenericChannel implements RecogOnlyReq
         return response;
     }
     
+    /**
+     * Listener for the recognition process.
+     */
     private class Listener implements RecogListener {
 
-        private MrcpSession _session;
+        private MrcpSession session;
 
         /**
-         * TODOC
-         * @param session
+         * Creates a new instance.
+         * @param mrcpSession the MRCP session
          */
-        public Listener(MrcpSession session) {
-            _session = session;
+        public Listener(MrcpSession mrcpSession) {
+            session = mrcpSession;
         }
 
-        /* (non-Javadoc)
-         * @see org.speechforge.cairo.server.recog.RecogListener#recognitionComplete()
+        /**
+         * {@inheritDoc}
          */
+        @Override
         public void recognitionComplete(RecognitionResult result) {
-        	LOGGER.debug("speech complete event...");
+            if (result != null) {
+                LOGGER.info("recognition complete: " + result.toString());
+            } else {
+                LOGGER.info("recognition complete: null");
+            }
             synchronized (MrcpRecogChannel.this) {
                 _state = RECOGNIZED;
             }
-        	LOGGER.debug("...and past the synchronized block");
             try {
-                MrcpEvent event = _session.createEvent(
+                MrcpEvent event = session.createEvent(
                         MrcpEventName.RECOGNITION_COMPLETE,
-                        MrcpRequestState.COMPLETE
-                );
+                        MrcpRequestState.COMPLETE);
                 String content = result.toString();
                 if (content == null || content.trim().length() < 1) {
-                    CompletionCause completionCause = new CompletionCause((short) 1, "no-match");
-                    event.addHeader(MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause));
+                    CompletionCause completionCause = new CompletionCause(
+                            (short) 1, "no-match");
+                    event.addHeader(MrcpHeaderName.COMPLETION_CAUSE
+                            .constructHeader(completionCause));
                 } else {
-                    CompletionCause completionCause = new CompletionCause((short) 0, "success");
-                    event.addHeader(MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause));
+                    CompletionCause completionCause = new CompletionCause(
+                            (short) 0, "success");
+                    event.addHeader(MrcpHeaderName.COMPLETION_CAUSE
+                            .constructHeader(completionCause));
                     event.setContent("text/plain", null, content);
                 }
-                _session.postEvent(event);
-            } catch (IllegalStateException e) {
-                // TODO Auto-generated catch block
-                LOGGER.debug(e, e);
-            } catch (TimeoutException e) {
-                // TODO Auto-generated catch block
-                LOGGER.debug(e, e);
+                session.postEvent(event);
+            } catch (IllegalStateException | TimeoutException e) {
+                LOGGER.warn("error processing the recognition result: " +e,
+                        e);
             }
         }
 
-        /* (non-Javadoc)
-         * @see org.speechforge.cairo.server.recog.RecogListener#speechStarted()
+        /**
+         * {@inheritDoc}
          */
+        @Override
         public void speechStarted() {
-        	LOGGER.debug("speech started event");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("speech started");
+            }
             short state;
             synchronized (MrcpRecogChannel.this) {
                 state = _state;
             }
-        	LOGGER.debug("and past the synchronized block");
             if (state == RECOGNIZING) try {
-                MrcpEvent event = _session.createEvent(
+                MrcpEvent event = session.createEvent(
                         MrcpEventName.START_OF_INPUT,
                         MrcpRequestState.IN_PROGRESS
                 );
-                _session.postEvent(event);
-            } catch (IllegalStateException e) {
-                // TODO Auto-generated catch block
-                LOGGER.debug(e, e);
-            } catch (TimeoutException e) {
-                // TODO Auto-generated catch block
-                LOGGER.debug(e, e);
+                session.postEvent(event);
+            } catch (IllegalStateException | TimeoutException e) {
+                LOGGER.warn("error processing speech started : " + e, e);
             }
         }
 
-        /* (non-Javadoc)
-         * @see org.speechforge.cairo.server.recog.RecogListener#noInputTimeout()
+        /**
+         * {@inheritDoc}
          */
+        @Override
         public void noInputTimeout() {
+            LOGGER.info("no input timeout");
             short state;
             synchronized (MrcpRecogChannel.this) {
                 state = _state;
                 _state = IDLE;
             }
-            if (state == RECOGNIZING) try {
-                MrcpEvent event = _session.createEvent(
-                        MrcpEventName.RECOGNITION_COMPLETE,
-                        MrcpRequestState.COMPLETE
-                );
-                CompletionCause completionCause = new CompletionCause((short) 2, "no-input-timeout");
-                MrcpHeader completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE.constructHeader(completionCause);
-                event.addHeader(completionCauseHeader);
-                _session.postEvent(event);
-            } catch (IllegalStateException e) {
-                // TODO Auto-generated catch block
-                LOGGER.debug(e, e);
-            } catch (TimeoutException e) {
-                // TODO Auto-generated catch block
-                LOGGER.debug(e, e);
-            }
-            
+            if (state == RECOGNIZING)
+                try {
+                    MrcpEvent event = session.createEvent(
+                            MrcpEventName.RECOGNITION_COMPLETE,
+                            MrcpRequestState.COMPLETE);
+                    CompletionCause completionCause = new CompletionCause(
+                            (short) 2, "no-input-timeout");
+                    MrcpHeader completionCauseHeader = MrcpHeaderName.COMPLETION_CAUSE
+                            .constructHeader(completionCause);
+                    event.addHeader(completionCauseHeader);
+                    session.postEvent(event);
+                } catch (IllegalStateException | TimeoutException e) {
+                    LOGGER.warn("error processing timeout: " + e, e);
+                }
         }
         
     }
