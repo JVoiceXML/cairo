@@ -140,7 +140,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      * TODOC
      */
     public synchronized void stopProcessing() {
-        LOGGER.debug("SphinxRecEngine  #"+_id +"stopping processing...");
+        LOGGER.debug("SphinxRecEngine  #" + _id + " stopping processing...");
         if (_rawAudioTransferHandler != null) {
             _rawAudioTransferHandler.stopProcessing();
             _rawAudioTransferHandler = null;
@@ -189,8 +189,10 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      */
     public synchronized void startRecognition(PushBufferDataSource dataSource, RecogListener listener)
       throws UnsupportedEncodingException {
-
-        LOGGER.debug("SphinxRecEngine  #"+_id +"starting  recognition...");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                    "SphinxRecEngine #" + _id + " starting recognition...");
+        }
         if (_rawAudioTransferHandler != null) {
             throw new IllegalStateException("Recognition already in progress!");
         }
@@ -222,18 +224,18 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     private RecognitionResult waitForResult(boolean hotword) {
         Result result = null;
         
-        LOGGER.debug("The hotword flag is: "+hotword);
         //if hotword mode, run recognize until a match occurs
         if (hotword) {
             RecognitionResult rr = new RecognitionResult();
             boolean inGrammarResult = false;
             while (!inGrammarResult) {
                  result = recognizer.recognize();
-
-                 if (result == null) {
-                     LOGGER.debug("result is null");
-                 } else {
-                     LOGGER.debug("result is:"+result.toString());
+                 if (LOGGER.isDebugEnabled()) {
+                     if (result == null) {
+                         LOGGER.debug("result is null");
+                     } else {
+                         LOGGER.debug("result is: " + result.toString());
+                     }
                  }
                  rr.setNewResult(result, (RuleGrammar) _jsgfGrammar.getRuleGrammar());
                  LOGGER.debug("Rec result: "+rr.toString());
@@ -245,7 +247,11 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
          
         //if not hotword, just run recognize once
         } else {
-             result = recognizer.recognize();
+            try {
+                result = recognizer.recognize();
+            } catch (IllegalStateException e) {
+                LOGGER.warn("error waiting for result " + e.getMessage(), e);
+            } 
         }
         stopProcessing();
         if (result != null) {
@@ -254,7 +260,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
                 LOGGER.debug("waitForResult(): result2clear not null!");
             }
         } else {
-            LOGGER.info("waitForResult(): got null result from recognizer!");
+            LOGGER.info("got no result from recognizer!");
             return null;
         }
         return new RecognitionResult(result, (RuleGrammar) _jsgfGrammar.getRuleGrammar());
@@ -305,7 +311,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
 
             RecognitionResult result = SphinxRecEngine.this.waitForResult(hotword);
 
-            if (LOGGER.isDebugEnabled()) {
+            if (LOGGER.isDebugEnabled() && (result != null)) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("\n**************************************************************");
                 sb.append("\nRecogThread got result: ").append(result);
