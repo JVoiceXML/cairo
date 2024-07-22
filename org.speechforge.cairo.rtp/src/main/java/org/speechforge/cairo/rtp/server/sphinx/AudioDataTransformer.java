@@ -32,10 +32,12 @@ import org.apache.logging.log4j.LogManager;
  * Transforms audio data of a specified format to {@code edu.cmu.sphinx.frontend.DoubleData}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class AudioDataTransformer {
-
-    private static Logger _logger = LogManager.getLogger(AudioDataTransformer.class);
+    /** The logger for this class. */
+    private static final Logger LOGGER =
+            LogManager.getLogger(AudioDataTransformer.class);
 
     public final static String STEREO_TO_MONO_AVERAGE = "average";
     public final static String STEREO_TO_MONO_SELECT_CHANNEL = "selectChannel";
@@ -50,7 +52,8 @@ public class AudioDataTransformer {
         _sourceFormat = sourceFormat;
     }
 
-    public AudioDataTransformer(SourceAudioFormat sourceFormat, String stereoToMono, int selectedChannel) {
+    public AudioDataTransformer(SourceAudioFormat sourceFormat,
+            String stereoToMono, int selectedChannel) {
         _sourceFormat    = sourceFormat;
         _stereoToMono    = stereoToMono;
         _selectedChannel = selectedChannel;
@@ -64,13 +67,24 @@ public class AudioDataTransformer {
             if (_sourceFormat.getChannels() > 1) {
                 samples = convertStereoToMono(samples, _sourceFormat.getChannels());
             }
-            if (_logger.isTraceEnabled()) {
+            if (LOGGER.isTraceEnabled()) {
+                final StringBuilder str = new StringBuilder();
+                str.append("Samples: [");
+                boolean first = true;
                 for (double sample : samples) {
-                    _logger.trace("sample: " + sample);
+                    if (!first) {
+                        str.append(", ");
+                    } else {
+                        first = false;
+                    }
+                    str.append(sample); 
                 }
+                str.append("]");
+                LOGGER.trace(str.toString());
             }
 
-            return new DoubleData(samples, _sourceFormat.getSampleRate(), collectTime, firstSampleNumber);
+            return new DoubleData(samples, _sourceFormat.getSampleRate(), 
+                    collectTime, firstSampleNumber);
     }
 
     /**
