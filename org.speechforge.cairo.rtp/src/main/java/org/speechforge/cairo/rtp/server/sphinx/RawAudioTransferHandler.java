@@ -53,14 +53,14 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
     public synchronized void startProcessing(PushBufferStream pbStream)
       throws UnsupportedEncodingException, IllegalStateException {
 
-    	LOGGER.debug("STARTING PROCESSING IN RAWAUDIO PROCESSOR");
+    	LOGGER.debug("Starting RawAudioProcessor");
         if (_rawAudioProcessor == null) {
             throw new IllegalStateException("RawAudioProcessor is null!");
         }
 
         Format format = pbStream.getFormat();
         if (!(format instanceof AudioFormat)) {
-        	LOGGER.info("Bad format "+format);
+            LOGGER.warn("Bad format " + format);
             throw new UnsupportedEncodingException("RawAudioTransferHandler can only process audio formats!");
         }
 
