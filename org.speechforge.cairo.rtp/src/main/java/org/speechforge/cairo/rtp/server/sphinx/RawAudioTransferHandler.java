@@ -39,34 +39,47 @@ import org.apache.logging.log4j.LogManager;
  * {@link org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor}.
  *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Dirk Schnelle-Walka
  */
 public class RawAudioTransferHandler implements BufferTransferHandler {
+    /** The logger for this class. */
+    private static Logger LOGGER =
+            LogManager.getLogger(RawAudioTransferHandler.class);
+    /**
+     * The {@link RawAudioProcessor} to which the raw audio data is transferred.
+     */
+    private RawAudioProcessor rawAudioProcessor;
 
-    private static Logger LOGGER = LogManager.getLogger(RawAudioTransferHandler.class);
-
-    private RawAudioProcessor _rawAudioProcessor;
-
-    public RawAudioTransferHandler(RawAudioProcessor rawAudioProcessor) {
-        _rawAudioProcessor = rawAudioProcessor;
+    /**
+     * Creates a new instance of {@code RawAudioTransferHandler}.
+     *
+     * @param processor
+     *            the {@link RawAudioProcessor} to which the raw audio data is
+     *            transferred.
+     */
+    public RawAudioTransferHandler(RawAudioProcessor processor) {
+        rawAudioProcessor = processor;
     }
 
     public synchronized void startProcessing(PushBufferStream pbStream)
       throws UnsupportedEncodingException, IllegalStateException {
-
-    	LOGGER.debug("Starting RawAudioProcessor");
-        if (_rawAudioProcessor == null) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Starting RawAudioProcessor with stream format = "
+                    + pbStream.getFormat());
+        }
+        if (rawAudioProcessor == null) {
             throw new IllegalStateException("RawAudioProcessor is null!");
         }
 
-        Format format = pbStream.getFormat();
+        final Format format = pbStream.getFormat();
         if (!(format instanceof AudioFormat)) {
             LOGGER.warn("Bad format " + format);
-            throw new UnsupportedEncodingException("RawAudioTransferHandler can only process audio formats!");
+            throw new UnsupportedEncodingException(
+                    "RawAudioTransferHandler can only process audio formats!");
         }
-
         pbStream.setTransferHandler(this);
         try {
-            _rawAudioProcessor.startProcessing((AudioFormat) format);
+            rawAudioProcessor.startProcessing((AudioFormat) format);
         } catch (UnsupportedEncodingException e) {
             pbStream.setTransferHandler(null);
             LOGGER.error(e.getMessage(), e);
@@ -77,9 +90,9 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
 
     public synchronized void stopProcessing() {
         LOGGER.debug("Stopping RawAudioProcessor...");
-        if (_rawAudioProcessor != null) {
-            _rawAudioProcessor.stopProcessing();
-            _rawAudioProcessor = null;
+        if (rawAudioProcessor != null) {
+            rawAudioProcessor.stopProcessing();
+            rawAudioProcessor = null;
         }
     }
 
@@ -109,9 +122,9 @@ public class RawAudioTransferHandler implements BufferTransferHandler {
                     LOGGER.debug("transferData(): buffer is discard!");
                 } else {
                     byte[] data = (byte[]) buffer.getData();
-                    if (_rawAudioProcessor != null) {
+                    if (rawAudioProcessor != null) {
                         if (buffer.getLength() > 0) {
-                            _rawAudioProcessor.addRawData(data, buffer.getOffset(), buffer.getLength());
+                            rawAudioProcessor.addRawData(data, buffer.getOffset(), buffer.getLength());
                         } else {
                             LOGGER.debug("transferData(): buffer length is zero!");
                         }
