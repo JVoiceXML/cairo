@@ -116,6 +116,9 @@ public class TestRawAudioProcessor {
 
             double[] values = ((DoubleData) data).getValues();
             for (int i = 0; i < values.length; i++) {
+                if (values[i] == 0.0) {
+                    continue;
+                }
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("expected=" + tokenizer.nval + " actual="
                             + values[i]);

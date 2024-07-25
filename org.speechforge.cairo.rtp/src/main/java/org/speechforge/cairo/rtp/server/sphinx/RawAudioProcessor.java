@@ -46,10 +46,11 @@ import edu.cmu.sphinx.util.props.PropertySheet;
 import edu.cmu.sphinx.util.props.S4Integer;
 
 /**
- * Processes raw audio data input and feeds it to the frontend of the Sphinx recognition engine.
+ * Processes raw audio data input and feeds it to the frontend of the Sphinx
+ * recognition engine.
  * 
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
- *
+ * @author Dirk Schnelle-Walka
  */
 public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     /** Logger for this class */
@@ -61,8 +62,10 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     private LinkedBlockingQueue<Data> dataList;
     /** List of raw audio data */
     private LinkedBlockingQueue<byte[]> rawAudioList;
-    private SourceAudioFormat _audioFormat;
-    private AudioDataTransformer _transformer = null;
+    /** Format of the audio data being processed */
+    private SourceAudioFormat audioFormat;
+    /** Transformer for audio data */
+    private AudioDataTransformer transformer;
     private volatile boolean processing = false;
     private volatile boolean utteranceEndReached = false;
     private volatile byte[] _frame;
@@ -121,26 +124,28 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
      * @param format format of the audio being passed to this processor
      * @throws UnsupportedEncodingException if the specified format cannot be supported
      */
-    public synchronized void startProcessing(AudioFormat format) throws UnsupportedEncodingException {
+    public synchronized void startProcessing(AudioFormat format)
+            throws UnsupportedEncodingException {
         if (processing) {
-            throw new IllegalStateException("RawAudioProcessor.startProcessing() cannot be called while already in processing state!");
+            throw new IllegalStateException("Cannot start another processing "
+                    + "while already in processing state!");
         }
 
         try {
-            //_fileWriter = new FileWriter("C:\\work\\cvs\\onomatopia\\cairo\\prompts\\test\\rtp.txt", false);
+            //_fileWriter = new FileWriter("C:\\tmp\\rtp.txt", false);
         } catch (Exception e) {
             LOGGER.warn(e, e);
         }
 
 
-        _audioFormat = SourceAudioFormat.newInstance(_msecPerRead, format);
+        audioFormat = SourceAudioFormat.newInstance(_msecPerRead, format);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Frame size: " + _audioFormat.getFrameSizeInBytes() + " bytes");
+            LOGGER.debug("Frame size: " + audioFormat.getFrameSizeInBytes() + " bytes");
         }
         utteranceEndReached = false;
-        //_transformer = new AudioDataTransformer(_audioFormat, stereoToMono, selectedChannel);
-        _transformer = new AudioDataTransformer(_audioFormat, "average", 0);
-        _frame = new byte[_audioFormat.getFrameSizeInBytes()];
+        transformer = new AudioDataTransformer(audioFormat, 
+                AudioDataTransformer.STEREO_TO_MONO_AVERAGE, 0);
+        _frame = new byte[audioFormat.getFrameSizeInBytes()];
         processing = true;
         final Thread processingThread = new Thread(this);
         processingThread.start();
@@ -184,7 +189,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         }
         
         // Insert a DataStartSignal to indicate the start of the data stream
-        Data data = new DataStartSignal(_audioFormat.getSampleRate());
+        Data data = new DataStartSignal(audioFormat.getSampleRate());
         dataList.add(data);
         LOGGER.debug("adding DataStartSignal");
         
@@ -204,7 +209,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
         // Insert a DataEndSignal to indicate the end of the data stream
         data = new DataEndSignal(
-                _audioFormat.calculateDurationMsecs(_totalSamplesRead));
+                audioFormat.calculateDurationMsecs(_totalSamplesRead));
         dataList.add(data);
         if (LOGGER.isTraceEnabled()) {
             long t2 = System.currentTimeMillis();
@@ -227,22 +232,22 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
             LOGGER.trace("transformNextRawAudio(): data from raw audio list, bytes=" + data.length);
         }
 
-        long firstSampleNumber = _totalSamplesRead / _audioFormat.getChannels();
-        long collectTime = _startTime + (firstSampleNumber * _audioFormat.getMsecPerRead());
+        long firstSampleNumber = _totalSamplesRead / audioFormat.getChannels();
+        long collectTime = _startTime + (firstSampleNumber * audioFormat.getMsecPerRead());
         if (data.length < 1) {
         	LOGGER.trace("data length < 1");
             return null;
         }
 
-        _totalSamplesRead += (data.length / _audioFormat.getSampleSizeInBytes());
+        _totalSamplesRead += (data.length / audioFormat.getSampleSizeInBytes());
         LOGGER.trace("read in " + data.length + " bytes " + _totalSamplesRead);
-        if (data.length != _audioFormat.getFrameSizeInBytes()) {
-            if (data.length % _audioFormat.getSampleSizeInBytes() != 0) {
+        if (data.length != audioFormat.getFrameSizeInBytes()) {
+            if (data.length % audioFormat.getSampleSizeInBytes() != 0) {
                 throw new Error("Incomplete sample read.");
             }
         }
 
-        return _transformer.toDoubleData(data, collectTime, firstSampleNumber);
+        return transformer.toDoubleData(data, collectTime, firstSampleNumber);
     }
 
     /**
@@ -250,36 +255,35 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
      */
     @Override
     public Data getData() throws DataProcessingException {
-        //getTimer().start();
-        Data output = null;
-        if (!utteranceEndReached) {
-            try {
-                LOGGER.trace("getData(): getting data from data list...");
-                output = dataList.take();
-                LOGGER.trace("getData(): got data from data list: " 
-                        + output.getClass().getName());
-            } catch (InterruptedException e){
-                LOGGER.warn(e, e);
-                DataProcessingException dpe =
-                        new DataProcessingException(
-                                "Data processing thread interrupted!");
-                dpe.initCause(e);
-                throw dpe;
+        if (utteranceEndReached) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("utterance end reached, returning null.");
             }
-            if (output instanceof DataEndSignal) {
-                utteranceEndReached = true;
-            }
-        } else {
-            LOGGER.trace("getData(): utterance end reached, returning null.");
+            return null;
         }
-
-        //getTimer().stop();
-
+        Data output;
+        try {
+            LOGGER.trace("getting data from data list...");
+            output = dataList.take();
+            LOGGER.trace("got data from data list: " 
+                    + output.getClass().getName());
+        } catch (InterruptedException e){
+            LOGGER.warn(e, e);
+            DataProcessingException dpe =
+                    new DataProcessingException(
+                            "Data processing thread interrupted!");
+            dpe.initCause(e);
+            throw dpe;
+        }
+        if (output instanceof DataEndSignal) {
+            utteranceEndReached = true;
+        }
         return output;
     }
 
     /**
-     * After processing is started on this processor this will add raw audio data to be processed.
+     * After processing is started on this processor this will add raw audio
+     * data to be processed.
      * 
      * @param data buffer of raw audio data to be processed
      */
@@ -288,7 +292,8 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     /**
-     * After processing is started on this processor this will add raw audio data to be processed.
+     * After processing is started on this processor this will add raw audio
+     * data to be processed.
      * 
      * @param data buffer of raw audio data to be processed
      * @param offset starting point in buffer to process data from
@@ -298,7 +303,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     	try {
             addRawDataPrivate(data, offset, length);
         } catch (RuntimeException e) {
-            LOGGER.debug("addRawData(): throwing exception", e);
+            LOGGER.warn("Caught runtime exception when processing raw data", e);
             throw e;
         }
     }

@@ -82,6 +82,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             LOGGER.isTraceEnabled() ? Toolkit.getDefaultToolkit() : null;
     /** The recognizer engine id. */
     private int id;
+    /** The Sphinx recognizer. */
     private Recognizer recognizer;
     private JSGFGrammar _jsgfGrammar;
     private RawAudioProcessor rawAudioProcessor;
@@ -107,27 +108,40 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      */
     public SphinxRecEngine(ConfigurationManager cm, int engineId)
       throws IOException, PropertyException, InstantiationException {
-
-    	LOGGER.info("Creating Engine # " + engineId);
-    	id = engineId;
+        LOGGER.info("Creating Engine # " + engineId);
+        id = engineId;
         recognizer = (Recognizer) cm.lookup("recognizer" + engineId);
         if (recognizer == null) {
             throw new InstantiationException("No configuration for recognizer" 
                     + engineId + " found in the sphinx configuration");
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Recognizer #" + engineId + ": " + recognizer);
+        }
         recognizer.allocate();
 
         _jsgfGrammar = (JSGFGrammar) cm.lookup("grammar");
-
-        SpeechDataMonitor speechDataMonitor = 
-                (SpeechDataMonitor) cm.lookup("speechDataMonitor"+engineId);
-        if (speechDataMonitor != null) {
-            speechDataMonitor.setSpeechEventListener(this);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("JSGF Grammar #" + engineId + ": " + _jsgfGrammar);
         }
 
-        Object primaryInput = cm.lookup("primaryInput"+engineId);
+        SpeechDataMonitor speechDataMonitor = 
+                (SpeechDataMonitor) cm.lookup("speechDataMonitor" + engineId);
+        if (speechDataMonitor != null) {
+            speechDataMonitor.setSpeechEventListener(this);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("SpeechDataMonitor #" + engineId + ": "
+                        + speechDataMonitor);
+            }
+        }
+
+        Object primaryInput = cm.lookup("primaryInput" + engineId);
         if (primaryInput instanceof RawAudioProcessor) {
             rawAudioProcessor = (RawAudioProcessor) primaryInput;
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("RawAudioProcessor #" + engineId + ": "
+                        + rawAudioProcessor);
+            }
         } else {
             String className = (primaryInput == null) 
                     ? null : primaryInput.getClass().getName();
@@ -234,7 +248,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             rawAudioTransferHandler = null;
             throw e;
         }
-
+        
         _recogListener = listener;
     }
 
@@ -270,6 +284,8 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         //if not hotword, just run recognize once
         } else {
             try {
+                LOGGER.info("starting recognition on recognizer engine #" + id +
+                        " (" + recognizer + ")...");
                 result = recognizer.recognize();
             } catch (IllegalStateException e) {
                 LOGGER.warn("error waiting for result " + e.getMessage(), e);

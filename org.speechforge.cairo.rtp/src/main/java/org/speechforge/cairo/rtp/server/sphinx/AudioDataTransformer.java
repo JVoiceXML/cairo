@@ -59,10 +59,21 @@ public class AudioDataTransformer {
         _selectedChannel = selectedChannel;
     }
 
+    /**
+     * Transforms the given audio data to {@code edu.cmu.sphinx.frontend.DoubleData}.
+     * @param data the audio data to transform
+     * @param collectTime time of the data
+     * @param firstSampleNumber the number of the first sample
+     * @return the transformed audio data
+     */
     public DoubleData toDoubleData(byte[] data, long collectTime, long firstSampleNumber) {
             double[] samples = _sourceFormat.isBigEndian() ?
-                DataUtil.bytesToValues(data, 0, data.length, _sourceFormat.getSampleSizeInBytes(), _sourceFormat.isSigned()) :
-                DataUtil.littleEndianBytesToValues(data, 0, data.length, _sourceFormat.getSampleSizeInBytes(), _sourceFormat.isSigned());
+                DataUtil.bytesToValues(data, 0, data.length, 
+                        _sourceFormat.getSampleSizeInBytes(),
+                        _sourceFormat.isSigned()) :
+                DataUtil.littleEndianBytesToValues(data, 0, data.length,
+                        _sourceFormat.getSampleSizeInBytes(),
+                        _sourceFormat.isSigned());
 
             if (_sourceFormat.getChannels() > 1) {
                 samples = convertStereoToMono(samples, _sourceFormat.getChannels());
