@@ -78,60 +78,96 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
     /** Logger instance. */
     private static final Logger LOGGER =
             LogManager.getLogger(SphinxRecEngine.class);
-    private static Toolkit _toolkit = LOGGER.isTraceEnabled()? Toolkit.getDefaultToolkit() : null;
-
-    private int _id;
+    private static Toolkit _toolkit = 
+            LOGGER.isTraceEnabled() ? Toolkit.getDefaultToolkit() : null;
+    /** The recognizer engine id. */
+    private int id;
+    /** The Sphinx recognizer. */
     private Recognizer recognizer;
     private JSGFGrammar _jsgfGrammar;
-    private RawAudioProcessor _rawAudioProcessor;
+    private RawAudioProcessor rawAudioProcessor;
 
-    private RawAudioTransferHandler _rawAudioTransferHandler;
+    private RawAudioTransferHandler rawAudioTransferHandler;
     RecogListener _recogListener;
     
     private boolean hotword = false;
 
-    public SphinxRecEngine(ConfigurationManager cm, int id)
+    /**
+     * Constructor.
+     * 
+     * @param cm
+     *            the configuration manager
+     * @param engineId
+     *            the engine id
+     * @throws IOException
+     *             error reading from the configuration
+     * @throws PropertyException
+     *             error in the configuration
+     * @throws InstantiationException
+     *             error instantiating the recognizer
+     */
+    public SphinxRecEngine(ConfigurationManager cm, int engineId)
       throws IOException, PropertyException, InstantiationException {
-
-    	LOGGER.info("Creating Engine # " + id);
-    	_id = id;
-        recognizer = (Recognizer) cm.lookup("recognizer" + id);
+        LOGGER.info("Creating Engine # " + engineId);
+        id = engineId;
+        recognizer = (Recognizer) cm.lookup("recognizer" + engineId);
         if (recognizer == null) {
             throw new InstantiationException("No configuration for recognizer" 
-                    + id + " found in the sphinx configuration");
+                    + engineId + " found in the sphinx configuration");
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Recognizer #" + engineId + ": " + recognizer);
         }
         recognizer.allocate();
 
         _jsgfGrammar = (JSGFGrammar) cm.lookup("grammar");
-
-        SpeechDataMonitor speechDataMonitor = (SpeechDataMonitor) cm.lookup("speechDataMonitor"+id);
-        if (speechDataMonitor != null) {
-            speechDataMonitor.setSpeechEventListener(this);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("JSGF Grammar #" + engineId + ": " + _jsgfGrammar);
         }
 
-        Object primaryInput = cm.lookup("primaryInput"+id);
+        SpeechDataMonitor speechDataMonitor = 
+                (SpeechDataMonitor) cm.lookup("speechDataMonitor" + engineId);
+        if (speechDataMonitor != null) {
+            speechDataMonitor.setSpeechEventListener(this);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("SpeechDataMonitor #" + engineId + ": "
+                        + speechDataMonitor);
+            }
+        }
+
+        Object primaryInput = cm.lookup("primaryInput" + engineId);
         if (primaryInput instanceof RawAudioProcessor) {
-            _rawAudioProcessor = (RawAudioProcessor) primaryInput;
+            rawAudioProcessor = (RawAudioProcessor) primaryInput;
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("RawAudioProcessor #" + engineId + ": "
+                        + rawAudioProcessor);
+            }
         } else {
-            String className = (primaryInput == null) ? null : primaryInput.getClass().getName();
-            throw new InstantiationException("Unsupported primary input type: " + className);
+            String className = (primaryInput == null) 
+                    ? null : primaryInput.getClass().getName();
+            throw new InstantiationException("Unsupported primary input type: "
+                    + className);
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.util.pool.PoolableObject#activate()
+    /**
+     * {@inheritDoc}
      */
     @Override
     public synchronized void activate() {
-        LOGGER.debug("SphinxRecEngine #"+_id +" activating...");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SphinxRecEngine #" + id + " activating...");
+        }
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.util.pool.PoolableObject#passivate()
+    /**
+     * {@inheritDoc}
      */
     @Override
     public synchronized void passivate() {
-        LOGGER.debug("SphinxRecEngine #"+_id +"passivating...");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("SphinxRecEngine #" + id + " passivating...");
+        }
         stopProcessing();
         _recogListener = null;
     }
@@ -140,10 +176,10 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      * TODOC
      */
     public synchronized void stopProcessing() {
-        LOGGER.debug("SphinxRecEngine  #" + _id + " stopping processing...");
-        if (_rawAudioTransferHandler != null) {
-            _rawAudioTransferHandler.stopProcessing();
-            _rawAudioTransferHandler = null;
+        LOGGER.debug("SphinxRecEngine  #" + id + " stopping processing...");
+        if (rawAudioTransferHandler != null) {
+            rawAudioTransferHandler.stopProcessing();
+            rawAudioTransferHandler = null;
         }
         // TODO: should wait to set this until after run thread completes (i.e. recognizer is cleared)
     }
@@ -172,7 +208,7 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
      * @throws GrammarException error in the grammar or while parsing
      */
     public synchronized RuleParse parse(String text, String ruleName) throws GrammarException {
-        if (_rawAudioTransferHandler != null) {
+        if (rawAudioTransferHandler != null) {
             throw new IllegalStateException("Recognition already in progress!");
         }
         
@@ -191,9 +227,9 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
       throws UnsupportedEncodingException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                    "SphinxRecEngine #" + _id + " starting recognition...");
+                    "SphinxRecEngine #" + id + " starting recognition...");
         }
-        if (_rawAudioTransferHandler != null) {
+        if (rawAudioTransferHandler != null) {
             throw new IllegalStateException("Recognition already in progress!");
         }
 
@@ -206,13 +242,13 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
             LOGGER.debug("Starting recognition on stream format: " + streams[0].getFormat());
         }
         try {
-            _rawAudioTransferHandler = new RawAudioTransferHandler(_rawAudioProcessor);
-            _rawAudioTransferHandler.startProcessing(streams[0]);
+            rawAudioTransferHandler = new RawAudioTransferHandler(rawAudioProcessor);
+            rawAudioTransferHandler.startProcessing(streams[0]);
         } catch (UnsupportedEncodingException e) {
-            _rawAudioTransferHandler = null;
+            rawAudioTransferHandler = null;
             throw e;
         }
-
+        
         _recogListener = listener;
     }
 
@@ -248,6 +284,8 @@ public class SphinxRecEngine extends AbstractPoolableObject implements SpeechEve
         //if not hotword, just run recognize once
         } else {
             try {
+                LOGGER.info("starting recognition on recognizer engine #" + id +
+                        " (" + recognizer + ")...");
                 result = recognizer.recognize();
             } catch (IllegalStateException e) {
                 LOGGER.warn("error waiting for result " + e.getMessage(), e);
