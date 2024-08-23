@@ -74,8 +74,8 @@ public class TestSphinxRecEngineReplicated {
         Assert.assertNotNull(sphinxConfigURL);
         LOGGER.debug("sphinxConfigURL: " + sphinxConfigURL);
 
-        ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
+//        ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
+        SphinxRecEngine engine = new SphinxRecEngine(sphinxConfigURL, 1);
 
         Processor processor1 = JMFUtil.createRealizedProcessor(new MediaLocator(audioFileURL), SourceAudioFormat.PREFERRED_MEDIA_FORMAT);
         processor1.addControllerListener(new ProcessorStarter(true));
@@ -106,8 +106,8 @@ public class TestSphinxRecEngineReplicated {
         processor2.start();
         Thread.sleep(1000);  // give processor2 a chance to start
         processor1.start();
-        LOGGER.debug("Starting recog thread...");
-        engine.startRecogThread();
+//        LOGGER.debug("Starting recog thread...");
+//        engine.startRecogThread();
 
         // wait for result
         RecognitionResult result = null;

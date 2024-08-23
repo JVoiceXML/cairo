@@ -58,7 +58,6 @@
 
     <component name="searchManager1"
                type="edu.cmu.sphinx.decoder.search.SimpleBreadthFirstSearchManager">
-        <property name="logMath" value="logMath"/>
         <property name="linguist" value="linguist"/>
         <property name="pruner" value="pruner1"/>
         <property name="scorer" value="scorer1"/>
@@ -67,7 +66,6 @@
 
     <component name="activeListFactory1"
                type="edu.cmu.sphinx.decoder.search.SortingActiveListFactory">
-        <property name="logMath" value="logMath"/>
         <property name="absoluteBeamWidth" value="${absoluteBeamWidth}"/>
         <property name="relativeBeamWidth" value="${relativeBeamWidth}"/>
     </component>
@@ -90,7 +88,6 @@
 
     <component name="searchManager2"
                type="edu.cmu.sphinx.decoder.search.SimpleBreadthFirstSearchManager">
-        <property name="logMath" value="logMath"/>
         <property name="linguist" value="linguist"/>
         <property name="pruner" value="pruner2"/>
         <property name="scorer" value="scorer2"/>
@@ -99,7 +96,6 @@
 
     <component name="activeListFactory2"
                type="edu.cmu.sphinx.decoder.search.SortingActiveListFactory">
-        <property name="logMath" value="logMath"/>
         <property name="absoluteBeamWidth" value="${absoluteBeamWidth}"/>
         <property name="relativeBeamWidth" value="${relativeBeamWidth}"/>
     </component>
@@ -109,7 +105,7 @@
 
     <component name="scorer2"
                type="edu.cmu.sphinx.decoder.scorer.ThreadedAcousticScorer">
-        <property name="frontend" value="frontend1"/>
+        <property name="frontend" value="frontend2"/>
     </component>
 
     <!-- ******************************************************** -->
@@ -164,10 +160,11 @@
 
     <component name="loader"
            type="edu.cmu.sphinx.linguist.acoustic.tiedstate.Sphinx3Loader">
-        <property name="logMath" value="logMath"/>
         <property name="unitManager" value="unitManager"/>
-        <property name="location" value="resource:/edu/cmu/sphinx/models/en-us/en-us"/>              
+        <!-- property name="location" value="resource:/edu/cmu/sphinx/models/en-us/en-us"/-->              
+        <property name="location" value="" />
         <property name="dataLocation" value="en-us"/>
+        <property name="topGaussiansNum" value="4" />
     </component>
 
 
@@ -245,10 +242,6 @@
     <component name="dither1"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-    <component name="LDA1" 
-		   type="edu.cmu.sphinx.frontend.feature.LDA">	
-		<property name="loader" value="loader"/>
-	</component>
 
     <!-- ******************************************************** -->
     <!-- The frontend configuration  #2                           -->
@@ -316,10 +309,6 @@
     <component name="dither2"
                type="edu.cmu.sphinx.frontend.filter.Dither"/>
 
-    <component name="LDA2" 
-           type="edu.cmu.sphinx.frontend.feature.LDA">  
-        <property name="loader" value="loader"/>
-    </component>
 
     <!-- ******************************************************* -->
     <!--  monitors                                               -->
@@ -352,16 +341,5 @@
     <!-- ******************************************************* -->
     <!--  Miscellaneous components                               -->
     <!-- ******************************************************* -->
-
-    <component name="logMath"
-               type="edu.cmu.sphinx.util.LogMath">
-        <property name="logBase" value="1.0001"/>
-        <property name="useAddTable" value="true"/>
-    </component>
-    
-    <component name="confidenceScorer"
-               type="edu.cmu.sphinx.result.MAPConfidenceScorer">
-        <property name="languageWeight" value="${languageWeight}"/>
-    </component>
 
 </config>

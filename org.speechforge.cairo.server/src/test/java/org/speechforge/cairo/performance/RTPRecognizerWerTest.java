@@ -86,7 +86,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
           //Get the recogntion engine
           try {
               cm = new ConfigurationManager(config);
-              engine = new SphinxRecEngine(cm,1);
+              engine = new SphinxRecEngine(config,1);
 //              scorer = (ConfidenceScorer) cm.lookup("confidenceScorer");
           } catch (IOException e) {
               LOGGER.warn(e.getMessage(), e);
@@ -164,7 +164,7 @@ public class RTPRecognizerWerTest extends BaseRecognizerWerTest{
             processor.addControllerListener(new ProcessorStarter());
 
             processor.start();
-            engine.startRecogThread();
+//            engine.startRecogThread();
 
         } catch (GrammarException e) {
             LOGGER.warn(e.getMessage(), e);

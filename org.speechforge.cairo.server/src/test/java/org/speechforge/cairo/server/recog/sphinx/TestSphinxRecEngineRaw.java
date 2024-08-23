@@ -205,7 +205,7 @@ public class TestSphinxRecEngineRaw {
 
         // configure sphinx
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
+        SphinxRecEngine engine = new SphinxRecEngine(sphinxConfigURL,1);
 
         RecognitionResult result1 = doRecognize(engine, audioFileURL1);
         _logger.debug("result=" + result1);
@@ -234,8 +234,8 @@ public class TestSphinxRecEngineRaw {
         RecogNotifier listener = new RecogNotifier();
         engine.startRecognition(pbds, listener);
         processor.start();
-        _logger.debug("Starting recog thread...");
-        engine.startRecogThread();
+//        _logger.debug("Starting recog thread...");
+//        engine.startRecogThread();
 
         // wait for result
         RecognitionResult result = null;

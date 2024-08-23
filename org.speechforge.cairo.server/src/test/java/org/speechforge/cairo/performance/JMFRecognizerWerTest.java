@@ -65,7 +65,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
 
             //recognizer = (Recognizer) cm.lookup("recognizer");
             jsgfGrammarManager = (JSGFGrammar) cm.lookup("grammar");
-            engine = new SphinxRecEngine(cm,1);
+            engine = new SphinxRecEngine(config,1);
             
         } catch (IOException e) {
             LOGGER.warn(e.getMessage(), e);
@@ -125,7 +125,7 @@ public class JMFRecognizerWerTest extends BaseRecognizerWerTest{
             LOGGER.warn(e.getMessage(), e);
         }
         processor.start();
-        engine.startRecogThread();
+//        engine.startRecogThread();
 
         // wait for result
         RecognitionResult result = null;

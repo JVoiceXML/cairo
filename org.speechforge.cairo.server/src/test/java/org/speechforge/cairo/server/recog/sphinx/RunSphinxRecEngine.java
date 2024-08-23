@@ -95,8 +95,8 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
         // TODO: find better solution for timing processor starting
         processor1.start();
 
-        _logger.debug("Starting recog thread...");
-        _engine.startRecogThread();
+//        _logger.debug("Starting recog thread...");
+//        _engine.startRecogThread();
 
         // wait for result
         RecognitionResult result = null;
@@ -127,7 +127,7 @@ public class RunSphinxRecEngine extends RecogListenerDecorator {
 
         _logger.debug("Loading...");
         ConfigurationManager cm = new ConfigurationManager(url);
-        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
+        SphinxRecEngine engine = new SphinxRecEngine(url,1);
 
         // commented out since SphinxRecEngine._jsgfGrammar not visible from this class
 //        if (_logger.isDebugEnabled()) {

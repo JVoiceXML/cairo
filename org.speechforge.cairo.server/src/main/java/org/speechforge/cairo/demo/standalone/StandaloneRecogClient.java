@@ -129,8 +129,8 @@ public class StandaloneRecogClient extends RecogListenerDecorator {
         // TODO: find better solution for timing processor starting
         processor1.start();
 
-        _logger.debug("Starting recog thread...");
-        _engine.startRecogThread();
+//        _logger.debug("Starting recog thread...");
+//        _engine.startRecogThread();
 
         if (_logger.isInfoEnabled()) {
             if (examplePhrase == null) {
@@ -206,8 +206,8 @@ public class StandaloneRecogClient extends RecogListenerDecorator {
         try {
 
             _logger.info("Loading Sphinx recognition engine...");
-            ConfigurationManager cm = new ConfigurationManager(sphinxConfigUrl);
-            SphinxRecEngine engine = new SphinxRecEngine(cm,1);
+//            ConfigurationManager cm = new ConfigurationManager(sphinxConfigUrl);
+            SphinxRecEngine engine = new SphinxRecEngine(sphinxConfigUrl,1);
 
             _logger.info("Loading grammar file...");
             engine.loadJSGF(grammarLocation);

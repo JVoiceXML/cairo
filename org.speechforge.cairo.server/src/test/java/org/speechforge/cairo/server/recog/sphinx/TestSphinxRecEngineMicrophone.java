@@ -125,7 +125,7 @@ public class TestSphinxRecEngineMicrophone {
 
         // configure sphinx
         ConfigurationManager cm = new ConfigurationManager(sphinxConfigURL);
-        SphinxRecEngine engine = new SphinxRecEngine(cm,1);
+        SphinxRecEngine engine = new SphinxRecEngine(sphinxConfigURL,1);
 
         RecognitionResult result = doRecognize(engine, expected);
         LOGGER.debug("result=" + result);
@@ -149,8 +149,8 @@ public class TestSphinxRecEngineMicrophone {
 
 
         engine.startRecognition(pbds, listener);
-        LOGGER.debug("Starting recog thread...");
-        engine.startRecogThread();
+//        LOGGER.debug("Starting recog thread...");
+//        engine.startRecogThread();
         LOGGER.info("\n\nWaiting for you to say \"" + expected + "\"...\n\n");
 
         // wait for result

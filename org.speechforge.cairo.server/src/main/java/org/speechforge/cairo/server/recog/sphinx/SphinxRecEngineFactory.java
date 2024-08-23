@@ -46,19 +46,16 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
     private final static Logger LOGGER =
             LogManager.getLogger(SphinxRecEngineFactory.class);
     /** URL of the sphinx configuration file. */
-    URL _sphinxConfigURL;
-    /** The sphinx configuration manager. */
-    ConfigurationManager _cm;
+    private URL sphinxConfigURL;
     /** Id of the last created instance. */
     private int id = 1;
 
     /**
      * Constructs a new object
-     * @param sphinxConfigURL URL of the sphinx configuration
+     * @param url URL of the sphinx configuration
      */
-    public SphinxRecEngineFactory(URL sphinxConfigURL) {
-        _sphinxConfigURL = sphinxConfigURL;
-        _cm = new ConfigurationManager(_sphinxConfigURL);
+    public SphinxRecEngineFactory(URL url) {
+        sphinxConfigURL = url;
     }
 
     /**
@@ -66,7 +63,7 @@ public class SphinxRecEngineFactory extends AbstractPoolableObjectFactory {
      */
     @Override
     public PoolableObject makeObject() throws Exception {
-        return new SphinxRecEngine(_cm, id++);
+        return new SphinxRecEngine(sphinxConfigURL, id++);
     }
 
     /**

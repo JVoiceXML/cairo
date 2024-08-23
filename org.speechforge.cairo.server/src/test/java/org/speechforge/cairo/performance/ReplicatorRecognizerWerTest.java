@@ -68,7 +68,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
             LOGGER.info("Loading Recognizer...\n");
             cm = new ConfigurationManager(config);
             jsgfGrammarManager = (JSGFGrammar) cm.lookup("grammar");
-            engine = new SphinxRecEngine(cm,1);
+            engine = new SphinxRecEngine(config,1);
             
         } catch (IOException e) {
             LOGGER.warn(e.getMessage(), e);
@@ -158,7 +158,7 @@ public class ReplicatorRecognizerWerTest extends BaseRecognizerWerTest{
         }  // give processor2 a chance to start
         processor1.start();
 
-        engine.startRecogThread();
+//        engine.startRecogThread();
 
         // wait for result
         RecognitionResult result = null;

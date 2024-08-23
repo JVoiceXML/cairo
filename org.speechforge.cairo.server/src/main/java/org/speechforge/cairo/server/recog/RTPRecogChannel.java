@@ -151,7 +151,7 @@ public class RTPRecogChannel {
             _processor.addControllerListener(new ProcessorStarter());
             _processor.start();
 
-            _recEngine.startRecogThread();
+//            _recEngine.startRecogThread();
 
             if (noInputTimeout > 0) {
                 startInputTimers(noInputTimeout);
