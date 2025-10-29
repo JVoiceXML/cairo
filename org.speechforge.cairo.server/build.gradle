@@ -73,19 +73,28 @@ dependencies {
     saxon 'net.sf.saxon:Saxon-HE:9.9.1-5'
 }
 
-task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
-    classpath.from(configurations.saxon)
-    stylesheet "${projectDir}/src/main/config/patch-configuration.xsl"
-    input "${projectDir}/src/main/config/cairo-config.xml"
-    output "${buildDir}/config/cairo-config.xml"
-    parameters(
-        synthesizer: CAIRO_SYNTHESIZER,
-        recordDir: CAIRO_RECORD_DIR,
-        grammarDir: CAIRO_GRAMMAR_DIR,
-        voice: CAIRO_VOICE,
-        promptDir: CAIRO_PROMPT_DIR,
-        ipAddress: getIP()
-    )
+task xsltCairoConfig(type: JavaExec) {
+    // Run Saxon's command-line Transform to perform the XSLT transformation
+    classpath = configurations.saxon
+    main = 'net.sf.saxon.Transform'
+
+    // Ensure output directory exists
+    doFirst {
+        file("${buildDir}/config").mkdirs()
+    }
+
+    args = [
+        "-s:${projectDir}/src/main/config/cairo-config.xml",
+        "-xsl:${projectDir}/src/main/config/patch-configuration.xsl",
+        "-o:${buildDir}/config/cairo-config.xml",
+        // Pass parameters as name=value pairs
+        "synthesizer=${CAIRO_SYNTHESIZER}",
+        "recordDir=${CAIRO_RECORD_DIR}",
+        "grammarDir=${CAIRO_GRAMMAR_DIR}",
+        "voice=${CAIRO_VOICE}",
+        "promptDir=${CAIRO_PROMPT_DIR}",
+        "ipAddress=${getIP()}"
+    ]
 }
 
 task createConfiguration(type: Copy) {
