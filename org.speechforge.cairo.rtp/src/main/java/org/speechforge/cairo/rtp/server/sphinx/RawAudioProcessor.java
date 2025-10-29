@@ -48,7 +48,11 @@ import edu.cmu.sphinx.util.props.S4Integer;
 /**
  * Processes raw audio data input and feeds it to the frontend of the Sphinx
  * recognition engine.
- * 
+ * <p>
+ * This class manages the transformation of raw audio data into a format suitable for
+ * Sphinx recognition, handling threading, buffering, and signaling for audio streams.
+ * </p>
+ *
  * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
  * @author Dirk Schnelle-Walka
  */
@@ -56,29 +60,64 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     /** Logger for this class */
     private static final Logger LOGGER =
             LogManager.getLogger(RawAudioProcessor.class);
+    /**
+     * Property name for milliseconds per read.
+     */
     @S4Integer(defaultValue = 10)
     public static final String PROP_MSEC_PER_READ = "msecPerRead";
-    /** List of transformed audio data */
+    /**
+     * List of transformed audio data ready for Sphinx frontend.
+     */
     private LinkedBlockingQueue<Data> dataList;
-    /** List of raw audio data */
+    /**
+     * List of raw audio data buffers to be processed.
+     */
     private LinkedBlockingQueue<byte[]> rawAudioList;
-    /** Format of the audio data being processed */
+    /**
+     * Format of the audio data being processed.
+     */
     private SourceAudioFormat audioFormat;
-    /** Transformer for audio data */
+    /**
+     * Transformer for converting raw audio data to Sphinx format.
+     */
     private AudioDataTransformer transformer;
+    /**
+     * Indicates if audio processing is currently active.
+     */
     private volatile boolean processing = false;
+    /**
+     * Indicates if the end of the utterance has been reached.
+     */
     private volatile boolean utteranceEndReached = false;
+    /**
+     * Buffer for the current audio frame being filled.
+     */
     private volatile byte[] _frame;
+    /**
+     * Pointer to the current position in the frame buffer.
+     */
     private volatile int _framePointer = 0;
+    /**
+     * Optional file writer for debugging or logging raw audio data.
+     */
     private FileWriter _fileWriter = null;
 
     // Configuration data
 
+    /**
+     * Number of milliseconds per audio read.
+     */
     private int _msecPerRead;
 
     // Runnable variables
 
+    /**
+     * Total number of samples read during processing.
+     */
     private long _totalSamplesRead = 0;
+    /**
+     * Start time of the current processing session.
+     */
     private long _startTime;
     
     long t1 =0;
@@ -86,9 +125,9 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     /**
      * Constructs a new RawAudioProcessor with the specified number of
      * milliseconds per read.
-     * 
-     * @param msecsPerRead
-     *            number of milliseconds per read
+     *
+     * @param ps the property sheet containing configuration properties
+     * @throws PropertyException if properties are invalid
      */
     @Override
     public void newProperties(PropertySheet ps) throws PropertyException {
@@ -99,7 +138,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes the processor, setting up internal queues and state.
      */
     @Override
     public void initialize() {
@@ -118,11 +157,12 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     /**
-     * Starts processing any audio data being added via this processors
-     * {@link org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor#addRawData(byte[], int, int)} method.
-     * 
+     * Starts processing any audio data being added via this processor's
+     * {@link #addRawData(byte[], int, int)} method.
+     *
      * @param format format of the audio being passed to this processor
      * @throws UnsupportedEncodingException if the specified format cannot be supported
+     * @throws IllegalStateException if processing is already active
      */
     public synchronized void startProcessing(AudioFormat format)
             throws UnsupportedEncodingException {
@@ -137,7 +177,6 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
             LOGGER.warn(e, e);
         }
 
-
         audioFormat = SourceAudioFormat.newInstance(_msecPerRead, format);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Frame size: " + audioFormat.getFrameSizeInBytes() + " bytes");
@@ -150,7 +189,6 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         final Thread processingThread = new Thread(this);
         processingThread.start();
     }
-
 
     /**
      * Stops processing audio. This method does not return until processing
@@ -179,7 +217,7 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     /**
      * Processes all audio data to be transformed and adds it to the list of
-     * transformed audio data.
+     * transformed audio data. This method runs in a separate thread.
      */
     public void run() {
         _totalSamplesRead = 0;
@@ -217,6 +255,13 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         }
     }
 
+    /**
+     * Transforms the next raw audio buffer into Sphinx-compatible data.
+     *
+     * @return the transformed Data object, or null if no data
+     * @throws InterruptedException if interrupted while waiting for data
+     * @throws Error if an incomplete sample is read
+     */
     private Data transformNextRawAudio() throws InterruptedException {
 
         LOGGER.trace("transformNextRawAudio(): retrieving data from raw audio list...");
@@ -252,6 +297,10 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * Returns the next processed data item, or null if the utterance has ended.
+     * </p>
+     * @throws DataProcessingException if interrupted while waiting for data
      */
     @Override
     public Data getData() throws DataProcessingException {
@@ -282,22 +331,25 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
     }
 
     /**
-     * After processing is started on this processor this will add raw audio
-     * data to be processed.
-     * 
+     * Adds raw audio data to be processed after processing is started.
+     *
      * @param data buffer of raw audio data to be processed
+     * @throws IllegalStateException if processor is not in processing state
+     * @throws IllegalArgumentException if data is null
      */
     public synchronized void addRawData(byte[] data) {
         addRawData(data, 0, data.length);
     }
 
     /**
-     * After processing is started on this processor this will add raw audio
-     * data to be processed.
-     * 
+     * Adds raw audio data to be processed after processing is started.
+     *
      * @param data buffer of raw audio data to be processed
      * @param offset starting point in buffer to process data from
      * @param length number of bytes to be processed from buffer
+     * @throws IllegalStateException if processor is not in processing state
+     * @throws IllegalArgumentException if data is null or offset/length are invalid
+     * @throws ArrayIndexOutOfBoundsException if offset + length exceeds data length
      */
     public synchronized void addRawData(byte[] data, int offset, int length) {
     	try {
@@ -308,6 +360,16 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
         }
     }
 
+    /**
+     * Internal method to add raw audio data to the processing queue.
+     *
+     * @param data buffer of raw audio data
+     * @param offset starting point in buffer
+     * @param length number of bytes to process
+     * @throws IllegalStateException if processor is not in processing state
+     * @throws IllegalArgumentException if data is null or offset/length are invalid
+     * @throws ArrayIndexOutOfBoundsException if offset + length exceeds data length
+     */
     private synchronized void addRawDataPrivate(byte[] data, int offset, int length) {
     	//long t2 = System.nanoTime();
         //_logger.info((t2-t1)+ "  nano secs between calls");
@@ -368,6 +430,11 @@ public class RawAudioProcessor extends BaseDataProcessor implements Runnable {
 
     }
 
+    /**
+     * Returns a new RawAudioProcessor instance for testing purposes.
+     *
+     * @return a new RawAudioProcessor instance with default configuration
+     */
     public static RawAudioProcessor getInstanceForTesting(){
         RawAudioProcessor instance = new RawAudioProcessor();
         instance._msecPerRead = 10;

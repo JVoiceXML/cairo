@@ -1,12 +1,13 @@
 buildscript {
     repositories {
         mavenCentral()
+        gradlePluginPortal()
     }
 }
 
 plugins {
     id 'java'
-    id 'com.github.eerohele.saxon-gradle' version '0.8.0'
+    id 'com.github.eerohele.saxon-gradle' version '0.9.0-beta4'
     id 'maven-publish'
     id 'signing'
     id 'application'
@@ -16,23 +17,34 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()    
     maven { 
         url "https://oss.sonatype.org/content/repositories/snapshots" 
     }
     maven { 
-        url "https://repo.spring.io/plugins-release/"
+        url "https://central.sonatype.com/repository/maven-snapshots"
     }
+    maven { 
+        url "https://nexus.terrestris.de/repository/public"
+    }
+    maven { 
+        url "https://nrgxnat.jfrog.io/artifactory/libs-release"
+    }
+}
+
+configurations {
+    saxon
 }
 
 dependencies {
     implementation group: 'org.jvoicexml', name: 'org.mrcp4j', version: '0.3-SNAPSHOT'
     implementation group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
     implementation group: 'org.glassfish.tyrus.bundles', name: 'tyrus-standalone-client', version: '1.13.1'
-    implementation group: 'de.dfki.mary', name: 'marytts-client', version: '5.2'
+    implementation group: 'gov.nist.math', name: 'Jampack', version: '1.0'
+    implementation group: 'com.twmacinta', name: 'fast-md5', version: '2.7.1'
+    implementation group: 'de.dfki.mary', name: 'marytts-client', version: '5.2.1'
     implementation group: 'javax.media', name: 'jmf', version: '2.1.1e'
-    implementation group: 'edu.cmu.sphinx', name: 'sphinx4-core', version: '5prealpha-SNAPSHOT'
-    implementation group: 'edu.cmu.sphinx', name: 'sphinx4-data', version: '5prealpha-SNAPSHOT'
+    implementation group: 'net.sf.phat', name: 'sphinx4-core', version: '5prealpha'
+    implementation group: 'net.sf.phat', name: 'sphinx4-data', version: '5prealpha'
     implementation fileTree(dir: "./lib", include: ['*.jar'])
     implementation group: 'org.jvoicexml', name: 'freetts', version: '1.2.3-SNAPSHOT'
     implementation group: 'org.jvoicexml', name: 'cmulex', version: '1.2.3-SNAPSHOT'
@@ -57,9 +69,12 @@ dependencies {
 
     testImplementation group: 'junit', name: 'junit', version: '4.13.1'
     testImplementation group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    
+    saxon 'net.sf.saxon:Saxon-HE:9.9.1-5'
 }
 
 task xsltCairoConfig(type: com.github.eerohele.SaxonXsltTask)  {
+    classpath.from(configurations.saxon)
     stylesheet "${projectDir}/src/main/config/patch-configuration.xsl"
     input "${projectDir}/src/main/config/cairo-config.xml"
     output "${buildDir}/config/cairo-config.xml"

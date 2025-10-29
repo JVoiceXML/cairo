@@ -54,35 +54,40 @@ import org.apache.logging.log4j.Logger;
 import org.speechforge.cairo.jmf.codec.audio.dtmf.JavaDecoder;
 import org.speechforge.cairo.util.CairoUtil;
 
-
 /**
  * Manages connection with and consumption from an incoming RTP audio stream.
+ * <p>
+ * This abstract class provides the base for RTP stream consumers, handling session
+ * initialization, event processing, and DTMF support registration. Subclasses must
+ * implement stream handling methods for received, mapped, and inactive streams.
+ * </p>
  *
- * @author Niels Godfredsen {@literal <}<a href="mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Niels Godfredsen {@literal <}ngodfredsen@users.sourceforge.net{@literal >}
  * @author Dirk Schnelle-Walka
  */
 public abstract class RTPConsumer implements SessionListener, ReceiveStreamListener {
-    /** Logger instance. */
+    /** Logger instance for RTPConsumer events and errors. */
     private static final Logger LOGGER = 
             LogManager.getLogger(RTPConsumer.class);
-    /** Highest possible TCP port. */
+    /** Highest possible TCP port value (exclusive upper bound). */
     public static final int TCP_PORT_MAX = 65536;
-    /** The RTP manger that is controlled by this consumer. */
+    /** The RTP manager controlled by this consumer. */
     protected RTPManager rtpManager;
+    /** Local session address for RTP. */
     private SessionAddress _localAddress;
+    /** Target (remote) session address for RTP. */
     private SessionAddress _targetAddress;
-    
+    /** Preferred media formats for incoming streams. */
     private Format[] preferredMediaFormats;
-
+    /** The current audio format of the active RTP stream. */
     private AudioFormat currentFormat;
     
     /**
-     * Instantiates a new RTP consumer.  Just needs a remote port.  
-     * Assumes the local and remote host is the localhost.
-     * 
-     * @param port the port
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * Instantiates a new RTP consumer using the specified port on localhost.
+     *
+     * @param port the port to use for both local and remote addresses
+     * @throws IOException if an I/O error occurs or port is invalid
+     * @throws IllegalArgumentException if port is out of range
      */
     public RTPConsumer(int port) throws IOException {
         if (port < 0 || port >= TCP_PORT_MAX) {
@@ -94,15 +99,12 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Instantiates a new RTP consumer. Needs a local host name and port.
-     * 
-     * @param localHost
-     *            the local host
-     * @param port
-     *            the port
-     * 
-     * @throws IOException
-     *             Signals that an I/O exception has occurred.
+     * Instantiates a new RTP consumer with a specific local address and port.
+     *
+     * @param localAddress the local host address
+     * @param port the local port
+     * @throws IOException if an I/O error occurs or port is invalid
+     * @throws IllegalArgumentException if port is out of range
      */
     public RTPConsumer(InetAddress localAddress, int port) throws IOException {
         if (port < 0 || port >= TCP_PORT_MAX) {
@@ -114,16 +116,15 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
     
     /**
-     * Instantiates a new RTP consumer.  It needs both the local and remote host names 
-     * as well as the local and remote port.
-     * 
-     * @param localHost the local host
+     * Instantiates a new RTP consumer with full local and remote address/port specification.
+     *
+     * @param localHost the local host name
      * @param localPort the local port
      * @param remoteAddress the remote address
      * @param remotePort the remote port
-     * @param preferredMediaFormats the preferred media formats
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @param preferredMediaFormats preferred media formats for the stream
+     * @throws IOException if an I/O error occurs or addresses/ports are invalid
+     * @throws IllegalArgumentException if any address/port is invalid
      */
     public RTPConsumer(String localHost, int localPort, 
             InetAddress remoteAddress, int remotePort, 
@@ -144,14 +145,13 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
     
     /**
-     * Instantiates a new RTP consumer.  Requires the remote host name and the local and remote port.  
-     * It uses localhost for the local host name.
-     * 
+     * Instantiates a new RTP consumer with local port and remote address/port, using localhost.
+     *
      * @param localPort the local port
      * @param remoteAddress the remote address
      * @param remotePort the remote port
-     * 
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws IOException if an I/O error occurs or addresses/ports are invalid
+     * @throws IllegalArgumentException if any address/port is invalid
      */
     public RTPConsumer(int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
         if (localPort < 0 || localPort > TCP_PORT_MAX) {
@@ -169,6 +169,16 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         init();
     }
     
+    /**
+     * Instantiates a new RTP consumer with explicit local and remote addresses and ports.
+     *
+     * @param localAddress the local address
+     * @param localPort the local port
+     * @param remoteAddress the remote address
+     * @param remotePort the remote port
+     * @throws IOException if an I/O error occurs or addresses/ports are invalid
+     * @throws IllegalArgumentException if any address/port is invalid
+     */
     public RTPConsumer(InetAddress localAddress, int localPort, InetAddress remoteAddress, int remotePort) throws IOException {
         if (localPort < 0 || localPort > TCP_PORT_MAX) {
             throw new IllegalArgumentException("Invalid local port value: " + localPort);
@@ -186,9 +196,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
     
     /**
-     * Initializes this RTP Consumer
-     * @throws IOException
-     *          error initializing
+     * Initializes this RTP Consumer, registering DTMF support and setting up RTPManager.
+     *
+     * @throws IOException error initializing RTPManager or DTMF support
      */
     private void init() throws IOException {
         registerDTMFSupport();
@@ -217,10 +227,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Registers DTMF support.
-     * 
-     * @throws IOException
-     *             error registering DTMF support
+     * Registers DTMF support by installing the JavaDecoder codec.
+     *
+     * @throws IOException error registering DTMF support
      */
     private void registerDTMFSupport() throws IOException {
         JavaDecoder decoder = new JavaDecoder();
@@ -236,9 +245,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Checks if the DTMF codec is installed.
-     * 
-     * @return true, if the DTMF codec is installed
+     * Checks if the DTMF codec is installed in the PlugInManager.
+     *
+     * @return true if the DTMF codec is installed, false otherwise
      */
     private boolean isDTMFCodecInstalled() {
         @SuppressWarnings("unchecked")
@@ -254,6 +263,7 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
 
     /**
      * Shutdown this RTP Consumer and free resources.
+     * Closes RTP streams and disposes the RTPManager.
      */
     public synchronized void shutdown() {
         // close RTP streams
@@ -270,7 +280,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * {@inheritDoc}
+     * Handles session-level events from the RTPManager.
+     *
+     * @param event the session event
      */
     @Override
     public synchronized void update(SessionEvent event) {
@@ -284,7 +296,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * {@inheritDoc}
+     * Handles receive stream events from the RTPManager.
+     *
+     * @param event the receive stream event
      */
     @Override
     public synchronized void update(ReceiveStreamEvent event) {
@@ -307,12 +321,10 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Handle inactive stream event.
-     * 
-     * @param event
-     *            the event
-     * @param stream
-     *            the stream
+     * Handle inactive stream event, such as BYE or inactivity.
+     *
+     * @param event the event
+     * @param stream the stream
      */
     private void handleInactiveStreamEvent(ReceiveStreamEvent event,
             final ReceiveStream stream) {
@@ -322,12 +334,10 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Handle stream mapped event.
-     * 
-     * @param event
-     *            the event
-     * @param stream
-     *            the stream
+     * Handle stream mapped event, associating a stream with a participant.
+     *
+     * @param event the event
+     * @param stream the stream
      */
     private void handleStreamMappedEvent(ReceiveStreamEvent event,
             final ReceiveStream stream) {
@@ -350,10 +360,9 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Handle new receive stream event.
-     * 
-     * @param stream
-     *            the receive stream
+     * Handle new receive stream event, initializing the stream and format.
+     *
+     * @param stream the receive stream
      */
     private void handleNewReceiveStreamEvent(ReceiveStream stream) {
         if (stream == null) {
@@ -384,7 +393,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Handle payload change event.
+     * Handle payload change event, including DTMF payloads.
+     *
      * @param event the payload change event
      * @param stream the receive stream
      */
@@ -411,8 +421,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
     }
 
     /**
-     * Handle DTMF payload.
-     * 
+     * Handle DTMF payload change event for the stream.
+     *
      * @param event the event
      * @param stream the receive stream
      */
@@ -437,16 +447,36 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
         
     }
     
+    /**
+     * Called when a new RTP stream is received.
+     *
+     * @param stream the receive stream
+     * @param dataSource the data source for the stream
+     * @param preferredMediaFormats preferred media formats
+     */
     public abstract void streamReceived(ReceiveStream stream, 
             PushBufferDataSource dataSource,Format[] preferredMediaFormats);
 
+    /**
+     * Called when a stream is mapped to a participant.
+     *
+     * @param stream the receive stream
+     * @param participant the participant
+     */
     public abstract void streamMapped(ReceiveStream stream, 
             Participant participant);
 
+    /**
+     * Called when a stream becomes inactive or receives a BYE event.
+     *
+     * @param stream the receive stream
+     * @param byeEvent true if the event is a BYE event
+     */
     public abstract void streamInactive(ReceiveStream stream, boolean byeEvent);
 
     /**
      * Generates a string representation of the given source description.
+     *
      * @param sd the source description
      * @return string representation of the source description
      */
@@ -490,7 +520,8 @@ public abstract class RTPConsumer implements SessionListener, ReceiveStreamListe
             break;
 
         }
-        sb.append('=').append(sd.getDescription());
+        sb.append('=');
+        sb.append(sd.getDescription());
         return sb.toString();
     }
 

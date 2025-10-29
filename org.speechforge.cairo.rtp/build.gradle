@@ -5,6 +5,7 @@ plugins {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven { 
         url "https://oss.sonatype.org/content/repositories/snapshots" 
@@ -13,7 +14,7 @@ repositories {
 
 dependencies {
     api group: 'org.glassfish', name: 'javax.json', version: '1.1.4'
-    api group: 'edu.cmu.sphinx', name: 'sphinx4-core', version: '5prealpha-SNAPSHOT'
+    api group: 'net.sf.phat', name: 'sphinx4-core', version: '5prealpha'
     api group: 'javax.media', name: 'jmf', version: '2.1.1e'
     api group: 'commons-lang', name: 'commons-lang', version: '2.6'
     api group: 'commons-pool', name: 'commons-pool', version: '1.6'

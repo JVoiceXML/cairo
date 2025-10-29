@@ -24,6 +24,8 @@
     <Loggers>
         <Logger name="org.speechforge.cairo" level="debug"/>
         <Logger name="org.mrcp4j" level="debug"/>
+        <Logger name="edu.cmu.sphinx" level="debug"/>
+        <Logger name="org.speechforge.cairo.rtp.server.sphinx" level="trace"/>
         <Logger name="gov.nist" level="info"/>
         <Logger name="org.speechforge.cairo.server.rtp.PBDSReplicator" 
             level="trace" />

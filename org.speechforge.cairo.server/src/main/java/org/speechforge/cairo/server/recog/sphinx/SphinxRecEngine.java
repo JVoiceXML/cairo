@@ -94,18 +94,48 @@ public class SphinxRecEngine extends AbstractPoolableObject
     private boolean hotword = false;
 
     /**
-     * Constructor.
-     * 
-     * @param url
-     *            URL of the Sphinx configuration
-     * @param engineId
-     *            the engine id
-     * @throws IOException
-     *             error reading from the configuration
-     * @throws PropertyException
-     *             error in the configuration
-     * @throws InstantiationException
-     *             error instantiating the recognizer
+     * Constructs and initializes a new SphinxRecEngine using the supplied
+     * Sphinx configuration XML and engine identifier.
+     * <p>
+     * This constructor performs the following actions:
+     * <ul>
+     *   <li>Creates a {@link edu.cmu.sphinx.util.props.ConfigurationManager}
+     *       from the provided URL and looks up configuration entries using
+     *       the following keys:
+     *       <ul>
+     *         <li>"primaryInput" + engineId — expected to be a
+     *             {@link org.speechforge.cairo.rtp.server.sphinx.RawAudioProcessor}.</li>
+     *         <li>"grammar" — expected to be a {@link JSGFGrammar} (may be null).</li>
+     *         <li>"speechDataMonitor" + engineId — optional SpeechDataMonitor; if
+     *             present, it will be registered with this engine as the
+     *             {@link org.speechforge.cairo.rtp.server.SpeechEventListener}.</li>
+     *       </ul>
+     *   </li>
+     *   <li>Builds a Sphinx {@link edu.cmu.sphinx.api.Configuration} and sets
+     *       the following default resources:
+     *       <ul>
+     *         <li>Acoustic model: "resource:/edu/cmu/sphinx/models/en-us/en-us"</li>
+     *         <li>Dictionary: "resource:/edu/cmu/sphinx/models/en-us/cmudict-en-us.dict"</li>
+     *         <li>Language model: "resource:/edu/cmu/sphinx/models/en-us/en-us.lm.bin"</li>
+     *       </ul>
+     *   </li>
+     *   <li>Creates a {@link Context} and a {@link CairoSphinxRecognizer} using
+     *       the constructed configuration and the looked-up RawAudioProcessor,
+     *       then calls {@code recognizer.allocate()} to initialize the recognizer.
+     *   </li>
+     * </ul>
+     * <p>
+     * Note: the constructor does not validate every returned component; a
+     * missing grammar will leave {@link #_jsgfGrammar} null which may cause
+     * NPEs when grammar methods are invoked later.
+     *
+     * @param sphinxConfigURL URL of the Sphinx configuration XML (must not be null)
+     * @param engineId        engine identifier used to select engine-specific
+     *                        configuration entries (e.g. primaryInput{n})
+     * @throws NullPointerException if {@code sphinxConfigURL} is null
+     * @throws IOException            if the configuration resource cannot be read
+     * @throws PropertyException      if required configuration properties are missing or invalid
+     * @throws InstantiationException if the primary input is missing or is not a RawAudioProcessor
      */
     public SphinxRecEngine(URL sphinxConfigURL, int engineId)
       throws IOException, PropertyException, InstantiationException {
@@ -186,7 +216,13 @@ public class SphinxRecEngine extends AbstractPoolableObject
     }
 
     /**
-     * TODOC
+     * Stops recognition processing on the underlying recognizer.
+     * <p>
+     * This requests the recognizer to stop any in-progress recognition. The
+     * method is synchronized to ensure safe concurrent access. Note that the
+     * recognizer's internal thread may still be completing work after this
+     * method returns; callers should not assume immediate termination of all
+     * recognizer activity.
      */
     public synchronized void stopProcessing() {
         LOGGER.debug("SphinxRecEngine  #" + id + " stopping processing...");
@@ -195,15 +231,17 @@ public class SphinxRecEngine extends AbstractPoolableObject
     }
 
     /**
-     * TODOC
-     * @param grammarLocation the location of the grammar to load
-     * @throws IOException error reading from the grammar location
-     * @throws GrammarException error parsing the grammar
-     * @throws JSGFGrammarException error parsing the grammar
-     * @throws JSGFGrammarParseException error parsing the grammar
+     * Loads a JSGF grammar from the supplied grammar location into the
+     * configured JSGFGrammar instance.
+     *
+     * @param grammarLocation the location of the grammar to load (contains base URL and grammar name)
+     * @throws IOException if an I/O error occurs while accessing the grammar
+     * @throws GrammarException if the grammar is invalid or cannot be parsed
+     * @throws JSGFGrammarParseException if the grammar parser fails to parse the grammar
+     * @throws JSGFGrammarException for other JSGF grammar related errors
      */
     public synchronized void loadJSGF(GrammarLocation grammarLocation) throws IOException, GrammarException, JSGFGrammarParseException, JSGFGrammarException {
-    	
+        
         _jsgfGrammar.setBaseURL(grammarLocation.getBaseURL());
         _jsgfGrammar.loadJSGF(grammarLocation.getGrammarName());
        LOGGER.debug("loadJSGF(): completed successfully.");
@@ -211,11 +249,14 @@ public class SphinxRecEngine extends AbstractPoolableObject
     }
 
     /**
-     * TODOC
-     * @param text the recognized input text
-     * @param ruleName the rule name to use for parsing
-     * @return parsed rule
-     * @throws GrammarException error in the grammar or while parsing
+     * Parses the supplied text against a rule in the currently loaded
+     * JSGF grammar and returns the resulting RuleParse.
+     *
+     * @param text the recognized input text to parse
+     * @param ruleName the rule name to use within the grammar
+     * @return a RuleParse representing the parse result
+     * @throws GrammarException if the grammar is invalid or parsing fails
+     * @throws IllegalStateException if recognition is currently in progress
      */
     public synchronized RuleParse parse(String text, String ruleName) throws GrammarException {
         if (recognizer.isRecognizing()) {
@@ -227,11 +268,14 @@ public class SphinxRecEngine extends AbstractPoolableObject
     }
 
     /**
-     * TODOC
-     * @param dataSource the data source
-     * @param listener  the listener
-     * @throws UnsupportedEncodingException
-     * 			encoding not supported 
+     * Begins recognition using the provided PushBufferDataSource as the
+     * audio input source and registers the listener to receive completion
+     * notifications.
+     *
+     * @param dataSource the audio data source (PushBufferDataSource)
+     * @param listener the listener to notify when recognition completes
+     * @throws UnsupportedEncodingException if the data encoding is not supported
+     * @throws IllegalStateException if recognition is already in progress
      */
     public synchronized void startRecognition(PushBufferDataSource dataSource, RecogListener listener)
       throws UnsupportedEncodingException {
@@ -320,8 +364,12 @@ public class SphinxRecEngine extends AbstractPoolableObject
         }
     }
 
-    /* (non-Javadoc)
-     * @see org.speechforge.cairo.server.recog.SpeechEventListener#speechEnded()
+    /**
+     * Called when the speech data monitor detects the end of speech.
+     * <p>
+     * Currently this method only emits a debug beep when trace logging is
+     * enabled. It is provided for symmetry with {@link #speechStarted()} and
+     * for future extension.
      */
     public void speechEnded() {
         if (_toolkit != null) {
@@ -511,12 +559,29 @@ public class SphinxRecEngine extends AbstractPoolableObject
         this.hotword = hotword;
     }
 
+    /**
+     * Receives new property values from the Sphinx property infrastructure.
+     * <p>
+     * This implementation is intentionally empty; subclasses or users may
+     * override it to react to property changes.
+     *
+     * @param ps the PropertySheet containing new property values
+     * @throws PropertyException if required properties are missing or invalid
+     */
     @Override
     public void newProperties(PropertySheet ps) throws PropertyException {
-        // TODO Auto-generated method stub
-        
+        // No-op: provided for interface compliance and future extension.
     }
 
+    /**
+     * Called by the recognizer when a new recognition result is produced.
+     * <p>
+     * The engine stops the recognizer, wraps the result in a
+     * {@link RecognitionResult} (including the configured RuleGrammar) and
+     * notifies the registered RecogListener, if any.
+     *
+     * @param result the raw Sphinx recognition result
+     */
     @Override
     public void newResult(Result result) {
         stopProcessing();

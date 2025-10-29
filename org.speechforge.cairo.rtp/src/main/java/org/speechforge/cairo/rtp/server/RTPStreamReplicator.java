@@ -53,8 +53,7 @@ import org.apache.logging.log4j.LogManager;
  * by multiple destinations at varying time intervals without starting or
  * stopping the underlying data source.
  *
- * @author Niels Godfredsen {@literal <}<a href=
- *         "mailto:ngodfredsen@users.sourceforge.net">ngodfredsen@users.sourceforge.net</a>{@literal >}
+ * @author Niels Godfredsen {@literal <}ngodfredsen@users.sourceforge.net{@literal >}
  * @author Dirk Schnelle-Walka
  */
 public class RTPStreamReplicator extends RTPConsumer {
@@ -73,11 +72,9 @@ public class RTPStreamReplicator extends RTPConsumer {
     
     /**
      * Creates a new RTP stream replicator that listens on the given port.
-     * 
-     * @param replicatorPort
-     *            the port to listen on
-     * @throws IOException
-     *             if the replicator could not be created
+     *
+     * @param replicatorPort the port to listen on
+     * @throws IOException if the replicator could not be created
      */
     public RTPStreamReplicator(int replicatorPort) throws IOException {
         super(replicatorPort);
@@ -85,14 +82,11 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
     
     /**
-     * Creates a new RTP stream replicator that listens on the given port.
-     * 
-     * @param localAddress
-     *            the local address to bind to
-     * @param replicatorPort
-     *            the port to listen on
-     * @throws IOException
-     *             if the replicator could not be created
+     * Creates a new RTP stream replicator that listens on the given port and binds to the specified local address.
+     *
+     * @param localAddress the local address to bind to
+     * @param replicatorPort the port to listen on
+     * @throws IOException if the replicator could not be created
      */
     public RTPStreamReplicator(InetAddress localAddress, int replicatorPort) 
             throws IOException {
@@ -102,7 +96,8 @@ public class RTPStreamReplicator extends RTPConsumer {
     
     /**
      * Retrieves the port that this replicator is listening on.
-     * @return Returns the port.
+     *
+     * @return the port number
      */
     public int getPort() {
         return port;
@@ -110,6 +105,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     
     /**
      * Removes a replicant from the list of replicants.
+     *
      * @param pbds the data source to remove
      */
     public void removeReplicant(PushBufferDataSource pbds) {
@@ -119,6 +115,7 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /**
+     * Shuts down the replicator and processor, releasing resources.
      * {@inheritDoc}
      */
     @Override
@@ -135,7 +132,11 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /**
-     * {@inheritDoc}
+     * Handles the event when a new RTP stream is received. Initializes the replicator if not already present.
+     *
+     * @param stream the received RTP stream
+     * @param dataSource the data source associated with the stream
+     * @param preferredFormats the preferred media formats
      */
     @Override
     public synchronized void streamReceived(ReceiveStream stream, 
@@ -147,14 +148,11 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /**
-     * Creates a new replicator for the given data source.
-     * 
-     * @param dataSource
-     *            the data source to replicate
-     * @param preferredFormats
-     *            the preferred formats
-     * @throws NotRealizedError
-     *             if the processor could not be realized
+     * Creates a new replicator for the given data source and preferred formats.
+     *
+     * @param dataSource the data source to replicate
+     * @param preferredFormats the preferred formats
+     * @throws NotRealizedError if the processor could not be realized
      */
     private void createNewReplicator(PushBufferDataSource dataSource,
             Format[] preferredFormats) throws NotRealizedError {
@@ -188,7 +186,10 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /**
-     * {@inheritDoc}
+     * Handles the event when a stream is mapped to a participant. This implementation ignores the event.
+     *
+     * @param stream the received RTP stream
+     * @param participant the participant to which the stream is mapped
      */
     @Override
     public void streamMapped(ReceiveStream stream, Participant participant) {
@@ -196,7 +197,10 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /**
-     * {@inheritDoc}
+     * Handles the event when a stream becomes inactive. Cleans up processor and replicator resources.
+     *
+     * @param stream the received RTP stream
+     * @param byeEvent true if the stream ended with a BYE event
      */
     @Override
     public synchronized void streamInactive(ReceiveStream stream, boolean byeEvent) {
@@ -220,13 +224,14 @@ public class RTPStreamReplicator extends RTPConsumer {
     }
 
     /**
-     * TODOC
-     * @param outputContentDescriptor A <code>ContentDescriptor</code> that describes the desired output content-type.
-     * @param maxWait the maximum time to wait in milliseconds if the stream has not yet been received.
+     * Creates and realizes a new processor for a replicated stream, waiting up to the specified time for a stream to be received.
+     *
+     * @param outputContentDescriptor a {@code ContentDescriptor} describing the desired output content-type
+     * @param maxWait the maximum time to wait in milliseconds if the stream has not yet been received
      * @param preferredMediaFormats the preferred media formats
-     * @return A new <code>Processor</code> that is in the <code>Realized</code> state.
-     * @throws IOException if there are I/O problems creating the processor from the stream.
-     * @throws IllegalStateException if the stream has not been received yet, and is not received within the maximum time to wait.
+     * @return a {@code ProcessorReplicatorPair} containing the realized processor and replicated data source
+     * @throws IOException if there are I/O problems creating the processor from the stream
+     * @throws IllegalStateException if the stream has not been received yet, and is not received within the maximum time to wait
      */
     public synchronized ProcessorReplicatorPair createRealizedProcessor(
             ContentDescriptor outputContentDescriptor, long maxWait, 
@@ -245,7 +250,6 @@ public class RTPStreamReplicator extends RTPConsumer {
                 throw new IllegalStateException("No RTP stream yet received!");
             }
         }
-
 
         PushBufferDataSource pbds = replicator.replicate();
         ProcessorModel pm = new ProcessorModel(
@@ -277,38 +281,57 @@ public class RTPStreamReplicator extends RTPConsumer {
         return new ProcessorReplicatorPair(processor,pbds);
     }
 
+    /**
+     * A simple container class holding a realized {@link Processor} and its associated {@link PushBufferDataSource}.
+     */
     public class ProcessorReplicatorPair {
-    	public ProcessorReplicatorPair(Processor proc, PushBufferDataSource pbds) {
-	        super();
-	        this.proc = proc;
-	        this.pbds = pbds;
+        /**
+         * Constructs a new pair with the given processor and data source.
+         *
+         * @param proc the realized processor
+         * @param pbds the replicated data source
+         */
+        public ProcessorReplicatorPair(Processor proc, PushBufferDataSource pbds) {
+            super();
+            this.proc = proc;
+            this.pbds = pbds;
         }
-		/**
-         * @return the proc
+        /**
+         * Returns the processor.
+         *
+         * @return the processor
          */
         public Processor getProc() {
-        	return proc;
+            return proc;
         }
-		/**
-         * @param proc the proc to set
+        /**
+         * Sets the processor.
+         *
+         * @param proc the processor to set
          */
         public void setProc(Processor proc) {
-        	this.proc = proc;
+            this.proc = proc;
         }
-		/**
-         * @return the pbds
+        /**
+         * Returns the replicated data source.
+         *
+         * @return the data source
          */
         public PushBufferDataSource getPbds() {
-        	return pbds;
+            return pbds;
         }
-		/**
-         * @param pbds the pbds to set
+        /**
+         * Sets the replicated data source.
+         *
+         * @param pbds the data source to set
          */
         public void setPbds(PushBufferDataSource pbds) {
-        	this.pbds = pbds;
+            this.pbds = pbds;
         }
-		private Processor proc;
-    	private PushBufferDataSource pbds;
+        /** The processor instance. */
+        private Processor proc;
+        /** The replicated data source. */
+        private PushBufferDataSource pbds;
     }
 
 }
